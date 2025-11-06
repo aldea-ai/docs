@@ -1,0 +1,80 @@
+---
+title: authentication
+---
+
+> This page is **auto-generated** from `/headers/authentication.h`. Edit doc comments in the header and rebuild to update.
+
+## Functions
+- [`authenticate_with_key`](#authenticate-with-key)
+- [`exchange_oauth_code`](#exchange-oauth-code)
+- [`start_oauth_flow`](#start-oauth-flow)
+
+<a id="authenticate-with-key"></a>
+### `authenticate_with_key`
+Authenticates using an API key.
+
+/
+/**
+
+**Signature**
+```c
+int authenticate_with_key(const char* api_key);
+```
+
+**Parameters**
+
+| Name | Description |
+|------|-------------|
+| `api_key` | The user's API key. |
+
+**Returns**
+
+0 on success or -1 if the key is invalid.
+
+**Example**
+```c
+int status = authenticate_with_key("sk_12345");
+if (status == 0) printf("Authenticated!");
+```
+
+<a id="exchange-oauth-code"></a>
+### `exchange_oauth_code`
+Exchanges an OAuth authorization code for an access token.
+
+**Signature**
+```c
+int exchange_oauth_code(const char* code, char* token, int token_size);
+```
+
+**Parameters**
+
+| Name | Description |
+|------|-------------|
+| `code` | The authorization code returned from OAuth callback. |
+| `token` | Buffer to store the received access token. |
+| `token_size` | Size of the token buffer. |
+
+**Returns**
+
+0 on success or negative on error.
+
+<a id="start-oauth-flow"></a>
+### `start_oauth_flow`
+Initiates the OAuth 2.0 authorization flow.
+
+**Signature**
+```c
+int start_oauth_flow(const char* client_id, const char* redirect_uri);
+```
+
+**Parameters**
+
+| Name | Description |
+|------|-------------|
+| `client_id` | The client ID issued to the application. |
+| `redirect_uri` | The redirect URI for authorization callback. |
+
+**Returns**
+
+0 on success, or -1 on failure.
+

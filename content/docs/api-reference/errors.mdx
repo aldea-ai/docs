@@ -1,0 +1,79 @@
+---
+title: errors
+---
+
+> This page is **auto-generated** from `/headers/errors.h`. Edit doc comments in the header and rebuild to update.
+
+## Functions
+- [`api_clear_error`](#api-clear-error)
+- [`api_error_from_http`](#api-error-from-http)
+- [`api_error_message`](#api-error-message)
+- [`api_last_error_code`](#api-last-error-code)
+
+<a id="api-clear-error"></a>
+### `api_clear_error`
+Clears the last error state.
+
+**Signature**
+```c
+int api_clear_error(void);
+```
+
+**Returns**
+
+0 on success.
+
+<a id="api-error-from-http"></a>
+### `api_error_from_http`
+Converts HTTP status to canonical API error code.
+
+**Signature**
+```c
+int api_error_from_http(int http_status);
+```
+
+**Parameters**
+
+| Name | Description |
+|------|-------------|
+| `http_status` | HTTP status (e.g., 404). |
+
+**Returns**
+
+Negative API error code or 0 if none.
+
+<a id="api-error-message"></a>
+### `api_error_message`
+Returns a human-readable message for an error code.
+
+**Signature**
+```c
+const char* api_error_message(int code);
+```
+
+**Parameters**
+
+| Name | Description |
+|------|-------------|
+| `code` | Error code (negative). |
+
+**Returns**
+
+Constant string describing the error.
+
+<a id="api-last-error-code"></a>
+### `api_last_error_code`
+Returns the last error code set by the API.
+
+/
+/**
+
+**Signature**
+```c
+int api_last_error_code(void);
+```
+
+**Returns**
+
+Negative error code; 0 if none.
+

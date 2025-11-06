@@ -1,0 +1,139 @@
+---
+title: Customization
+description: Customize the Hackmamba documentation template to match your brand
+---
+
+# Customization
+
+Customize the Hackmamba documentation template to match your brand and requirements.
+
+## Brand Customization
+
+### Logo and Branding
+
+Update your logo in `lib/layout.shared.tsx`:
+
+```typescript
+nav: {
+  title: (
+    <>
+      <YourLogoComponent />
+      Your Brand Name
+    </>
+  ),
+}
+```
+
+### Color Scheme
+
+Modify colors in `app/global.css`:
+
+```css
+:root {
+  --primary-color: #your-primary-color;
+  --secondary-color: #your-secondary-color;
+  --accent-color: #your-accent-color;
+}
+```
+
+### Typography
+
+Customize fonts in `app/layout.tsx`:
+
+```typescript
+import { Inter, Poppins } from "next/font/google";
+
+const inter = Inter({ subsets: ["latin"] });
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+});
+```
+
+## Layout Customization
+
+### Navigation Structure
+
+Modify the navigation in `content/docs/meta.json`:
+
+```json
+{
+  "title": "Your Documentation",
+  "pages": [
+    "index",
+    {
+      "title": "Your Section",
+      "pages": ["page1", "page2"]
+    }
+  ]
+}
+```
+
+### Sidebar Configuration
+
+Customize sidebar behavior in `app/docs/layout.tsx`:
+
+```typescript
+sidebar={{
+  defaultOpenLevel: 2,
+  collapsible: true,
+}}
+```
+
+## Content Customization
+
+### Page Templates
+
+Create custom page templates by modifying the MDX components in `mdx-components.tsx`.
+
+### Custom Components
+
+Add custom components for your specific needs:
+
+```typescript
+// components/CustomCard.tsx
+export function CustomCard({ title, children }) {
+  return (
+    <div className="custom-card">
+      <h3>{title}</h3>
+      {children}
+    </div>
+  );
+}
+```
+
+## Deployment Customization
+
+### Build Configuration
+
+Modify `next.config.mjs` for your deployment needs:
+
+```javascript
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  output: "export", // For static export
+  trailingSlash: true,
+};
+
+export default nextConfig;
+```
+
+## Best Practices
+
+- Keep customizations minimal and focused
+- Use CSS variables for consistent theming
+- Test changes across different screen sizes
+- Document your customizations
+
+<Cards>
+  <Card
+    title="Deployment"
+    href="/docs/customization"
+    description="Deploy your customized documentation"
+  />
+  <Card
+    title="Content Guide"
+    href="/docs/overview"
+    description="Learn content creation best practices"
+  />
+</Cards>

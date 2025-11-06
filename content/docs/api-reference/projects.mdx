@@ -1,0 +1,57 @@
+---
+title: projects
+---
+
+> This page is **auto-generated** from `/headers/projects.h`. Edit doc comments in the header and rebuild to update.
+
+## Functions
+- [`create_project`](#create-project)
+- [`list_projects`](#list-projects)
+
+<a id="create-project"></a>
+### `create_project`
+Creates a new project.
+
+**Signature**
+```c
+int create_project(const char* name, const char* description, char* buffer, int buffer_size);
+```
+
+**Parameters**
+
+| Name | Description |
+|------|-------------|
+| `name` | Name of the new project. |
+| `description` | Optional project description. |
+| `buffer` | Output buffer to store JSON response. |
+| `buffer_size` | Size of the buffer. |
+
+**Returns**
+
+0 on success, -1 if creation fails.
+
+<a id="list-projects"></a>
+### `list_projects`
+Lists available projects for the authenticated user.
+
+/
+/**
+
+**Signature**
+```c
+int list_projects(int limit, int offset, char* buffer, int buffer_size);
+```
+
+**Parameters**
+
+| Name | Description |
+|------|-------------|
+| `limit` | Maximum number of results to return. |
+| `offset` | Offset for pagination. |
+| `buffer` | Output buffer to store JSON response. |
+| `buffer_size` | Size of the buffer. |
+
+**Returns**
+
+0 on success, negative on error.
+

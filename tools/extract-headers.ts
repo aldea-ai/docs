@@ -1,129 +1,253 @@
-/* tools/extract-headers.ts
-   POC: Convert C header docblocks into MDX pages Fumadocs can render.
-   Assumption: /** ... *\/ directly precedes a function signature ending with ';'
-   NOTE: Replace regex with a proper parser later if headers get complex.
-*/
 import fs from "node:fs";
 import path from "node:path";
 
-const HEADERS_DIR = path.resolve("headers");
-// Most Fuma templates read content from ./content (your template already has /content)
-const OUT_DIR = path.resolve("content/docs");
+/**
+ * Fumadocs POC — One MDX per header
+ * ----------------------------------
+ * - Reads each .h file in /headers
+ * - Extracts:
+ *   (A) docblock + prototype pairs  /** ... *\/  ret name(args);
+ *   (B) bare prototypes (no docblock)
+ * - Emits ONE file per header: content/docs/api-reference/<HeaderBase>.mdx
+ * - Exits non-zero if no headers or no functions found.
+ */
 
-const blockPair =
-  /\/\*\*([\s\S]*?)\*\/\s*([a-zA-Z_][\w\s\*]+?\([^;{]*\)\s*;)/g;
+const HEADERS_DIR = path.resolve("headers");
+const OUT_DIR = path.resolve("content/docs/api-reference");
+
+// docblock + prototype (group1 = docblock body, group2 = prototype)
+const BLOCK =
+  /\/\*\*([\s\S]*?)\*\/\s*([a-zA-Z_][\w\s\*\&]+?\([^;{]*\)\s*;)/g;
+
+// bare prototypes (skip typedef/struct/enum/preproc/comments)
+const PROTO =
+  /^(?!\s*(typedef|struct|enum|#)|\s*\/\*|\s*\*|\s*\/\/)([a-zA-Z_][\w\s\*\&]+?\([^;{]*\)\s*;)\s*$/gm;
+
+type Doc = {
+  brief?: string;
+  description?: string;
+  params: { name: string; desc: string }[];
+  returns?: string;
+  errors: string[];
+  example?: string;
+  since?: string;
+};
+
+type FnEntry = {
+  name: string;
+  signature: string;
+  doc?: Doc;           // present if docblock found
+  fromDocblock: boolean;
+};
 
 function ensureDir(p: string) {
   if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
 }
 
-function cleanDocBlock(doc: string): string {
-  return doc
-    .split("\n")
-    .map((l) => l.replace(/^\s*\*\s?/, ""))
-    .join("\n")
-    .trim();
-}
-
-function mdEscape(s: string): string {
+function mdEscape(s: string) {
   return s.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-function fnName(sig: string): string {
-  const m = sig.match(/\b([a-zA-Z_]\w*)\s*\(/);
-  return m ? m[1] : "function";
+function funcName(signature: string) {
+  return (signature.match(/\b([a-zA-Z_]\w*)\s*\(/)?.[1]) ?? "function";
 }
 
-function page(title: string, signature: string, doc: string): string {
-  return `---
-title: ${title}
----
-
-${doc ? doc + "\n" : ""}
-
-## Signature
-\`\`\`c
-${signature.trim()}
-\`\`\`
-`;
+function slugify(s: string) {
+  return s.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 }
 
-function writeIndex(folder: string, headerFile: string) {
-  const name = path.basename(headerFile);
-  const index = `---
-title: ${name} API
----
+function parseDocblock(raw: string): Doc {
+  const lines = raw.split("\n").map((l) => l.replace(/^\s*\*\s?/, "").trim());
+  const doc: Doc = { params: [], errors: [] };
+  const prose: string[] = [];
 
-Auto-generated from \`${name}\`.`;
-  fs.writeFileSync(path.join(folder, "index.mdx"), index, "utf8");
-}
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
 
-function extractFile(filePath: string) {
-  const src = fs.readFileSync(filePath, "utf8");
-  const base = path.basename(filePath, path.extname(filePath));
-  const outFolder = path.join(OUT_DIR, base);
-  ensureDir(outFolder);
-
-  let count = 0;
-  let match: RegExpExecArray | null;
-  while ((match = blockPair.exec(src))) {
-    const doc = cleanDocBlock(match[1] ?? "");
-    const sig = mdEscape(match[2] ?? "");
-    const title = fnName(sig);
-    const outPath = path.join(outFolder, `${String(count + 1).padStart(2, "0")}-${title}.mdx`);
-    fs.writeFileSync(outPath, page(title, sig, doc), "utf8");
-    count++;
-  }
-
-  writeIndex(outFolder, path.basename(filePath));
-  return count;
-}
-
-function resetOut() {
-  // Only remove our generated subfolders; keep any hand-written pages if you have them
-  if (!fs.existsSync(OUT_DIR)) ensureDir(OUT_DIR);
-  for (const name of fs.readdirSync(OUT_DIR)) {
-    const p = path.join(OUT_DIR, name);
-    if (fs.lstatSync(p).isDirectory() && fs.existsSync(path.join(p, "index.mdx"))) {
-      fs.rmSync(p, { recursive: true, force: true });
+    if (line.startsWith("@brief")) {
+      doc.brief = line.replace("@brief", "").trim();
+    } else if (line.startsWith("@param")) {
+      const m = line.match(/@param\s+(\w+)\s+(.*)$/);
+      if (m) doc.params.push({ name: m[1], desc: m[2] });
+    } else if (line.startsWith("@return") || line.startsWith("@returns")) {
+      doc.returns = line.replace(/@returns?/, "").trim();
+    } else if (line.startsWith("@error")) {
+      doc.errors.push(line.replace("@error", "").trim());
+    } else if (line.startsWith("@since")) {
+      doc.since = line.replace("@since", "").trim();
+    } else if (line.startsWith("@example")) {
+      const ex: string[] = [];
+      i++;
+      while (i < lines.length && !lines[i].startsWith("@")) {
+        ex.push(lines[i]);
+        i++;
+      }
+      i--;
+      const exText = ex.join("\n").trim();
+      if (exText) doc.example = exText;
+    } else if (!line.startsWith("@")) {
+      if (line) prose.push(line);
     }
   }
+
+  const text = prose.join("\n").trim();
+  if (text) doc.description = text;
+
+  return doc;
+}
+
+function renderHeaderPage(headerBase: string, fns: FnEntry[]) {
+  const title = headerBase;
+  const fm = `---\ntitle: ${title}\n---\n\n`;
+  const intro = `> This page is **auto-generated** from \`/headers/${headerBase}.h\`. Edit doc comments in the header and rebuild to update.\n\n`;
+
+  // TOC
+  const tocLines: string[] = [];
+  tocLines.push("## Functions");
+  for (const fn of fns) {
+    const id = slugify(fn.name);
+    tocLines.push(`- [\`${fn.name}\`](#${id})`);
+  }
+  tocLines.push("");
+
+  // Sections
+  const sections: string[] = [];
+  for (const fn of fns) {
+    const id = slugify(fn.name);
+    sections.push(`<a id="${id}"></a>`);
+    sections.push(`### \`${fn.name}\``);
+    if (!fn.fromDocblock) {
+      sections.push("> ⚠️ No doc comment found. Add a `/** ... */` block above this prototype in the header to include description, parameters, returns, and examples.\n");
+    }
+
+    // brief/description
+    if (fn.doc?.brief) sections.push(fn.doc.brief + "\n");
+    if (fn.doc?.description) sections.push(fn.doc.description + "\n");
+
+    // signature
+    sections.push("**Signature**");
+    sections.push("```c");
+    sections.push(fn.signature.trim());
+    sections.push("```");
+
+    // params table
+    if (fn.doc && fn.doc.params.length) {
+      sections.push("\n**Parameters**");
+      sections.push("");
+      sections.push("| Name | Description |");
+      sections.push("|------|-------------|");
+      for (const p of fn.doc.params) {
+        sections.push(`| \`${p.name}\` | ${p.desc} |`);
+      }
+    }
+
+    if (fn.doc?.returns) {
+      sections.push("\n**Returns**");
+      sections.push("");
+      sections.push(fn.doc.returns);
+    }
+
+    if (fn.doc && fn.doc.errors.length) {
+      sections.push("\n**Errors**");
+      for (const e of fn.doc.errors) sections.push(`- ${e}`);
+    }
+
+    if (fn.doc?.example) {
+      sections.push("\n**Example**");
+      sections.push("```c");
+      sections.push(fn.doc.example);
+      sections.push("```");
+    }
+
+    sections.push(""); // blank line between sections
+  }
+
+  return fm + intro + tocLines.join("\n") + "\n" + sections.join("\n") + "\n";
 }
 
 function main() {
   if (!fs.existsSync(HEADERS_DIR)) {
-    console.error(`Missing headers directory: ${HEADERS_DIR}`);
+    console.error("Missing headers/ folder");
     process.exit(1);
   }
+  ensureDir(OUT_DIR);
 
-  resetOut();
-
-  const headerFiles = fs
-    .readdirSync(HEADERS_DIR)
-    .filter((f) => f.endsWith(".h"))
-    .map((f) => path.join(HEADERS_DIR, f));
-
-  if (headerFiles.length === 0) {
-    console.error("No .h files found in headers/");
-    process.exit(1);
-  }
-
-  let total = 0;
-  for (const hf of headerFiles) total += extractFile(hf);
-
-  // Friendly landing page for the demo
-  const gettingStarted = `---
-title: Getting Started
+  // Always write a landing page
+  fs.writeFileSync(
+    path.join(OUT_DIR, "index.mdx"),
+    `---
+title: API Reference
 ---
-This site is **auto-generated** from C header files in \`/headers\`.
+Browse API references generated from header files.
+`,
+    "utf8"
+  );
 
-- Edit comments in \`headers/*.h\`
-- Run \`npm run build\`
-- Pages appear under the header file name in the sidebar
-`;
-  fs.writeFileSync(path.join(OUT_DIR, "getting-started.mdx"), gettingStarted, "utf8");
+  const headerFiles = fs.readdirSync(HEADERS_DIR).filter((f) => f.endsWith(".h"));
+  if (!headerFiles.length) {
+    console.error("No .h files in headers/");
+    process.exit(1);
+  }
 
-  console.log(`Generated ${total} API page(s) from ${headerFiles.length} header file(s)`);
+  let totalFunctions = 0;
+  for (const file of headerFiles) {
+    const srcPath = path.join(HEADERS_DIR, file);
+    const src = fs.readFileSync(srcPath, "utf8");
+    const base = path.basename(file, ".h");
+
+    const entries: FnEntry[] = [];
+    const seen = new Set<string>();
+
+    // 1) docblock + prototype pairs
+    let m: RegExpExecArray | null;
+    while ((m = BLOCK.exec(src))) {
+      const rawDoc = m[1] ?? "";
+      const proto = m[2] ?? "";
+      const name = funcName(proto);
+      if (!name || seen.has(name)) continue;
+
+      entries.push({
+        name,
+        signature: mdEscape(proto),
+        doc: parseDocblock(rawDoc),
+        fromDocblock: true,
+      });
+      seen.add(name);
+    }
+
+    // 2) bare prototypes
+    let pm: RegExpExecArray | null;
+    while ((pm = PROTO.exec(src))) {
+      const proto = pm[2] ?? "";
+      const name = funcName(proto);
+      if (!name || seen.has(name)) continue;
+      if (!/\(.*\)\s*;/.test(proto)) continue;
+
+      entries.push({
+        name,
+        signature: mdEscape(proto),
+        fromDocblock: false,
+      });
+      seen.add(name);
+    }
+
+    if (entries.length === 0) continue;
+
+    // Sort by name for stable TOC
+    entries.sort((a, b) => a.name.localeCompare(b.name));
+
+    const outFile = path.join(OUT_DIR, `${base}.mdx`);
+    fs.writeFileSync(outFile, renderHeaderPage(base, entries), "utf8");
+    totalFunctions += entries.length;
+    console.log(`${base}.h → ${entries.length} function(s) → ${outFile}`);
+  }
+
+  if (totalFunctions === 0) {
+    console.error("No function prototypes found in any header.");
+    process.exit(2);
+  } else {
+    console.log(`Generated ${totalFunctions} function section(s) across ${headerFiles.length} header(s).`);
+  }
 }
 
 main();

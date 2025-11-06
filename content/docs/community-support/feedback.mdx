@@ -1,0 +1,277 @@
+---
+title: Feedback
+description: Share your feedback to help us improve
+---
+
+Your feedback helps us improve Hackmamba and make it better for everyone.
+
+## How to Share Feedback
+
+### Quick Feedback
+
+For quick feedback and suggestions:
+
+- **Discord** - Share in `#feedback` channel
+- **GitHub Discussions** - Post in "Feedback" category
+- **Email** - feedback@hackmamba.com
+
+### Detailed Feedback
+
+For detailed feedback and feature requests:
+
+- **GitHub Issues** - Use feature request template
+- **Survey** - Complete our quarterly feedback survey
+- **Interview** - Participate in user research sessions
+
+## Types of Feedback
+
+### Product Feedback
+
+Help us improve the product:
+
+- **Feature requests** - What features do you need?
+- **UI/UX feedback** - How can we improve the interface?
+- **Performance** - Are there performance issues?
+- **Usability** - What's confusing or difficult?
+
+### Documentation Feedback
+
+Help us improve our documentation:
+
+- **Missing information** - What's not documented?
+- **Unclear explanations** - What's confusing?
+- **Incorrect information** - What's wrong?
+- **Better examples** - What examples would help?
+
+### API Feedback
+
+Help us improve our API:
+
+- **Missing endpoints** - What endpoints do you need?
+- **Response format** - How can responses be better?
+- **Error messages** - Are error messages helpful?
+- **Rate limits** - Are limits appropriate?
+
+## Feedback Guidelines
+
+### Be Specific
+
+Instead of:
+
+> "The API is hard to use"
+
+Say:
+
+> "The user creation endpoint requires too many optional fields, making it confusing to know what's required"
+
+### Provide Context
+
+Include relevant information:
+
+- **Use case** - What are you trying to accomplish?
+- **Environment** - What's your setup?
+- **Impact** - How does this affect your work?
+
+### Suggest Solutions
+
+When possible, suggest solutions:
+
+- **Alternative approaches** - How could this work better?
+- **Examples** - What would good examples look like?
+- **Priorities** - How important is this to you?
+
+## Feedback Examples
+
+### Good Feedback
+
+````markdown
+## Feature Request: Batch User Creation
+
+### Use Case
+
+We need to create hundreds of users at once during our onboarding process. Currently, we have to make individual API calls for each user, which is slow and hits rate limits.
+
+### Current Workaround
+
+We're using Promise.all() with individual API calls, but this often fails due to rate limiting.
+
+### Proposed Solution
+
+Add a batch endpoint like POST /v1/users/batch that accepts an array of user objects and returns an array of results.
+
+### Example API
+
+```json
+POST /v1/users/batch
+{
+  "users": [
+    {"name": "User 1", "email": "user1@example.com"},
+    {"name": "User 2", "email": "user2@example.com"}
+  ]
+}
+```
+````
+
+### Priority
+
+High - This would significantly improve our onboarding process.
+
+````
+
+### Documentation Feedback
+
+```markdown
+## Documentation Issue: Missing Error Codes
+
+### Problem
+The API reference doesn't list all possible error codes. When we get a 400 error, we don't know what specific error code to handle.
+
+### Location
+/docs/api-reference - Error Handling section
+
+### Suggested Fix
+Add a complete list of error codes with descriptions and examples.
+
+### Example
+```json
+{
+  "error": {
+    "code": "invalid_email_format",
+    "message": "The email address format is invalid",
+    "field": "email"
+  }
+}
+````
+
+````
+
+## Feedback Process
+
+### How We Handle Feedback
+
+1. **Collection** - We collect feedback from multiple channels
+2. **Review** - Product team reviews all feedback
+3. **Prioritization** - We prioritize based on impact and effort
+4. **Planning** - We plan features and improvements
+5. **Implementation** - We build and test changes
+6. **Communication** - We update the community on progress
+
+### Response Times
+
+- **Acknowledgment** - Within 1-2 business days
+- **Initial response** - Within 1 week
+- **Status updates** - Monthly for major requests
+
+## User Research
+
+### Participate in Research
+
+Help us understand your needs:
+
+- **User interviews** - 30-minute video calls
+- **Usability testing** - Test new features
+- **Surveys** - Quick feedback on specific topics
+- **Beta testing** - Early access to new features
+
+### Research Benefits
+
+- **Early access** to new features
+- **Influence** product direction
+- **Recognition** as a beta tester
+- **Swag** and rewards
+
+## Feature Requests
+
+### Submitting Feature Requests
+
+1. **Check existing requests** - Search GitHub Issues first
+2. **Use template** - Use our feature request template
+3. **Provide details** - Include use case and examples
+4. **Vote on others** - Vote on existing requests
+
+### Feature Request Template
+
+```markdown
+## Feature Description
+Brief description of the feature.
+
+## Problem Statement
+What problem does this solve?
+
+## Proposed Solution
+How should this work?
+
+## Use Cases
+- Use case 1
+- Use case 2
+- Use case 3
+
+## Alternatives Considered
+What other solutions were considered?
+
+## Additional Context
+Any other context or screenshots.
+````
+
+## Bug Reports
+
+### Reporting Bugs
+
+1. **Search existing issues** - Check if already reported
+2. **Use bug template** - Use our bug report template
+3. **Include details** - Steps to reproduce, environment, etc.
+4. **Test in sandbox** - Verify in test environment first
+
+## Community Feedback
+
+### Voting and Discussion
+
+- **GitHub Issues** - Vote with 👍 reactions
+- **GitHub Discussions** - Discuss and refine ideas
+- **Discord** - Real-time discussion
+- **Surveys** - Formal feedback collection
+
+### Feedback Categories
+
+- **High Priority** - Critical issues affecting many users
+- **Medium Priority** - Important improvements
+- **Low Priority** - Nice-to-have features
+- **Future Consideration** - Ideas for future versions
+
+## Recognition
+
+### Feedback Contributors
+
+We recognize valuable feedback:
+
+- **Contributor badges** on GitHub
+- **Beta tester** recognition
+- **Early access** to new features
+- **Swag** for significant contributions
+
+### Feedback Impact
+
+Your feedback directly influences:
+
+- **Product roadmap** - What we build next
+- **API design** - How endpoints work
+- **Documentation** - What we document
+- **Community** - How we support users
+
+<Cards>
+  <Card
+    title="Community"
+    href="/docs/community"
+    description="Join our developer community"
+  />
+  <Card
+    title="Support"
+    href="/docs/support"
+    description="Get technical support"
+  />
+  <Card
+    title="Feature Requests"
+    href="/docs/feature-requests"
+    description="Request new features"
+  />
+</Cards>

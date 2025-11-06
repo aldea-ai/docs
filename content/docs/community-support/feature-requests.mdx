@@ -1,0 +1,287 @@
+---
+title: Feature Requests
+description: Request new features and improvements
+---
+
+Help shape the future of Hackmamba by requesting new features and improvements.
+
+## How to Submit Feature Requests
+
+### GitHub Issues (Recommended)
+
+Submit feature requests through GitHub Issues:
+
+1. **Search existing issues** - Check if your request already exists
+2. **Use the template** - Use our feature request template
+3. **Provide details** - Include use case, examples, and impact
+4. **Vote and discuss** - Engage with the community
+
+### Other Channels
+
+- **Discord** - Share ideas in `#feature-requests`
+- **Email** - Send to features@hackmamba.com
+- **Community Survey** - Participate in quarterly surveys
+
+## Feature Request Template
+
+```markdown
+## Feature Description
+
+Brief description of the feature you'd like to see.
+
+## Problem Statement
+
+What problem does this feature solve? What pain point does it address?
+
+## Proposed Solution
+
+How should this feature work? What would the user experience be like?
+
+## Use Cases
+
+Describe specific scenarios where this feature would be valuable:
+
+- Use case 1: [Description]
+- Use case 2: [Description]
+- Use case 3: [Description]
+
+## Alternatives Considered
+
+What other solutions have you considered? Why is this approach better?
+
+## Additional Context
+
+Any other context, mockups, or examples that would help explain the feature.
+```
+
+## Feature Request Examples
+
+### Good Feature Request
+
+````markdown
+## Feature Description
+
+Add webhook retry configuration to allow custom retry policies.
+
+## Problem Statement
+
+Currently, webhooks retry 3 times with fixed intervals (1min, 5min, 15min). Our application needs different retry behavior - we want to retry more times with shorter intervals for critical events.
+
+## Proposed Solution
+
+Add a `retry_policy` field to webhook configuration:
+
+```json
+{
+  "url": "https://example.com/webhook",
+  "events": ["payment.succeeded"],
+  "retry_policy": {
+    "max_attempts": 10,
+    "intervals": [30, 60, 120, 300, 600], // seconds
+    "backoff": "exponential"
+  }
+}
+```
+````
+
+## Use Cases
+
+- Critical payment notifications need immediate retry
+- Different retry policies for different event types
+- Custom backoff strategies for specific applications
+
+## Alternatives Considered
+
+- Using a message queue (adds complexity)
+- Implementing retry logic in our application (redundant)
+- Accepting current retry behavior (not suitable for our needs)
+
+## Additional Context
+
+This would be especially valuable for financial applications where delayed notifications can impact user experience.
+
+````
+
+### API Feature Request
+
+```markdown
+## Feature Description
+Add bulk operations for user management.
+
+## Problem Statement
+We need to update hundreds of users at once (e.g., changing user roles during a migration). Currently, we have to make individual API calls, which is slow and hits rate limits.
+
+## Proposed Solution
+Add bulk endpoints:
+- `POST /v1/users/bulk-update` - Update multiple users
+- `POST /v1/users/bulk-delete` - Delete multiple users
+- `POST /v1/users/bulk-create` - Create multiple users
+
+## Use Cases
+- User role migrations
+- Bulk user imports
+- Account cleanup operations
+- Data synchronization
+
+## Alternatives Considered
+- Using individual API calls (current approach - too slow)
+- Using webhooks to trigger bulk operations (complex)
+- Implementing our own bulk operations (redundant)
+
+## Additional Context
+This would significantly improve our migration processes and reduce API calls.
+````
+
+## Feature Prioritization
+
+### How We Prioritize Features
+
+We consider several factors when prioritizing features:
+
+- **User Impact** - How many users would benefit?
+- **Business Value** - Does it align with our goals?
+- **Technical Effort** - How complex is it to implement?
+- **User Demand** - How many requests do we receive?
+- **Strategic Fit** - Does it fit our roadmap?
+
+### Priority Levels
+
+- **P0 - Critical** - Security issues, breaking changes
+- **P1 - High** - Major features, significant improvements
+- **P2 - Medium** - Important features, nice-to-have improvements
+- **P3 - Low** - Minor features, future considerations
+
+## Voting and Discussion
+
+### Voting on Features
+
+- **GitHub Issues** - Use 👍 reactions to vote
+- **Discord** - React with emojis to show support
+- **Surveys** - Participate in formal voting
+
+### Discussing Features
+
+- **GitHub Discussions** - Detailed discussions
+- **Discord** - Real-time chat
+- **Community Calls** - Monthly feature discussions
+
+## Feature Status
+
+### Status Tracking
+
+We track feature requests through these statuses:
+
+- **Under Review** - Being evaluated by product team
+- **Planned** - Approved and planned for development
+- **In Development** - Currently being built
+- **Beta Testing** - Available for testing
+- **Released** - Available in production
+- **Rejected** - Not planned for implementation
+
+### Status Updates
+
+- **Monthly updates** - Status changes posted to GitHub
+- **Release notes** - New features announced
+- **Beta announcements** - Early access opportunities
+
+## Current Roadmap
+
+### Q1 2024
+
+- [ ] Bulk user operations
+- [ ] Enhanced webhook configuration
+- [ ] Improved error messages
+
+### Q2 2024
+
+- [ ] GraphQL API
+- [ ] Real-time subscriptions
+- [ ] Advanced analytics
+
+### Q3 2024
+
+- [ ] Mobile SDKs
+- [ ] Plugin marketplace
+- [ ] Advanced security features
+
+## Contributing to Features
+
+### Implementation
+
+Want to help implement a feature?
+
+1. **Check the roadmap** - See what's planned
+2. **Look for "help wanted"** labels on GitHub Issues
+3. **Contact maintainers** - Discuss implementation approach
+4. **Submit PR** - Follow contribution guidelines
+
+### Design and UX
+
+Help with design and user experience:
+
+- **Mockups** - Create visual designs
+- **User flows** - Design user journeys
+- **Accessibility** - Ensure inclusive design
+- **Testing** - Participate in usability testing
+
+## Feature Request Best Practices
+
+### Before Submitting
+
+1. **Search existing requests** - Avoid duplicates
+2. **Check roadmap** - See if already planned
+3. **Gather feedback** - Discuss with community first
+4. **Prepare details** - Have use cases and examples ready
+
+### Writing Effective Requests
+
+- **Be specific** - Clear description of what you want
+- **Explain the problem** - Why is this needed?
+- **Provide examples** - Show how it would work
+- **Consider alternatives** - What else could work?
+
+### Following Up
+
+- **Vote on others** - Support related requests
+- **Provide feedback** - Help refine the feature
+- **Test betas** - Help test implementations
+- **Share use cases** - Provide real-world examples
+
+## Community Feature Requests
+
+### Popular Requests
+
+Based on community voting:
+
+1. **Bulk Operations** - Batch API calls
+2. **GraphQL API** - More flexible querying
+3. **Real-time Updates** - WebSocket connections
+4. **Mobile SDKs** - Native mobile support
+5. **Advanced Analytics** - Better insights
+
+### Recent Additions
+
+Features added based on community requests:
+
+- **Webhook retry configuration** - Custom retry policies
+- **Enhanced error messages** - More helpful error details
+- **Rate limit headers** - Better rate limit visibility
+- **SDK improvements** - Better developer experience
+
+<Cards>
+  <Card
+    title="Community"
+    href="/docs/community"
+    description="Join our developer community"
+  />
+  <Card
+    title="Feedback"
+    href="/docs/feedback"
+    description="Share your feedback"
+  />
+  <Card
+    title="Contributing"
+    href="/docs/contributing"
+    description="Contribute to the project"
+  />
+</Cards>

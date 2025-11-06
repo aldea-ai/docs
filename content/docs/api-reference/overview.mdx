@@ -1,0 +1,62 @@
+---
+title: overview
+---
+
+> This page is **auto-generated** from `/headers/overview.h`. Edit doc comments in the header and rebuild to update.
+
+## Functions
+- [`get_api_version`](#get-api-version)
+- [`initialize_api`](#initialize-api)
+- [`shutdown_api`](#shutdown-api)
+
+<a id="get-api-version"></a>
+### `get_api_version`
+Prints the API version string.
+
+/
+/**
+
+**Signature**
+```c
+const char* get_api_version(void);
+```
+
+**Returns**
+
+A constant string representing the current API version.
+
+**Example**
+```c
+const char* version = get_api_version();
+printf("API Version: %s\n", version);
+```
+
+<a id="initialize-api"></a>
+### `initialize_api`
+Initializes the API environment.
+
+**Signature**
+```c
+int initialize_api(void);
+```
+
+**Returns**
+
+0 on success, or a negative error code on failure.
+
+**Errors**
+- -1 Initialization failed
+
+<a id="shutdown-api"></a>
+### `shutdown_api`
+Cleans up and shuts down the API.
+
+**Signature**
+```c
+int shutdown_api(void);
+```
+
+**Returns**
+
+0 on success.
+

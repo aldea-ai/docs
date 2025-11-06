@@ -1,0 +1,108 @@
+---
+title: config
+---
+
+> This page is **auto-generated** from `/headers/config.h`. Edit doc comments in the header and rebuild to update.
+
+## Functions
+- [`cfg_get_base_url`](#cfg-get-base-url)
+- [`cfg_get_int`](#cfg-get-int)
+- [`cfg_reset_defaults`](#cfg-reset-defaults)
+- [`cfg_set_base_url`](#cfg-set-base-url)
+- [`cfg_set_int`](#cfg-set-int)
+
+<a id="cfg-get-base-url"></a>
+### `cfg_get_base_url`
+Gets the current API base URL.
+
+**Signature**
+```c
+int cfg_get_base_url(char* out, int out_size);
+```
+
+**Parameters**
+
+| Name | Description |
+|------|-------------|
+| `out` | Buffer for URL string. |
+| `out_size` | Size of buffer. |
+
+**Returns**
+
+0 on success; -1 buffer too small.
+
+<a id="cfg-get-int"></a>
+### `cfg_get_int`
+Gets a numeric config option by key.
+
+**Signature**
+```c
+int cfg_get_int(const char* key, int* out_value);
+```
+
+**Parameters**
+
+| Name | Description |
+|------|-------------|
+| `key` | Option name. |
+| `out_value` | Pointer to receive value. |
+
+**Returns**
+
+0 on success; -1 unknown key.
+
+<a id="cfg-reset-defaults"></a>
+### `cfg_reset_defaults`
+Resets all runtime config to defaults.
+
+**Signature**
+```c
+int cfg_reset_defaults(void);
+```
+
+**Returns**
+
+0 on success.
+
+<a id="cfg-set-base-url"></a>
+### `cfg_set_base_url`
+Sets the API base URL.
+
+/
+/**
+
+**Signature**
+```c
+int cfg_set_base_url(const char* url);
+```
+
+**Parameters**
+
+| Name | Description |
+|------|-------------|
+| `url` | Null-terminated base URL. |
+
+**Returns**
+
+0 on success; -1 invalid URL.
+
+<a id="cfg-set-int"></a>
+### `cfg_set_int`
+Sets a numeric config option by key.
+
+**Signature**
+```c
+int cfg_set_int(const char* key, int value);
+```
+
+**Parameters**
+
+| Name | Description |
+|------|-------------|
+| `key` | Option name (e.g., "timeout_ms"). |
+| `value` | Integer value. |
+
+**Returns**
+
+0 on success; -1 unknown key.
+

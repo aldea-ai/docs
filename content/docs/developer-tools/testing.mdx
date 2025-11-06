@@ -1,0 +1,301 @@
+---
+title: Testing
+description: Testing your integration and webhook setup
+---
+
+# Testing
+
+Learn how to test your integration with our API and webhooks.
+
+## Testing Environment
+
+### Sandbox Environment
+
+Use our sandbox environment for testing:
+
+- **Base URL**: `https://api-sandbox.hackmamba.com/v1`
+- **Test API Keys**: Start with `sk_test_`
+- **Test Data**: Separate from production data
+
+### Test API Keys
+
+```bash
+# Test API key (safe to use in code examples)
+export HACKMAMBA_API_KEY=sk_test_1234567890abcdef
+```
+
+## API Testing
+
+### Manual Testing with cURL
+
+Test API endpoints manually:
+
+```bash
+# Test user creation
+curl -X POST https://api-sandbox.hackmamba.com/v1/users \
+  -H "Authorization: Bearer sk_test_1234567890abcdef" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Test User",
+    "email": "test@example.com"
+  }'
+
+# Test user retrieval
+curl -H "Authorization: Bearer sk_test_1234567890abcdef" \
+     https://api-sandbox.hackmamba.com/v1/users/user_123
+```
+
+### Automated Testing
+
+Write automated tests for your integration:
+
+```javascript
+// Jest test example
+const { HackmambaClient } = require("@hackmamba/sdk");
+
+describe("Hackmamba Integration", () => {
+  let client;
+
+  beforeAll(() => {
+    client = new HackmambaClient({
+      apiKey: process.env.HACKMAMBA_TEST_API_KEY,
+      environment: "sandbox",
+    });
+  });
+
+  test("should create a user", async () => {
+    const user = await client.users.create({
+      name: "Test User",
+      email: "test@example.com",
+    });
+
+    expect(user.id).toBeDefined();
+    expect(user.name).toBe("Test User");
+    expect(user.email).toBe("test@example.com");
+  });
+
+  test("should retrieve a user", async () => {
+    const user = await client.users.get("user_123");
+    expect(user).toBeDefined();
+  });
+});
+```
+
+## Webhook Testing
+
+### Local Development Setup
+
+Use ngrok to test webhooks locally:
+
+```bash
+# Install ngrok
+npm install -g ngrok
+
+# Start your local server
+npm start
+
+# In another terminal, expose your local server
+ngrok http 3000
+```
+
+### Webhook Test Endpoint
+
+Create a test endpoint to receive webhooks:
+
+```javascript
+app.post("/webhooks/test", (req, res) => {
+  console.log("Received webhook:", req.body);
+
+  // Verify signature
+  const signature = req.headers["x-hackmamba-signature"];
+  if (!verifyWebhookSignature(req.body, signature)) {
+    return res.status(400).send("Invalid signature");
+  }
+
+  // Process the event
+  const event = req.body;
+  console.log(`Event type: ${event.type}`);
+  console.log(`Event data:`, event.data);
+
+  res.status(200).send("OK");
+});
+```
+
+### Register Test Webhook
+
+```bash
+curl -X POST https://api-sandbox.hackmamba.com/v1/webhooks \
+  -H "Authorization: Bearer sk_test_1234567890abcdef" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://abc123.ngrok.io/webhooks/test",
+    "events": ["user.created", "user.updated"]
+  }'
+```
+
+### Trigger Test Events
+
+```bash
+# Create a test user to trigger webhook
+curl -X POST https://api-sandbox.hackmamba.com/v1/users \
+  -H "Authorization: Bearer sk_test_1234567890abcdef" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Webhook Test User",
+    "email": "webhook-test@example.com"
+  }'
+```
+
+## Test Data Management
+
+### Creating Test Data
+
+```javascript
+async function createTestData() {
+  const testUsers = [
+    { name: "Alice Johnson", email: "alice@test.com" },
+    { name: "Bob Smith", email: "bob@test.com" },
+    { name: "Carol Davis", email: "carol@test.com" },
+  ];
+
+  for (const userData of testUsers) {
+    await client.users.create(userData);
+  }
+}
+```
+
+### Cleaning Up Test Data
+
+```javascript
+async function cleanupTestData() {
+  const users = await client.users.list();
+  const testUsers = users.filter((user) => user.email.includes("@test.com"));
+
+  for (const user of testUsers) {
+    await client.users.delete(user.id);
+  }
+}
+```
+
+## Error Testing
+
+### Testing Error Responses
+
+```javascript
+test("should handle invalid API key", async () => {
+  const invalidClient = new HackmambaClient({
+    apiKey: "sk_invalid_key",
+  });
+
+  await expect(invalidClient.users.list()).rejects.toThrow("Invalid API key");
+});
+
+test("should handle rate limiting", async () => {
+  // Make many requests quickly
+  const promises = Array(10)
+    .fill()
+    .map(() => client.users.list());
+
+  const results = await Promise.allSettled(promises);
+  const rateLimited = results.filter(
+    (r) => r.status === "rejected" && r.reason.code === "rate_limit_exceeded"
+  );
+
+  expect(rateLimited.length).toBeGreaterThan(0);
+});
+```
+
+## Integration Testing
+
+### End-to-End Testing
+
+```javascript
+describe("Complete Integration Flow", () => {
+  test("should handle user lifecycle", async () => {
+    // 1. Create user
+    const user = await client.users.create({
+      name: "Integration Test User",
+      email: "integration@test.com",
+    });
+
+    expect(user.id).toBeDefined();
+
+    // 2. Update user
+    const updatedUser = await client.users.update(user.id, {
+      name: "Updated Integration Test User",
+    });
+
+    expect(updatedUser.name).toBe("Updated Integration Test User");
+
+    // 3. Verify webhook was received
+    await waitForWebhookEvent("user.updated", user.id);
+
+    // 4. Delete user
+    await client.users.delete(user.id);
+
+    // 5. Verify user is deleted
+    await expect(client.users.get(user.id)).rejects.toThrow("User not found");
+  });
+});
+```
+
+## Performance Testing
+
+### Load Testing
+
+```javascript
+const { performance } = require("perf_hooks");
+
+async function loadTest() {
+  const startTime = performance.now();
+
+  const promises = Array(100)
+    .fill()
+    .map(async (_, index) => {
+      return client.users.create({
+        name: `Load Test User ${index}`,
+        email: `load-test-${index}@example.com`,
+      });
+    });
+
+  const results = await Promise.all(promises);
+  const endTime = performance.now();
+
+  console.log(`Created ${results.length} users in ${endTime - startTime}ms`);
+  console.log(
+    `Average: ${(endTime - startTime) / results.length}ms per request`
+  );
+}
+```
+
+## Testing Checklist
+
+### Pre-Production Testing
+
+- [ ] Test all API endpoints
+- [ ] Verify webhook delivery
+- [ ] Test error handling
+- [ ] Validate rate limiting behavior
+- [ ] Test authentication flows
+- [ ] Verify data consistency
+- [ ] Test edge cases
+- [ ] Performance testing
+- [ ] Security testing
+
+<Cards>
+  <Card
+    title="API Reference"
+    href="/docs/api-reference"
+    description="Complete API documentation"
+  />
+  <Card
+    title="Webhooks"
+    href="/docs/webhooks"
+    description="Webhook setup and management"
+  />
+  <Card
+    title="Troubleshooting"
+    href="/docs/troubleshooting"
+    description="Common issues and solutions"
+  />
+</Cards>

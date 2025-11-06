@@ -1,0 +1,92 @@
+---
+title: logger
+---
+
+> This page is **auto-generated** from `/headers/logger.h`. Edit doc comments in the header and rebuild to update.
+
+## Functions
+- [`log_enable_timestamps`](#log-enable-timestamps)
+- [`log_set_level`](#log-set-level)
+- [`log_set_sink`](#log-set-sink)
+- [`log_write`](#log-write)
+
+<a id="log-enable-timestamps"></a>
+### `log_enable_timestamps`
+Enables or disables timestamps in log output.
+
+**Signature**
+```c
+int log_enable_timestamps(int enabled);
+```
+
+**Parameters**
+
+| Name | Description |
+|------|-------------|
+| `enabled` | 1 to enable; 0 to disable. |
+
+**Returns**
+
+0 on success.
+
+<a id="log-set-level"></a>
+### `log_set_level`
+Sets log level threshold.
+
+/
+/**
+
+**Signature**
+```c
+int log_set_level(int level);
+```
+
+**Parameters**
+
+| Name | Description |
+|------|-------------|
+| `level` | One of: 0=ERROR, 1=WARN, 2=INFO, 3=DEBUG, 4=TRACE. |
+
+**Returns**
+
+0 on success; -1 invalid level.
+
+<a id="log-set-sink"></a>
+### `log_set_sink`
+Sets a custom log sink (stderr, file, etc).
+
+**Signature**
+```c
+int log_set_sink(const char* sink_name);
+```
+
+**Parameters**
+
+| Name | Description |
+|------|-------------|
+| `sink_name` | Name identifier for sink (e.g., "stderr","file"). |
+
+**Returns**
+
+0 on success; -1 not supported.
+
+<a id="log-write"></a>
+### `log_write`
+Logs a formatted message at a given level.
+
+**Signature**
+```c
+int log_write(int level, const char* message);
+```
+
+**Parameters**
+
+| Name | Description |
+|------|-------------|
+| `level` | Log level. |
+| `message` | Null-terminated message (no formatting). |
+
+**Returns**
+
+0 on success.
+

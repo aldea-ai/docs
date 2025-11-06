@@ -1,0 +1,55 @@
+---
+title: users
+---
+
+> This page is **auto-generated** from `/headers/users.h`. Edit doc comments in the header and rebuild to update.
+
+## Functions
+- [`get_user_profile`](#get-user-profile)
+- [`update_user_profile`](#update-user-profile)
+
+<a id="get-user-profile"></a>
+### `get_user_profile`
+Fetches a user's profile by ID.
+
+/
+/**
+
+**Signature**
+```c
+int get_user_profile(const char* user_id, char* buffer, int buffer_size);
+```
+
+**Parameters**
+
+| Name | Description |
+|------|-------------|
+| `user_id` | The unique identifier of the user. |
+| `buffer` | Output buffer to store JSON response. |
+| `buffer_size` | Size of the output buffer. |
+
+**Returns**
+
+0 on success or negative error code.
+
+<a id="update-user-profile"></a>
+### `update_user_profile`
+Updates a user's name or email.
+
+**Signature**
+```c
+int update_user_profile(const char* user_id, const char* name, const char* email);
+```
+
+**Parameters**
+
+| Name | Description |
+|------|-------------|
+| `user_id` | The user's unique ID. |
+| `name` | New name (nullable). |
+| `email` | New email (nullable). |
+
+**Returns**
+
+0 on success, -1 on invalid input.
+

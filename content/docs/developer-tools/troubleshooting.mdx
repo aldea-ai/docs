@@ -1,0 +1,373 @@
+---
+title: Troubleshooting
+description: Common issues and solutions for API integration
+---
+
+# Troubleshooting
+
+Common issues and solutions when integrating with our API.
+
+## Authentication Issues
+
+### Invalid API Key
+
+**Error**: `invalid_api_key`
+
+**Symptoms**:
+
+- 401 Unauthorized responses
+- "Invalid API key" error messages
+
+**Solutions**:
+
+1. Verify your API key is correct
+2. Check for extra spaces or characters
+3. Ensure you're using the right environment (sandbox vs production)
+4. Regenerate your API key if needed
+
+```bash
+# Check your API key format
+echo $HACKMAMBA_API_KEY
+# Should start with sk_test_ or sk_live_
+```
+
+### Expired Token
+
+**Error**: `expired_token`
+
+**Symptoms**:
+
+- 401 Unauthorized responses
+- "Token has expired" error messages
+
+**Solutions**:
+
+1. Refresh your access token
+2. Implement automatic token refresh
+3. Check your system clock synchronization
+
+```javascript
+// Implement token refresh
+async function refreshToken() {
+  const response = await fetch("/oauth/token", {
+    method: "POST",
+    body: new URLSearchParams({
+      grant_type: "refresh_token",
+      refresh_token: storedRefreshToken,
+    }),
+  });
+
+  const data = await response.json();
+  // Store new tokens
+}
+```
+
+## Rate Limiting Issues
+
+### Rate Limit Exceeded
+
+**Error**: `rate_limit_exceeded`
+
+**Symptoms**:
+
+- 429 Too Many Requests responses
+- `X-RateLimit-Remaining: 0` headers
+
+**Solutions**:
+
+1. Implement exponential backoff
+2. Reduce request frequency
+3. Use batch endpoints when available
+4. Upgrade your plan for higher limits
+
+```javascript
+// Exponential backoff implementation
+async function makeRequestWithBackoff(url, options, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const response = await fetch(url, options);
+
+      if (response.status === 429) {
+        const retryAfter = response.headers.get("Retry-After");
+        const delay = retryAfter
+          ? parseInt(retryAfter) * 1000
+          : Math.pow(2, i) * 1000;
+
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        continue;
+      }
+
+      return response;
+    } catch (error) {
+      if (i === maxRetries - 1) throw error;
+    }
+  }
+}
+```
+
+## Webhook Issues
+
+### Webhook Not Receiving Events
+
+**Symptoms**:
+
+- No webhook events received
+- Events not triggering
+
+**Solutions**:
+
+1. Verify webhook URL is accessible
+2. Check webhook registration
+3. Ensure HTTPS is used in production
+4. Verify signature validation
+
+```bash
+# Test webhook endpoint
+curl -X POST https://your-webhook-url.com/webhooks \
+  -H "Content-Type: application/json" \
+  -d '{"test": "data"}'
+```
+
+### Invalid Webhook Signature
+
+**Error**: Signature verification fails
+
+**Solutions**:
+
+1. Verify webhook secret is correct
+2. Check signature calculation
+3. Ensure raw request body is used
+
+```javascript
+// Correct signature verification
+const crypto = require("crypto");
+
+function verifyWebhookSignature(payload, signature, secret) {
+  const expectedSignature = crypto
+    .createHmac("sha256", secret)
+    .update(payload, "utf8") // Use raw body
+    .digest("hex");
+
+  return signature === `sha256=${expectedSignature}`;
+}
+```
+
+## Data Issues
+
+### User Not Found
+
+**Error**: `user_not_found`
+
+**Solutions**:
+
+1. Verify user ID is correct
+2. Check if user was deleted
+3. Ensure you're querying the right environment
+
+```javascript
+// Safe user retrieval
+async function getUserSafely(userId) {
+  try {
+    return await client.users.get(userId);
+  } catch (error) {
+    if (error.code === "user_not_found") {
+      return null; // Handle gracefully
+    }
+    throw error;
+  }
+}
+```
+
+### Invalid Data Format
+
+**Error**: `invalid_request`
+
+**Solutions**:
+
+1. Validate data before sending
+2. Check required fields
+3. Verify data types
+
+```javascript
+// Data validation
+function validateUserData(data) {
+  const errors = [];
+
+  if (!data.name || typeof data.name !== "string") {
+    errors.push("Name is required and must be a string");
+  }
+
+  if (!data.email || !isValidEmail(data.email)) {
+    errors.push("Valid email is required");
+  }
+
+  if (errors.length > 0) {
+    throw new Error(`Validation failed: ${errors.join(", ")}`);
+  }
+}
+```
+
+## Network Issues
+
+### Connection Timeouts
+
+**Symptoms**:
+
+- Requests timing out
+- Network errors
+
+**Solutions**:
+
+1. Increase timeout values
+2. Implement retry logic
+3. Check network connectivity
+4. Use connection pooling
+
+```javascript
+// Configure timeouts
+const client = new HackmambaClient({
+  apiKey: "your-key",
+  timeout: 30000, // 30 seconds
+  retries: 3,
+});
+```
+
+### SSL/TLS Issues
+
+**Symptoms**:
+
+- SSL certificate errors
+- Connection refused
+
+**Solutions**:
+
+1. Update certificates
+2. Check TLS version compatibility
+3. Verify certificate chain
+
+```bash
+# Test SSL connection
+openssl s_client -connect api.hackmamba.com:443
+```
+
+## SDK Issues
+
+### SDK Not Found
+
+**Error**: Module not found
+
+**Solutions**:
+
+1. Install the correct SDK
+2. Check package.json dependencies
+3. Clear node_modules and reinstall
+
+```bash
+# Reinstall SDK
+npm uninstall @hackmamba/sdk
+npm install @hackmamba/sdk
+```
+
+### Version Compatibility
+
+**Symptoms**:
+
+- Deprecated warnings
+- Feature not available
+
+**Solutions**:
+
+1. Update to latest SDK version
+2. Check API version compatibility
+3. Review changelog for breaking changes
+
+```bash
+# Check SDK version
+npm list @hackmamba/sdk
+
+# Update to latest
+npm update @hackmamba/sdk
+```
+
+## Debugging Tips
+
+### Enable Debug Logging
+
+```javascript
+// Enable debug mode
+const client = new HackmambaClient({
+  apiKey: "your-key",
+  debug: true, // Enable debug logging
+});
+```
+
+### Log Request/Response
+
+```javascript
+// Log all requests
+client.on("request", (req) => {
+  console.log("Request:", req.method, req.url);
+});
+
+client.on("response", (res) => {
+  console.log("Response:", res.status, res.data);
+});
+```
+
+### Use Request IDs
+
+```javascript
+// Include request ID for tracking
+const response = await client.users.list({
+  requestId: "my-unique-request-id",
+});
+```
+
+## Getting Help
+
+### Check Status Page
+
+Visit our status page for service updates:
+
+- [Status Page](https://status.hackmamba.com)
+
+### Contact Support
+
+If you're still experiencing issues:
+
+1. **Check Documentation**: Review relevant documentation
+2. **Search Issues**: Look for similar issues in our support forum
+3. **Contact Support**: Reach out with detailed information:
+   - Error messages
+   - Request/response logs
+   - Steps to reproduce
+   - SDK version and environment
+
+### Support Information
+
+When contacting support, include:
+
+- API key (masked: `sk_test_...`)
+- SDK version
+- Environment (sandbox/production)
+- Error messages
+- Request IDs
+- Timestamps
+
+<Cards>
+  <Card
+    title="API Reference"
+    href="/docs/api-reference"
+    description="Complete API documentation"
+  />
+  <Card
+    title="Testing"
+    href="/docs/testing"
+    description="Testing your integration"
+  />
+  <Card
+    title="Support"
+    href="/docs/support"
+    description="Get help and support"
+  />
+</Cards>

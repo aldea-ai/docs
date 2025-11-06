@@ -1,0 +1,266 @@
+---
+title: Webhooks
+description: Set up and manage webhooks for real-time updates
+---
+
+# Webhooks
+
+Set up webhooks to receive real-time notifications about events in your account.
+
+## Overview
+
+Webhooks allow you to receive instant notifications when events occur in your account, enabling you to build real-time integrations and keep your systems in sync.
+
+## Supported Events
+
+### User Events
+
+- `user.created` - A new user is created
+- `user.updated` - User information is updated
+- `user.deleted` - A user is deleted
+
+### Project Events
+
+- `project.created` - A new project is created
+- `project.updated` - Project settings are updated
+- `project.deleted` - A project is deleted
+
+### Payment Events
+
+- `payment.succeeded` - A payment is completed successfully
+- `payment.failed` - A payment fails
+- `payment.refunded` - A payment is refunded
+
+## Setting Up Webhooks
+
+### 1. Create a Webhook Endpoint
+
+First, create an endpoint in your application to receive webhook events:
+
+```javascript
+// Express.js example
+app.post("/webhooks/hackmamba", (req, res) => {
+  const event = req.body;
+
+  // Verify the webhook signature
+  const signature = req.headers["x-hackmamba-signature"];
+  if (!verifyWebhookSignature(req.body, signature)) {
+    return res.status(400).send("Invalid signature");
+  }
+
+  // Process the event
+  handleWebhookEvent(event);
+
+  res.status(200).send("OK");
+});
+```
+
+### 2. Register Your Webhook
+
+Register your webhook endpoint through the API:
+
+```bash
+curl -X POST https://api.hackmamba.com/v1/webhooks \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://your-app.com/webhooks/hackmamba",
+    "events": ["user.created", "user.updated"],
+    "secret": "your-webhook-secret"
+  }'
+```
+
+### 3. Handle Events
+
+Process incoming webhook events:
+
+```javascript
+function handleWebhookEvent(event) {
+  switch (event.type) {
+    case "user.created":
+      console.log("New user:", event.data);
+      // Sync user to your database
+      break;
+
+    case "user.updated":
+      console.log("Updated user:", event.data);
+      // Update user in your database
+      break;
+
+    case "payment.succeeded":
+      console.log("Payment succeeded:", event.data);
+      // Activate user subscription
+      break;
+
+    default:
+      console.log("Unknown event type:", event.type);
+  }
+}
+```
+
+## Webhook Security
+
+### Signature Verification
+
+Always verify webhook signatures to ensure events are from Hackmamba:
+
+```javascript
+const crypto = require("crypto");
+
+function verifyWebhookSignature(payload, signature, secret) {
+  const expectedSignature = crypto
+    .createHmac("sha256", secret)
+    .update(payload)
+    .digest("hex");
+
+  return signature === `sha256=${expectedSignature}`;
+}
+```
+
+### HTTPS Only
+
+Webhook endpoints must use HTTPS in production. We will not send webhooks to HTTP endpoints.
+
+## Event Structure
+
+All webhook events follow this structure:
+
+```json
+{
+  "id": "evt_1234567890",
+  "type": "user.created",
+  "created": 1640995200,
+  "data": {
+    "object": "user",
+    "id": "user_123",
+    "name": "John Doe",
+    "email": "john@example.com"
+  },
+  "livemode": false,
+  "pending_webhooks": 1,
+  "request": {
+    "id": "req_1234567890"
+  }
+}
+```
+
+## Retry Logic
+
+If your webhook endpoint returns a non-2xx status code, we will retry the webhook:
+
+- **Retry attempts**: Up to 3 times
+- **Retry intervals**: 1 minute, 5 minutes, 15 minutes
+- **Timeout**: 30 seconds per attempt
+
+## Testing Webhooks
+
+### Using ngrok for Local Development
+
+```bash
+# Install ngrok
+npm install -g ngrok
+
+# Expose your local server
+ngrok http 3000
+
+# Use the ngrok URL for webhook registration
+curl -X POST https://api.hackmamba.com/v1/webhooks \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://abc123.ngrok.io/webhooks/hackmamba",
+    "events": ["user.created"]
+  }'
+```
+
+### Webhook Testing Tool
+
+Use our webhook testing tool to send test events:
+
+```bash
+curl -X POST https://api.hackmamba.com/v1/webhooks/wh_123/test \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+## Managing Webhooks
+
+### List Webhooks
+
+```bash
+curl -H "Authorization: Bearer YOUR_API_KEY" \
+     https://api.hackmamba.com/v1/webhooks
+```
+
+### Update Webhook
+
+```bash
+curl -X PUT https://api.hackmamba.com/v1/webhooks/wh_123 \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "events": ["user.created", "user.updated", "user.deleted"]
+  }'
+```
+
+### Delete Webhook
+
+```bash
+curl -X DELETE https://api.hackmamba.com/v1/webhooks/wh_123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+## Best Practices
+
+### Idempotency
+
+Make your webhook handlers idempotent to handle duplicate events:
+
+```javascript
+const processedEvents = new Set();
+
+function handleWebhookEvent(event) {
+  if (processedEvents.has(event.id)) {
+    return; // Already processed
+  }
+
+  // Process event
+  processEvent(event);
+
+  // Mark as processed
+  processedEvents.add(event.id);
+}
+```
+
+### Error Handling
+
+Implement proper error handling and logging:
+
+```javascript
+function handleWebhookEvent(event) {
+  try {
+    processEvent(event);
+    console.log(`Successfully processed event ${event.id}`);
+  } catch (error) {
+    console.error(`Failed to process event ${event.id}:`, error);
+    // Don't throw - return 200 to prevent retries
+  }
+}
+```
+
+<Cards>
+  <Card
+    title="API Reference"
+    href="/docs/api-reference"
+    description="Complete API documentation"
+  />
+  <Card
+    title="SDKs"
+    href="/docs/sdks"
+    description="Official SDKs with webhook support"
+  />
+  <Card
+    title="Testing"
+    href="/docs/testing"
+    description="Testing your webhook integration"
+  />
+</Cards>
