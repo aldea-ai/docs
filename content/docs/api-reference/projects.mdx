@@ -2,15 +2,28 @@
 title: projects
 ---
 
-> This page is **auto-generated** from `/headers/projects.h`. Edit doc comments in the header and rebuild to update.
+> Auto-generated from `projects.h`. Edit doc comments in the header and rebuild.
 
-## Functions
-- [`create_project`](#create-project)
-- [`list_projects`](#list-projects)
+## API
 
-<a id="create-project"></a>
+### Functions
+- [`list_projects`](#function-list-projects-635ade02)
+- [`create_project`](#function-create-project-84115132)
+
+<a id="function-list-projects-635ade02"></a>
+### `list_projects`
+Manages user projects and workspace listings.
+
+
+**Signature**
+```c
+int list_projects(int limit, int offset, char* buffer, int buffer_size);
+```
+
+<a id="function-create-project-84115132"></a>
 ### `create_project`
 Creates a new project.
+
 
 **Signature**
 ```c
@@ -18,7 +31,6 @@ int create_project(const char* name, const char* description, char* buffer, int 
 ```
 
 **Parameters**
-
 | Name | Description |
 |------|-------------|
 | `name` | Name of the new project. |
@@ -27,31 +39,5 @@ int create_project(const char* name, const char* description, char* buffer, int 
 | `buffer_size` | Size of the buffer. |
 
 **Returns**
-
 0 on success, -1 if creation fails.
-
-<a id="list-projects"></a>
-### `list_projects`
-Lists available projects for the authenticated user.
-
-/
-/**
-
-**Signature**
-```c
-int list_projects(int limit, int offset, char* buffer, int buffer_size);
-```
-
-**Parameters**
-
-| Name | Description |
-|------|-------------|
-| `limit` | Maximum number of results to return. |
-| `offset` | Offset for pagination. |
-| `buffer` | Output buffer to store JSON response. |
-| `buffer_size` | Size of the buffer. |
-
-**Returns**
-
-0 on success, negative on error.
 

@@ -1,8 +1,3 @@
-#ifndef UTILS_H
-#define UTILS_H
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /**
  * @file utils.h
@@ -47,7 +42,4 @@ int url_encode(const char* src, char* dst, int dst_size);
  */
 int url_join(const char* base, const char* path, char* out, int out_size);
 
-#ifdef __cplusplus
-}
-#endif
-#endif /* UTILS_H */
+

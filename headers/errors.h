@@ -1,9 +1,3 @@
-#ifndef ERRORS_H
-#define ERRORS_H
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /**
  * @file errors.h
  * @brief Error handling helpers and codes.
@@ -35,7 +29,3 @@ int api_clear_error(void);
  */
 int api_error_from_http(int http_status);
 
-#ifdef __cplusplus
-}
-#endif
-#endif /* ERRORS_H */

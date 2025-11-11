@@ -1,8 +1,3 @@
-#ifndef CONFIG_H
-#define CONFIG_H
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /**
  * @file config.h
@@ -46,7 +41,3 @@ int cfg_get_int(const char* key, int* out_value);
  */
 int cfg_reset_defaults(void);
 
-#ifdef __cplusplus
-}
-#endif
-#endif /* CONFIG_H */

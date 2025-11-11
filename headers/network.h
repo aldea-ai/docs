@@ -1,8 +1,3 @@
-#ifndef NETWORK_H
-#define NETWORK_H
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /**
  * @file network.h
@@ -60,7 +55,4 @@ int net_put(const char* path, const char* json_body, char* json_out, int json_ou
  */
 int net_delete(const char* path);
 
-#ifdef __cplusplus
-}
-#endif
-#endif /* NETWORK_H */
+

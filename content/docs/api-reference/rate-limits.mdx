@@ -2,52 +2,29 @@
 title: rate-limits
 ---
 
-> This page is **auto-generated** from `/headers/rate-limits.h`. Edit doc comments in the header and rebuild to update.
+> Auto-generated from `rate-limits.h`. Edit doc comments in the header and rebuild.
 
-## Functions
-- [`get_rate_limit`](#get-rate-limit)
-- [`get_rate_limit_reset_time`](#get-rate-limit-reset-time)
-- [`get_remaining_requests`](#get-remaining-requests)
+## API
 
-<a id="get-rate-limit"></a>
+### Functions
+- [`get_rate_limit`](#function-get-rate-limit-ac3bce77)
+- [`get_remaining_requests`](#function-get-remaining-requests-109d20dc)
+- [`get_rate_limit_reset_time`](#function-get-rate-limit-reset-time-c4a80440)
+
+<a id="function-get-rate-limit-ac3bce77"></a>
 ### `get_rate_limit`
-Retrieves the current rate limit for the authenticated user.
+Provides rate limiting and quota management utilities.
 
-/
-/**
 
 **Signature**
 ```c
 int get_rate_limit(char* tier, int tier_size);
 ```
 
-**Parameters**
-
-| Name | Description |
-|------|-------------|
-| `tier` | Output buffer to store the user's plan tier (e.g. "Free", "Pro"). |
-| `tier_size` | Size of the output buffer. |
-
-**Returns**
-
-The maximum number of allowed requests per hour.
-
-<a id="get-rate-limit-reset-time"></a>
-### `get_rate_limit_reset_time`
-Calculates the time (in seconds) until the next rate limit reset.
-
-**Signature**
-```c
-int get_rate_limit_reset_time(void);
-```
-
-**Returns**
-
-Seconds until reset.
-
-<a id="get-remaining-requests"></a>
+<a id="function-get-remaining-requests-109d20dc"></a>
 ### `get_remaining_requests`
 Returns the number of remaining API calls before reset.
+
 
 **Signature**
 ```c
@@ -55,6 +32,18 @@ int get_remaining_requests(void);
 ```
 
 **Returns**
-
 Number of remaining calls.
+
+<a id="function-get-rate-limit-reset-time-c4a80440"></a>
+### `get_rate_limit_reset_time`
+Calculates the time (in seconds) until the next rate limit reset.
+
+
+**Signature**
+```c
+int get_rate_limit_reset_time(void);
+```
+
+**Returns**
+Seconds until reset.
 

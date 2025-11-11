@@ -2,38 +2,50 @@
 title: network
 ---
 
-> This page is **auto-generated** from `/headers/network.h`. Edit doc comments in the header and rebuild to update.
+> Auto-generated from `network.h`. Edit doc comments in the header and rebuild.
 
-## Functions
-- [`net_delete`](#net-delete)
-- [`net_get`](#net-get)
-- [`net_post`](#net-post)
-- [`net_put`](#net-put)
-- [`net_set_retries`](#net-set-retries)
-- [`net_set_timeout`](#net-set-timeout)
+## API
 
-<a id="net-delete"></a>
-### `net_delete`
-Performs a DELETE request.
+### Functions
+- [`net_set_timeout`](#function-net-set-timeout-760fbdc9)
+- [`net_set_retries`](#function-net-set-retries-fa9519dc)
+- [`net_get`](#function-net-get-a30d5d03)
+- [`net_post`](#function-net-post-b85c83fd)
+- [`net_put`](#function-net-put-e076da7a)
+- [`net_delete`](#function-net-delete-04c9fa14)
+
+<a id="function-net-set-timeout-760fbdc9"></a>
+### `net_set_timeout`
+HTTP transport (simple request helpers).
+
 
 **Signature**
 ```c
-int net_delete(const char* path);
+int net_set_timeout(int timeout_ms);
+```
+
+<a id="function-net-set-retries-fa9519dc"></a>
+### `net_set_retries`
+Sets retry attempts for idempotent requests.
+
+
+**Signature**
+```c
+int net_set_retries(int retries);
 ```
 
 **Parameters**
-
 | Name | Description |
 |------|-------------|
-| `path` | Path portion. |
+| `retries` | Number of retries (>=0). |
 
 **Returns**
+0 on success; -1 invalid value.
 
-0 on success; negative on error.
-
-<a id="net-get"></a>
+<a id="function-net-get-a30d5d03"></a>
 ### `net_get`
 Performs a GET request and returns raw JSON.
+
 
 **Signature**
 ```c
@@ -41,7 +53,6 @@ int net_get(const char* path, const char* query, char* json_out, int json_out_si
 ```
 
 **Parameters**
-
 | Name | Description |
 |------|-------------|
 | `path` | Path portion (e.g., "/users"). |
@@ -50,12 +61,12 @@ int net_get(const char* path, const char* query, char* json_out, int json_out_si
 | `json_out_size` | Size of buffer. |
 
 **Returns**
-
 0 on success; negative on network or HTTP error.
 
-<a id="net-post"></a>
+<a id="function-net-post-b85c83fd"></a>
 ### `net_post`
 Performs a POST request with JSON body.
+
 
 **Signature**
 ```c
@@ -63,7 +74,6 @@ int net_post(const char* path, const char* json_body, char* json_out, int json_o
 ```
 
 **Parameters**
-
 | Name | Description |
 |------|-------------|
 | `path` | Path portion. |
@@ -72,12 +82,12 @@ int net_post(const char* path, const char* json_body, char* json_out, int json_o
 | `json_out_size` | Size of buffer. |
 
 **Returns**
-
 0 on success; negative on error.
 
-<a id="net-put"></a>
+<a id="function-net-put-e076da7a"></a>
 ### `net_put`
 Performs a PUT request with JSON body.
+
 
 **Signature**
 ```c
@@ -85,7 +95,6 @@ int net_put(const char* path, const char* json_body, char* json_out, int json_ou
 ```
 
 **Parameters**
-
 | Name | Description |
 |------|-------------|
 | `path` | Path portion. |
@@ -94,47 +103,23 @@ int net_put(const char* path, const char* json_body, char* json_out, int json_ou
 | `json_out_size` | Size of buffer. |
 
 **Returns**
-
 0 on success; negative on error.
 
-<a id="net-set-retries"></a>
-### `net_set_retries`
-Sets retry attempts for idempotent requests.
+<a id="function-net-delete-04c9fa14"></a>
+### `net_delete`
+Performs a DELETE request.
+
 
 **Signature**
 ```c
-int net_set_retries(int retries);
+int net_delete(const char* path);
 ```
 
 **Parameters**
-
 | Name | Description |
 |------|-------------|
-| `retries` | Number of retries (>=0). |
+| `path` | Path portion. |
 
 **Returns**
-
-0 on success; -1 invalid value.
-
-<a id="net-set-timeout"></a>
-### `net_set_timeout`
-Sets default request timeout (milliseconds).
-
-/
-/**
-
-**Signature**
-```c
-int net_set_timeout(int timeout_ms);
-```
-
-**Parameters**
-
-| Name | Description |
-|------|-------------|
-| `timeout_ms` | Timeout value in ms. |
-
-**Returns**
-
-0 on success; -1 invalid value.
+0 on success; negative on error.
 

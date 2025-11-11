@@ -2,17 +2,30 @@
 title: utils
 ---
 
-> This page is **auto-generated** from `/headers/utils.h`. Edit doc comments in the header and rebuild to update.
+> Auto-generated from `utils.h`. Edit doc comments in the header and rebuild.
 
-## Functions
-- [`json_get_int`](#json-get-int)
-- [`json_get_string`](#json-get-string)
-- [`url_encode`](#url-encode)
-- [`url_join`](#url-join)
+## API
 
-<a id="json-get-int"></a>
+### Functions
+- [`json_get_string`](#function-json-get-string-08f85f6c)
+- [`json_get_int`](#function-json-get-int-9eb07e08)
+- [`url_encode`](#function-url-encode-77102d07)
+- [`url_join`](#function-url-join-9ade654c)
+
+<a id="function-json-get-string-08f85f6c"></a>
+### `json_get_string`
+Utility helpers (JSON + strings).
+
+
+**Signature**
+```c
+int json_get_string(const char* json, const char* key, char* out, int out_size);
+```
+
+<a id="function-json-get-int-9eb07e08"></a>
 ### `json_get_int`
 Extracts an integer field from a flat JSON object.
+
 
 **Signature**
 ```c
@@ -20,7 +33,6 @@ int json_get_int(const char* json, const char* key, int* out_int);
 ```
 
 **Parameters**
-
 | Name | Description |
 |------|-------------|
 | `json` | JSON string. |
@@ -28,37 +40,12 @@ int json_get_int(const char* json, const char* key, int* out_int);
 | `out_int` | Pointer to receive value. |
 
 **Returns**
-
 0 on success; -1 missing; -3 invalid JSON.
 
-<a id="json-get-string"></a>
-### `json_get_string`
-Extracts a string field from a flat JSON object.
-
-/
-/**
-
-**Signature**
-```c
-int json_get_string(const char* json, const char* key, char* out, int out_size);
-```
-
-**Parameters**
-
-| Name | Description |
-|------|-------------|
-| `json` | JSON string. |
-| `key` | Field name to extract. |
-| `out` | Buffer for value. |
-| `out_size` | Size of buffer. |
-
-**Returns**
-
-0 on success; -1 missing; -2 buffer too small; -3 invalid JSON.
-
-<a id="url-encode"></a>
+<a id="function-url-encode-77102d07"></a>
 ### `url_encode`
 Simple URL-encodes a string to a buffer.
+
 
 **Signature**
 ```c
@@ -66,7 +53,6 @@ int url_encode(const char* src, char* dst, int dst_size);
 ```
 
 **Parameters**
-
 | Name | Description |
 |------|-------------|
 | `src` | Input string. |
@@ -74,12 +60,12 @@ int url_encode(const char* src, char* dst, int dst_size);
 | `dst_size` | Size of output buffer. |
 
 **Returns**
-
 0 on success; -1 buffer too small.
 
-<a id="url-join"></a>
+<a id="function-url-join-9ade654c"></a>
 ### `url_join`
 Joins base URL and path with a single slash.
+
 
 **Signature**
 ```c
@@ -87,7 +73,6 @@ int url_join(const char* base, const char* path, char* out, int out_size);
 ```
 
 **Parameters**
-
 | Name | Description |
 |------|-------------|
 | `base` | Base URL (no trailing slash preferred). |
@@ -96,6 +81,5 @@ int url_join(const char* base, const char* path, char* out, int out_size);
 | `out_size` | Size of buffer. |
 
 **Returns**
-
 0 on success; -1 buffer too small.
 
