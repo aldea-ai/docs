@@ -6,13 +6,8 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    uses: aldea-ai/pizza-party/.github/workflows/service-deploy.yaml@main
+    secrets: inherit
     permissions:
       id-token: write
       contents: read
-    steps:
-      - uses: actions/checkout@v4
-      - uses: aldea-ai/pizza-party/.github/actions/deploy@main
-        with:
-          aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
-          platform_token: ${{ secrets.PLATFORM_TOKEN }}
