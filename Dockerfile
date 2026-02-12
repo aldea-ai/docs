@@ -1,6 +1,6 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json source.config.ts ./
 RUN npm ci
 
 FROM node:20-alpine AS build
