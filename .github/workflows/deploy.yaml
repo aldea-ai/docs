@@ -4,10 +4,147 @@ on:
     branches: [main, staging, dev]
   workflow_dispatch:
 
+concurrency:
+  group: deploy-${{ github.ref_name }}
+  cancel-in-progress: true
+
+env:
+  AWS_REGION: us-east-1
+
 jobs:
   deploy:
-    uses: aldea-ai/pizza-party/.github/workflows/service-deploy.yaml@main
-    secrets: inherit
+    runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
+    steps:
+      - name: Free Disk Space
+        run: |
+          rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL 2>/dev/null || true
+          docker image prune -af 2>/dev/null || true
+
+      - name: Checkout service
+        uses: actions/checkout@v4
+
+      - name: Checkout platform
+        uses: actions/checkout@v4
+        with:
+          repository: aldea-ai/pizza-party
+          path: .platform
+          token: ${{ secrets.PLATFORM_TOKEN }}
+
+      - name: Setup
+        id: setup
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.local/bin:$PATH"
+
+          if ! command -v yq &>/dev/null; then
+            wget -qO "$HOME/.local/bin/yq" https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+            chmod +x "$HOME/.local/bin/yq"
+          fi
+
+          # Determine environment from branch
+          case "${{ github.ref_name }}" in
+            main)       ENV="prod" ;;
+            staging)    ENV="staging" ;;
+            maintest)   ENV="maintest" ;;
+            maintest-2) ENV="maintest-2" ;;
+            *)          ENV="dev" ;;
+          esac
+          echo "environment=$ENV" >> $GITHUB_OUTPUT
+          echo "cluster=$ENV-cluster" >> $GITHUB_OUTPUT
+
+          SERVICE=$(yq '.service.name // .service // "app"' platform.yaml)
+          echo "service=$SERVICE" >> $GITHUB_OUTPUT
+
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+          echo "image_tag=$ENV-$SHORT_SHA-$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
+
+          echo "Service: $SERVICE"
+          echo "Environment: $ENV"
+
+      - name: Configure AWS (ECR)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHubActionsECR
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build & Push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          build-args: |
+            GIT_SHA=${{ github.sha }}
+            GIT_BRANCH=${{ github.ref_name }}
+          tags: ${{ steps.ecr.outputs.registry }}/${{ steps.setup.outputs.service }}:${{ steps.setup.outputs.image_tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Configure AWS (EKS)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHubActionsEKS-${{ steps.setup.outputs.environment }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Setup Tools
+        run: |
+          mkdir -p "$HOME/.local/bin"
+
+          if ! command -v kubectl &>/dev/null; then
+            curl -sLO "https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubectl"
+            chmod +x kubectl && mv kubectl "$HOME/.local/bin/"
+          fi
+
+          if ! command -v helm &>/dev/null; then
+            export HELM_INSTALL_DIR="$HOME/.local/bin"
+            export USE_SUDO="false"
+            curl -s https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+          fi
+
+          aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ steps.setup.outputs.cluster }}
+
+      - name: Generate Values & Deploy
+        run: |
+          python3 -c "import yaml" 2>/dev/null || pip install pyyaml
+
+          python3 .platform/platform/scripts/generate_values.py \
+            --config platform.yaml \
+            --environment ${{ steps.setup.outputs.environment }} \
+            --image ${{ steps.ecr.outputs.registry }}/${{ steps.setup.outputs.service }}:${{ steps.setup.outputs.image_tag }} \
+            --output values.yaml
+
+          helm upgrade --install \
+            ${{ steps.setup.outputs.service }} \
+            .platform/platform/charts/service \
+            --namespace ${{ steps.setup.outputs.service }} \
+            --create-namespace \
+            --values values.yaml \
+            --wait \
+            --timeout 30m \
+            --qps 50 \
+            --burst-limit 200
+
+          echo "Deployed ${{ steps.setup.outputs.service }} to ${{ steps.setup.outputs.environment }}"
+
+      - name: Verify
+        run: |
+          kubectl wait --for=condition=ready pod \
+            -l app.kubernetes.io/name=${{ steps.setup.outputs.service }} \
+            -n ${{ steps.setup.outputs.service }} \
+            --timeout=300s
+          echo "Pods ready!"
