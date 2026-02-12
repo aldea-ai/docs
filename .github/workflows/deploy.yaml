@@ -75,6 +75,19 @@ jobs:
         id: ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Create ECR Repository (if not exists)
+        run: |
+          SERVICE="${{ steps.setup.outputs.service }}"
+          if ! aws ecr describe-repositories --repository-names "$SERVICE" 2>/dev/null; then
+            aws ecr create-repository \
+              --repository-name "$SERVICE" \
+              --image-scanning-configuration scanOnPush=true \
+              --encryption-configuration encryptionType=AES256
+            aws ecr put-lifecycle-policy \
+              --repository-name "$SERVICE" \
+              --lifecycle-policy-text '{"rules":[{"rulePriority":1,"description":"Keep last 20 images","selection":{"tagStatus":"any","countType":"imageCountMoreThan","countNumber":20},"action":{"type":"expire"}}]}'
+          fi
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
