@@ -14,10 +14,9 @@ scaling:
 
 networking:
   port: 3000
-  protocol: http
-  ingress:
-    enabled: true
-    path: /
+  exposure: public
+  hostname: docs
+  domain: subquadratic.ai
 
 health:
   readiness:
