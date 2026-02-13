@@ -15,8 +15,7 @@ scaling:
 networking:
   port: 3000
   exposure: public
-  hostname: docs
-  domain: subquadratic.ai
+  hostname: docs.subquadratic.ai
 
 health:
   readiness:
