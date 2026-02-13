@@ -1,7 +1,7 @@
 name: Deploy
 on:
   push:
-    branches: [main, staging, prod]
+    branches: [main, staging]
   workflow_dispatch:
 
 concurrency:
@@ -47,11 +47,8 @@ jobs:
 
           # Determine environment from branch
           case "${{ github.ref_name }}" in
-            main)       ENV="prod" ;;
+            main)       ENV="pizza-dev" ;;
             staging)    ENV="staging" ;;
-            maintest)   ENV="maintest" ;;
-            maintest-2) ENV="maintest-2" ;;
-            prod)       ENV="pizza-dev" ;;
             *)          ENV="pizza-dev" ;;
           esac
           echo "environment=$ENV" >> $GITHUB_OUTPUT
