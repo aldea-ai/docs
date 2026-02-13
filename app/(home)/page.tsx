@@ -262,7 +262,7 @@ export default function HomePage() {
           <p className="relative mx-auto max-w-2xl text-base text-white/80 dark:text-white/80 md:text-lg">
             Learn how to connect, build, and scale with Hackmamba. Our docs
             offer clear guides and technical references to help you get more
-            from our unified documentation infrastructure.
+            from our unified documentation infrastructure. - test
           </p>
         </div>
       </div>
