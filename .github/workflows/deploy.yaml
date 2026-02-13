@@ -51,7 +51,7 @@ jobs:
             staging)    ENV="staging" ;;
             maintest)   ENV="maintest" ;;
             maintest-2) ENV="maintest-2" ;;
-            *)          ENV="dev" ;;
+            *)          ENV="pizza-dev" ;;
           esac
           echo "environment=$ENV" >> $GITHUB_OUTPUT
           echo "cluster=$ENV-cluster" >> $GITHUB_OUTPUT
