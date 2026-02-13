@@ -161,3 +161,9 @@ jobs:
             -n ${{ steps.setup.outputs.service }} \
             --timeout=300s
           echo "Pods ready!"
+
+          echo "--- Generated values.yaml ---"
+          cat values.yaml
+
+          echo "--- Ingress ---"
+          kubectl get ingress -n ${{ steps.setup.outputs.service }} -o wide 2>/dev/null || echo "No ingress found"
