@@ -167,3 +167,12 @@ jobs:
 
           echo "--- Ingress ---"
           kubectl get ingress -n ${{ steps.setup.outputs.service }} -o wide 2>/dev/null || echo "No ingress found"
+
+          echo "--- Certificate ---"
+          kubectl get certificate -n ${{ steps.setup.outputs.service }} 2>/dev/null || echo "No certificates found"
+
+          echo "--- ClusterIssuers ---"
+          kubectl get clusterissuer 2>/dev/null || echo "No ClusterIssuers found"
+
+          echo "--- Cert-Manager pods ---"
+          kubectl get pods -n cert-manager 2>/dev/null || echo "No cert-manager namespace found"
