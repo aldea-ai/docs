@@ -131,6 +131,30 @@ jobs:
 
           aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ steps.setup.outputs.cluster }}
 
+      - name: Ensure ClusterIssuer
+        run: |
+          if ! kubectl get clusterissuer letsencrypt-prod &>/dev/null; then
+            echo "Creating letsencrypt-prod ClusterIssuer..."
+            kubectl apply -f - <<'YAML'
+          apiVersion: cert-manager.io/v1
+          kind: ClusterIssuer
+          metadata:
+            name: letsencrypt-prod
+          spec:
+            acme:
+              server: https://acme-v02.api.letsencrypt.org/directory
+              email: platform@subquadratic.ai
+              privateKeySecretRef:
+                name: letsencrypt-prod-account-key
+              solvers:
+                - http01:
+                    ingress:
+                      class: nginx
+          YAML
+          else
+            echo "ClusterIssuer letsencrypt-prod already exists"
+          fi
+
       - name: Generate Values & Deploy
         run: |
           python3 -c "import yaml" 2>/dev/null || pip install pyyaml
