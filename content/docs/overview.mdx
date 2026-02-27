@@ -1,72 +1,59 @@
 ---
 title: Overview
-description: Complete introduction to Hackmamba documentation solutions
+description: Introduction to the Aldea Speech-to-Text API platform
 ---
 
-Welcome to Hackmamba, your comprehensive documentation solution for modern software projects.
+Welcome to Aldea - a fast, accurate speech-to-text API that is fully compatible with the Deepgram API.
 
-## Why Hackmamba?
+## Why Aldea?
 
-Hackmamba addresses the key challenges facing documentation teams:
+Aldea gives you production-ready speech-to-text with minimal integration effort:
 
-- **Complex Setup**: Traditional documentation tools require extensive configuration
-- **Poor User Experience**: Many documentation sites are difficult to navigate
-- **Maintenance Overhead**: Keeping documentation up-to-date is time-consuming
-- **Brand Consistency**: Ensuring documentation matches your brand identity
+- **Deepgram-compatible:** Use existing Deepgram SDKs by changing two lines of code (API key + base URL)
+- **Pre-recorded & streaming:** Batch transcription via REST or real-time transcription via WebSocket
+- **Native mobile SDKs:** First-party Swift (iOS) and Kotlin (Android) SDKs
+- **Rich feature set:** Speaker diarization, smart formatting, language detection, PII redaction, and more
 
-## Core Principles
+## How it works
 
-### 1. Developer-First
+Aldea exposes a `/v1/listen` endpoint that accepts audio and returns transcription results. You can send audio in two ways:
 
-Hackmamba is built from the ground up for developers, recognizing that great documentation starts with great developer experience.
+1. **Pre-recorded:** POST an audio file or URL and receive the full transcript in the response
+2. **Streaming:** Open a WebSocket connection and send audio chunks for real-time, low-latency transcription
 
-### 2. Modern Standards
+## Integration paths
 
-Every feature follows modern web standards and best practices for performance and accessibility.
+### Use existing Deepgram SDKs
 
-### 3. Customizable
+If you already use Deepgram, switch to Aldea by updating your API key and base URL. All existing Deepgram SDKs (Python, Node.js, Go, Rust, .NET) work out of the box.
 
-Hackmamba provides extensive customization options while maintaining sensible defaults.
+### Use native Aldea SDKs
 
-## Key Features
+For mobile apps, use our first-party SDKs:
 
-### Documentation Template
+- **iOS:** Swift SDK via Swift Package Manager
+- **Android:** Kotlin SDK via Gradle
 
-- Pre-built components and layouts
-- Responsive design that works on all devices
-- SEO-optimized structure
-- Fast loading times
+### Use raw HTTP
 
-### Developer Experience
+Call the API directly with any HTTP client: no SDK required.
 
-- Markdown-based content creation
-- Live preview during development
-- Easy deployment options
-- Version control integration
-
-### Customization
-
-- Brand colors and styling
-- Custom components
-- Flexible navigation structure
-- Multiple layout options
-
-## Getting Started
+## Next steps
 
 <Cards>
   <Card
-    title="🚀 Start Building"
-    href="/docs/installation"
-    description="Set up your documentation project"
+    title="🚀 Quickstart"
+    href="/docs/getting-started/quickstart"
+    description="Get your first transcription in 5 minutes"
   />
   <Card
-    title="Learn More"
-    href="/docs/configuration"
-    description="Configure your documentation"
+    title="Concepts"
+    href="/docs/concepts/how-aldea-works"
+    description="Understand the Aldea architecture"
   />
   <Card
-    title="Join Community"
-    href="/docs/community"
-    description="Connect with other users"
+    title="API Reference"
+    href="/docs/api-reference/api-overview"
+    description="Endpoints, parameters, and error codes"
   />
 </Cards>

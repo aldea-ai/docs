@@ -1,0 +1,13 @@
+{
+  "title": "API Reference",
+  "root": true,
+  "defaultOpen": false,
+  "pages": [
+    "api-overview",
+    "authentication",
+    "pre-recorded",
+    "streaming",
+    "parameters",
+    "error-codes"
+  ]
+}

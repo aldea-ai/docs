@@ -1,0 +1,5 @@
+{
+  "title": "Transcript formatting",
+  "defaultOpen": false,
+  "pages": ["smart-formatting", "paragraphs", "numerals", "measurements", "filler-words"]
+}

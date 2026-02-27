@@ -1,0 +1,5 @@
+{
+  "title": "Speech intelligence",
+  "defaultOpen": false,
+  "pages": ["language-detection", "speaker-diarization", "keyword-boosting"]
+}
