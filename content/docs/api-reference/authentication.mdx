@@ -7,22 +7,22 @@ description: API authentication and security guide
 
 Learn how to authenticate with our API securely and effectively.
 
-## Authentication Methods
+## Authentication methods
 
 We support multiple authentication methods to fit different use cases:
 
-### API Keys
+### API keys
 
 API keys are the simplest way to authenticate for server-to-server communication.
 
-#### Creating an API Key
+#### Creating an API key
 
 1. Log in to your account dashboard
 2. Navigate to "API Keys" section
 3. Click "Create New Key"
 4. Copy and securely store your key
 
-#### Using API Keys
+#### Using API keys
 
 Include your API key in the `Authorization` header:
 
@@ -35,13 +35,13 @@ curl -H "Authorization: Bearer sk_live_1234567890abcdef" \
 
 OAuth 2.0 is recommended for applications that need to access user data.
 
-#### OAuth Flow
+#### OAuth flow
 
-1. **Authorization Request**: Redirect users to our authorization endpoint
-2. **User Consent**: Users grant permission to your application
-3. **Authorization Code**: Receive an authorization code
-4. **Token Exchange**: Exchange the code for an access token
-5. **API Access**: Use the access token to make API requests
+1. **Authorization request**: Redirect users to our authorization endpoint
+2. **User consent**: Users grant permission to your application
+3. **Authorization code**: Receive an authorization code
+4. **Token exchange**: Exchange the code for an access token
+5. **API access**: Use the access token to make API requests
 
 #### Authorization URL
 
@@ -53,7 +53,7 @@ https://auth.example.com/oauth/authorize?
   scope=read write
 ```
 
-#### Token Exchange
+#### Token exchange
 
 ```bash
 curl -X POST https://auth.example.com/oauth/token \
@@ -65,11 +65,11 @@ curl -X POST https://auth.example.com/oauth/token \
   -d "client_secret=your_client_secret"
 ```
 
-### JWT Tokens
+### JWT tokens
 
 For stateless authentication, we support JSON Web Tokens (JWT).
 
-#### JWT Structure
+#### JWT structure
 
 ```json
 {
@@ -86,32 +86,32 @@ For stateless authentication, we support JSON Web Tokens (JWT).
 }
 ```
 
-## Security Best Practices
+## Security best practices
 
-### API Key Security
+### API key security
 
 - **Never expose API keys** in client-side code
 - **Use environment variables** to store keys
 - **Rotate keys regularly** for enhanced security
 - **Use different keys** for different environments
 
-### OAuth Security
+### OAuth security
 
 - **Use HTTPS** for all OAuth flows
 - **Validate state parameters** to prevent CSRF attacks
 - **Store tokens securely** on the server side
 - **Implement token refresh** for long-lived applications
 
-### General Security
+### General security
 
 - **Use HTTPS** for all API requests
 - **Validate all inputs** before making requests
 - **Implement rate limiting** on your end
 - **Monitor for suspicious activity**
 
-## Error Handling
+## Error handling
 
-### Authentication Errors
+### Authentication errors
 
 ```json
 {
@@ -123,16 +123,16 @@ For stateless authentication, we support JSON Web Tokens (JWT).
 }
 ```
 
-### Common Error Codes
+### Common error codes
 
 - `invalid_api_key`: API key is missing or invalid
 - `expired_token`: Access token has expired
 - `insufficient_scope`: Token doesn't have required permissions
 - `rate_limit_exceeded`: Too many requests made
 
-## Testing Authentication
+## Testing authentication
 
-### Test API Keys
+### Test API keys
 
 Use our test API keys for development:
 

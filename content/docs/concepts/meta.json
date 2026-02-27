@@ -1,0 +1,12 @@
+{
+  "title": "Concepts",
+  "defaultOpen": true,
+  "pages": [
+    "how-aldea-works",
+    "transcription-modes",
+    "speech-intelligence",
+    "transcript-formatting",
+    "streaming-controls",
+    "privacy-compliance"
+  ]
+}

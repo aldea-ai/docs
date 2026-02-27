@@ -1,9 +1,9 @@
 ---
-title: Rate Limits
+title: Rate limits
 description: Understanding API rate limits and best practices
 ---
 
-# Rate Limits
+# Rate limits
 
 Learn about API rate limits and how to work within them effectively.
 
@@ -11,27 +11,27 @@ Learn about API rate limits and how to work within them effectively.
 
 Rate limiting helps ensure fair usage and system stability. All API endpoints are subject to rate limits based on your plan.
 
-## Rate Limit Tiers
+## Rate limit tiers
 
-### Free Tier
+### Free tier
 
 - **Requests per hour**: 100
 - **Burst limit**: 10 requests per minute
 - **Concurrent requests**: 5
 
-### Pro Tier
+### Pro tier
 
 - **Requests per hour**: 1,000
 - **Burst limit**: 50 requests per minute
 - **Concurrent requests**: 20
 
-### Enterprise Tier
+### Enterprise tier
 
 - **Requests per hour**: Custom (contact sales)
 - **Burst limit**: Custom
 - **Concurrent requests**: Custom
 
-## Rate Limit Headers
+## Rate limit headers
 
 Every API response includes rate limit information:
 
@@ -42,14 +42,14 @@ X-RateLimit-Reset: 1640995200
 X-RateLimit-Retry-After: 3600
 ```
 
-### Header Descriptions
+### Header descriptions
 
 - `X-RateLimit-Limit`: Maximum requests allowed per hour
 - `X-RateLimit-Remaining`: Requests remaining in current window
 - `X-RateLimit-Reset`: Unix timestamp when the limit resets
 - `X-RateLimit-Retry-After`: Seconds to wait before retrying (only on 429)
 
-## Rate Limit Responses
+## Rate limit responses
 
 ### 429 Too Many Requests
 
@@ -66,9 +66,9 @@ When you exceed the rate limit, you'll receive a 429 status code:
 }
 ```
 
-## Best Practices
+## Best practices
 
-### Implement Exponential Backoff
+### Implement exponential backoff
 
 ```javascript
 async function makeRequestWithRetry(url, options, maxRetries = 3) {
@@ -92,7 +92,7 @@ async function makeRequestWithRetry(url, options, maxRetries = 3) {
 }
 ```
 
-### Monitor Rate Limit Usage
+### Monitor rate limit usage
 
 ```javascript
 function checkRateLimit(response) {
@@ -110,7 +110,7 @@ function checkRateLimit(response) {
 }
 ```
 
-### Batch Requests When Possible
+### Batch requests when possible
 
 Instead of making multiple individual requests:
 
@@ -124,7 +124,7 @@ const user3 = await api.getUser(3);
 const users = await api.getUsers([1, 2, 3]);
 ```
 
-## Rate Limit by Endpoint
+## Rate limit by endpoint
 
 Different endpoints may have different rate limits:
 
@@ -134,7 +134,7 @@ Different endpoints may have different rate limits:
 | `/projects` | 50/hour   | 500/hour   | Custom     |
 | `/webhooks` | 20/hour   | 200/hour   | Custom     |
 
-## Handling Rate Limits in SDKs
+## Handling rate limits in SDKs
 
 Our official SDKs handle rate limiting automatically:
 
@@ -143,7 +143,7 @@ Our official SDKs handle rate limiting automatically:
 const users = await sdk.users.list();
 ```
 
-## Upgrading Your Plan
+## Upgrading your plan
 
 If you consistently hit rate limits, consider upgrading:
 

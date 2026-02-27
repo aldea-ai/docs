@@ -1,0 +1,5 @@
+{
+  "title": "Mobile",
+  "defaultOpen": false,
+  "pages": ["installation", "quick-start", "authentication", "sdk-reference", "sample-app"]
+}
