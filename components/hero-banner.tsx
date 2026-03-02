@@ -11,8 +11,7 @@ export function HeroBanner() {
         Aldea speech-to-text documentation
       </h1>
       <p className="relative mx-auto max-w-2xl text-base text-white/80 dark:text-white/80 md:text-lg">
-        Fast, accurate speech-to-text API. Deepgram-compatible: migrate with a
-        two-line code change or start fresh with our native SDKs.
+        Fast, accurate speech-to-text API that is fully compatible with Deepgram
       </p>
     </div>
   );
