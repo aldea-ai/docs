@@ -1,0 +1,32 @@
+---
+title: Measurements
+description: Format spoken measurements into standard notation with measurements=true
+---
+
+The measurements feature converts spoken measurement expressions into standard notation in the transcript.
+
+## Usage
+
+Add `measurements=true` as a query parameter:
+
+```bash
+curl -X POST "https://api.aldea.ai/v1/listen?measurements=true" \
+  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+  --data-binary @audio.wav
+```
+
+## Examples
+
+| Spoken | Without `measurements` | With `measurements=true` |
+|---|---|---|
+| "five kilograms" | five kilograms | 5 kg |
+| "ten degrees celsius" | ten degrees celsius | 10°C |
+| "three point five meters" | three point five meters | 3.5 m |
+
+This parameter works well alongside [numerals](/docs/concepts/transcript-formatting/numerals) and [smart formatting](/docs/concepts/transcript-formatting/smart-formatting).
+
+## Next steps
+
+- [Numerals](/docs/concepts/transcript-formatting/numerals)
+- [Smart formatting](/docs/concepts/transcript-formatting/smart-formatting)
+- [API reference](/docs/api-reference)

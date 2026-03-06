@@ -5,6 +5,8 @@
 .contentlayer
 .content-collections
 .source
+.wrangler/
+.wrangler/**
 
 # test & build
 /coverage

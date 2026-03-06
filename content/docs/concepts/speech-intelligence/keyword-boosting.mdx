@@ -1,0 +1,34 @@
+---
+title: Keyword boosting
+description: Boost recognition accuracy for specific terms with keywords parameter
+---
+
+Keyword boosting increases the likelihood that specific terms are recognized correctly in the transcript. This is useful for domain-specific vocabulary, product names, or proper nouns that the model might not prioritize by default.
+
+## Usage
+
+Pass one or more `keywords` query parameters. Each keyword is specified separately:
+
+```bash
+curl -X POST "https://api.aldea.ai/v1/listen?keywords=Aldea&keywords=STT" \
+  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+  --data-binary @audio.wav
+```
+
+For streaming, append the same parameters to the WebSocket URL:
+
+```bash
+wss://api.aldea.ai/v1/listen?keywords=Aldea&keywords=STT&interim_results=true
+```
+
+## When to use keyword boosting
+
+- **Brand or product names** that the model may not have seen frequently during training
+- **Technical jargon** such as domain-specific terminology in medical, legal, or engineering contexts
+- **Proper nouns** like names of people, companies, or locations relevant to your audio
+
+## Next steps
+
+- [API reference](/docs/api-reference)
+- [Pre-recorded quickstart](/docs/getting-started/quickstart/pre-recorded)
+- [Streaming quickstart](/docs/getting-started/quickstart/streaming)

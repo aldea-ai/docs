@@ -1,0 +1,72 @@
+---
+title: Languages
+description: Supported languages, language selection, and automatic language detection
+---
+
+Aldea supports English and Spanish transcription. You can set the language explicitly, or let the API detect it automatically.
+
+## Supported languages
+
+| Language | Code | Aliases |
+|----------|------|---------|
+| English | `en` | `en-US` |
+| Spanish | `es` | `es-ES` |
+
+Language codes follow the [BCP-47](https://en.wikipedia.org/wiki/IETF_language_tag) format.
+
+## Setting the language
+
+Pass the `language` query parameter (or its alias `lang`) on any transcription request:
+
+```bash title="Pre-recorded"
+curl -X POST "https://api.aldea.ai/v1/listen?language=es" \
+  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+  --data-binary @audio.wav
+```
+
+```bash title="Streaming"
+# WebSocket URL with language parameter
+wss://api.aldea.ai/v1/listen?language=es&interim_results=true
+```
+
+When no `language` parameter is provided, the API defaults to English.
+
+## Automatic language detection
+
+Set `detect_language=true` to let the API identify the spoken language automatically:
+
+```bash
+curl -X POST "https://api.aldea.ai/v1/listen?detect_language=true" \
+  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+  --data-binary @audio.wav
+```
+
+You can also pass `language=auto` as a shorthand:
+
+```bash
+curl -X POST "https://api.aldea.ai/v1/listen?language=auto" \
+  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+  --data-binary @audio.wav
+```
+
+When language detection is enabled, the response includes a `detected_language` field:
+
+```json
+{
+  "results": {
+    "channels": [{
+      "detected_language": "es",
+      "alternatives": [{
+        "transcript": "Hola, ¿cómo estás?",
+        "confidence": 0.91
+      }]
+    }]
+  }
+}
+```
+
+## Next steps
+
+- [API reference](/docs/api-reference)
+- [Pre-recorded quickstart](/docs/getting-started/quickstart/pre-recorded)
+- [Streaming quickstart](/docs/getting-started/quickstart/streaming)

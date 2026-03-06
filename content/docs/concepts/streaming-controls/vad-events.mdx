@@ -1,0 +1,38 @@
+---
+title: VAD events
+description: Voice Activity Detection events with vad_events=true
+---
+
+Voice Activity Detection (VAD) events notify your application when the API detects that someone has started speaking. This is useful for building UI indicators, triggering recording, or implementing push-to-talk workflows.
+
+## Usage
+
+Enable VAD events by adding `vad_events=true` to the WebSocket query string:
+
+```bash
+wss://api.aldea.ai/v1/listen?vad_events=true&encoding=mp3
+```
+
+## SpeechStarted message
+
+When voice activity is detected, the server sends a `SpeechStarted` message:
+
+```json
+{
+  "type": "SpeechStarted",
+  "channel": [0],
+  "timestamp": 0.0
+}
+```
+
+| Field | Description |
+|-------|------------|
+| `type` | Always `"SpeechStarted"` |
+| `channel` | Array indicating which channel detected speech |
+| `timestamp` | Time offset in seconds from the start of the stream |
+
+## Next steps
+
+- [Interim results](/docs/concepts/streaming-controls/interim-results)
+- [Utterance detection](/docs/concepts/streaming-controls/utterance-detection)
+- [WebSocket protocol](/docs/concepts/streaming-controls/websocket-protocol)

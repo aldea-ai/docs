@@ -1,0 +1,29 @@
+---
+title: Paragraphs
+description: Automatic paragraph formatting with paragraphs=true
+---
+
+Paragraph formatting inserts line breaks into the transcript based on natural pauses and topic shifts, making long transcripts easier to read.
+
+## Usage
+
+Add `paragraphs=true` as a query parameter:
+
+```bash
+curl -X POST "https://api.aldea.ai/v1/listen?paragraphs=true" \
+  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+  --data-binary @audio.wav
+```
+
+You can combine it with other formatting parameters:
+
+```bash
+curl -X POST "https://api.aldea.ai/v1/listen?paragraphs=true&smart_format=true&numerals=true" \
+  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+  --data-binary @audio.wav
+```
+
+## Next steps
+
+- [Smart formatting](/docs/concepts/transcript-formatting/smart-formatting)
+- [API reference](/docs/api-reference)

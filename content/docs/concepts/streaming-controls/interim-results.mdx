@@ -1,0 +1,59 @@
+---
+title: Interim results
+description: Get partial transcription results in real-time with interim_results=true
+---
+
+Interim results provide partial transcripts while the speaker is still talking. The transcript updates progressively as more audio arrives, giving your application low-latency feedback before a sentence is finalized.
+
+## Usage
+
+Interim results are **enabled by default**. To disable them and receive only final transcripts, set `interim_results=false` in the WebSocket query string:
+
+```bash
+# Default (interim results enabled)
+wss://api.aldea.ai/v1/listen?encoding=mp3
+
+# Disable interim results
+wss://api.aldea.ai/v1/listen?encoding=mp3&interim_results=false
+```
+
+## How it works
+
+As audio streams in, the server sends `Results` messages. Each message contains two key fields:
+
+| Field | Meaning |
+|-------|--------|
+| `is_final: false` | Interim result. The transcript may change as more audio arrives |
+| `is_final: true` | Final result for this audio segment. The transcript is stable |
+| `speech_final: true` | The speaker finished talking (end of utterance) |
+
+A typical sequence looks like:
+
+1. `is_final: false` returns `"Hello"`
+2. `is_final: false` returns `"Hello world"`
+3. `is_final: true` returns `"Hello world, how are you?"`
+4. `speech_final: true` signals utterance complete
+
+Interim results let you display text as the user speaks (like live captions), while final results give you the stable transcript to store or process.
+
+## Example response
+
+```json
+{
+  "type": "Results",
+  "is_final": false,
+  "speech_final": false,
+  "channel": {
+    "alternatives": [{
+      "transcript": "Hello world",
+      "confidence": 0.95
+    }]
+  }
+}
+```
+
+## Next steps
+
+- [Endpointing](/docs/concepts/streaming-controls/endpointing) to control when sentences are finalized
+- [Utterance detection](/docs/concepts/streaming-controls/utterance-detection) to detect end of speaker turns
+- [WebSocket protocol](/docs/concepts/streaming-controls/websocket-protocol) for the full message reference

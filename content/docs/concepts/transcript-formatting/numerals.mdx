@@ -1,0 +1,32 @@
+---
+title: Numerals
+description: Convert spoken numbers to digits with numerals=true
+---
+
+The numerals feature converts spoken numbers into their digit form in the transcript.
+
+## Usage
+
+Add `numerals=true` as a query parameter:
+
+```bash
+curl -X POST "https://api.aldea.ai/v1/listen?numerals=true" \
+  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+  --data-binary @audio.wav
+```
+
+## Examples
+
+| Spoken | Without `numerals` | With `numerals=true` |
+|---|---|---|
+| "twenty three" | twenty three | 23 |
+| "one hundred and fifty" | one hundred and fifty | 150 |
+| "two thousand twenty six" | two thousand twenty six | 2026 |
+
+For broader formatting that also covers punctuation and capitalization, use [smart formatting](/docs/concepts/transcript-formatting/smart-formatting) instead.
+
+## Next steps
+
+- [Smart formatting](/docs/concepts/transcript-formatting/smart-formatting)
+- [Measurements](/docs/concepts/transcript-formatting/measurements)
+- [API reference](/docs/api-reference)

@@ -1,0 +1,34 @@
+---
+title: Smart formatting
+description: Automatic formatting with smart_format=true
+---
+
+Smart formatting applies punctuation, capitalization, and number formatting to the transcript in a single parameter. It combines the behavior of [numerals](/docs/concepts/transcript-formatting/numerals), [measurements](/docs/concepts/transcript-formatting/measurements), and basic punctuation into one setting.
+
+## Usage
+
+Add `smart_format=true` as a query parameter:
+
+```bash
+curl -X POST "https://api.aldea.ai/v1/listen?smart_format=true" \
+  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+  --data-binary @audio.wav
+```
+
+## What it does
+
+| Before (raw) | After (smart formatted) |
+|---|---|
+| `one hundred twenty three dollars` | `$123` |
+| `march sixth twenty twenty six` | `March 6th, 2026` |
+| `hello how are you doing today` | `Hello, how are you doing today?` |
+| `my phone number is five five five one two three four` | `My phone number is 555-1234.` |
+
+Smart formatting is a convenient shorthand. If you need finer control, use the individual formatting parameters ([numerals](/docs/concepts/transcript-formatting/numerals), [measurements](/docs/concepts/transcript-formatting/measurements), [paragraphs](/docs/concepts/transcript-formatting/paragraphs)) instead.
+
+## Next steps
+
+- [Numerals](/docs/concepts/transcript-formatting/numerals)
+- [Measurements](/docs/concepts/transcript-formatting/measurements)
+- [Paragraphs](/docs/concepts/transcript-formatting/paragraphs)
+- [API reference](/docs/api-reference)

@@ -1,0 +1,5 @@
+{
+  "title": "Browser",
+  "defaultOpen": false,
+  "pages": ["setup", "live-recording", "pre-recorded-upload"]
+}
