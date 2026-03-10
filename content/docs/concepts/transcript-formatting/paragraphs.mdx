@@ -3,8 +3,6 @@ title: Paragraphs
 description: Automatic paragraph formatting with paragraphs=true
 ---
 
-
-
 Paragraph formatting adds line breaks to a transcript based on natural pauses, topic changes, and other conversational cues in the audio. Without paragraph formatting, the result would be a long unstructured block of text that's difficult to read or skim through. 
 
 ## How paragraph detection works
@@ -15,7 +13,7 @@ Aldea doesn't insert line breaks at fixed intervals or arbitrary word counts. In
 
 - Change in topic and context: Aldea's models evaluate whether the content that comes before and after a break represents a shift in the subject. For example, a speaker who pauses briefly to breathe mid-sentence won't trigger a paragraph break, but a speaker who finishes discussing Q1 revenue and moves to hiring plans will.
 
-This approach produces paragraphs that feel natural and align with the speaker's intent, rather than mechanically splitting text at predetermined intervals. The result is a structured transcript that mirrors how the conversation actually flowed.
+Paragraph formatting ensures that the final transcript feels natural, aligns with the speaker's intent, and mirrors how the conversation actually flowed.
 
 ## Usage
 
