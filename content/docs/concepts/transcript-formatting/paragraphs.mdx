@@ -3,7 +3,19 @@ title: Paragraphs
 description: Automatic paragraph formatting with paragraphs=true
 ---
 
-Paragraph formatting inserts line breaks into the transcript based on natural pauses and topic shifts, making long transcripts easier to read.
+
+
+Paragraph formatting adds line breaks to a transcript based on natural pauses, topic changes, and other conversational cues in the audio. Without paragraph formatting, the result would be a long unstructured block of text that's difficult to read or skim through. 
+
+## How paragraph detection works
+
+Aldea doesn't insert line breaks at fixed intervals or arbitrary word counts. Instead, it analyzes different signals from the audio, such as:
+
+- Pause duration: Extended silences between utterances often indicate a transition. In most cases, a speaker finalizing one thought and beginning another. Aldea's STT models use these pauses as signals for potential paragraph boundaries.
+
+- Change in topic and context: Aldea's models evaluate whether the content that comes before and after a break represents a shift in the subject. For example, a speaker who pauses briefly to breathe mid-sentence won't trigger a paragraph break, but a speaker who finishes discussing Q1 revenue and moves to hiring plans will.
+
+This approach produces paragraphs that feel natural and align with the speaker's intent, rather than mechanically splitting text at predetermined intervals. The result is a structured transcript that mirrors how the conversation actually flowed.
 
 ## Usage
 
@@ -15,13 +27,22 @@ curl -X POST "https://api.aldea.ai/v1/listen?paragraphs=true" \
   --data-binary @audio.wav
 ```
 
-You can combine it with other formatting parameters:
+You can combine it with other formatting parameters such as smart formatting for fully polished output in a single request:
 
 ```bash
 curl -X POST "https://api.aldea.ai/v1/listen?paragraphs=true&smart_format=true&numerals=true" \
   -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
   --data-binary @audio.wav
 ```
+
+## When to use paragraph formatting:
+
+Paragraph formatting adds structure to your transcript, which is important for:
+
+- Meeting and call transcripts: It makes it easier to scan though long-form recordings as reviewers can jump to specific sections instead of reading the entire transcript.
+- Content publishing: Podcast transcripts, interview write-ups, and lecture notes require structured paragraphs before publishing or sharing.
+- Accessibility: Screen readers and assistive technologies navigate structured text more effectively.
+- Downstream summaries: If you feed transcripts into a summarization model, paragraph boundaries give the model natural chunks to work with, which improves summary quality.
 
 ## Next steps
 
