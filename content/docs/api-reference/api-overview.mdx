@@ -7,7 +7,7 @@ description: Complete API documentation with examples and integration guides
 
 All API requests require authentication using API keys or OAuth tokens.
 
-### API Key Authentication
+### API key authentication
 
 Include your API key in the request header:
 
@@ -16,7 +16,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \
      https://api.example.com/v1/endpoint
 ```
 
-### OAuth Authentication
+### OAuth authentication
 
 For OAuth authentication, follow the OAuth 2.0 flow:
 
@@ -33,12 +33,12 @@ All API requests should be made to:
 https://api.example.com/v1
 ```
 
-## Rate Limits
+## Rate limits
 
 API requests are rate limited to ensure fair usage:
 
-- **Free Tier**: 100 requests per hour
-- **Pro Tier**: 1,000 requests per hour
+- **Free tier**: 100 requests per hour
+- **Pro tier**: 1,000 requests per hour
 - **Enterprise**: Custom limits
 
 Rate limit headers are included in all responses:
@@ -53,7 +53,7 @@ X-RateLimit-Reset: 1640995200
 
 ### Users
 
-#### Get User Profile
+#### Get user profile
 
 ```http
 GET /users/{user_id}
@@ -70,7 +70,7 @@ GET /users/{user_id}
 }
 ```
 
-#### Update User Profile
+#### Update user profile
 
 ```http
 PUT /users/{user_id}
@@ -87,7 +87,7 @@ PUT /users/{user_id}
 
 ### Projects
 
-#### List Projects
+#### List projects
 
 ```http
 GET /projects
@@ -98,7 +98,7 @@ GET /projects
 - `limit` (optional): Number of results per page (default: 20)
 - `offset` (optional): Number of results to skip (default: 0)
 
-## Error Handling
+## Error handling
 
 The API uses standard HTTP status codes and returns error details in JSON format:
 

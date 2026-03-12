@@ -1,0 +1,55 @@
+---
+title: PII redaction
+description: Redact personally identifiable information with redact=pii|pci|numbers
+---
+
+PII redaction automatically removes personally identifiable information from transcripts before the results reach your application. Sensitive data is replaced in the transcript text and word-level output.
+
+## Usage
+
+Add one or more `redact` query parameters to a streaming WebSocket URL:
+
+```bash
+# Redact personal information
+wss://api.aldea.ai/v1/listen?redact=pii&encoding=mp3
+
+# Redact payment card data
+wss://api.aldea.ai/v1/listen?redact=pci&encoding=mp3
+
+# Combine multiple redaction types
+wss://api.aldea.ai/v1/listen?redact=pii&redact=pci&encoding=mp3
+
+# Redact all supported types
+wss://api.aldea.ai/v1/listen?redact=true&encoding=mp3
+```
+
+## Redaction types
+
+| Value | What it redacts |
+|-------|----------------|
+| `pii` | Person names, email addresses, phone numbers, physical addresses, Social Security numbers |
+| `pci` | Credit card numbers, bank account numbers |
+| `numbers` | Dates, phone numbers, Social Security numbers, credit card numbers |
+| `true` | All PII types combined |
+
+The `redact` parameter is repeatable. You can combine multiple types in a single request (e.g., `?redact=pii&redact=pci`).
+
+## Redaction mode
+
+Control how redacted content appears in the transcript with the `redact_mode` parameter:
+
+| Mode | Description | Example output |
+|------|-------------|---------------|
+| `mask` | Replaces characters with asterisks | `My SSN is ***-**-****` |
+| `redact` | Removes the content entirely | `My SSN is` |
+| `replace` | Substitutes with a type label | `My SSN is [SSN]` |
+
+```bash
+wss://api.aldea.ai/v1/listen?redact=pii&redact_mode=replace&encoding=mp3
+```
+
+## Next steps
+
+- [Compliance](/docs/concepts/privacy-compliance/compliance)
+- [Streaming quickstart](/docs/getting-started/quickstart/streaming)
+- [API reference](/docs/api-reference)

@@ -1,0 +1,42 @@
+---
+title: Utterance detection
+description: Detect end of speech utterances with utterance_end_ms parameter
+---
+
+Utterance detection identifies when a speaker has finished a turn by monitoring for a configurable period of silence. When the silence threshold is reached, the server sends an `UtteranceEnd` message.
+
+## Usage
+
+Set the `utterance_end_ms` parameter to the silence duration (in milliseconds) that should trigger an utterance end:
+
+```bash
+wss://api.aldea.ai/v1/listen?utterance_end_ms=1000&encoding=mp3
+```
+
+This example fires an `UtteranceEnd` event after 1 second of silence.
+
+## UtteranceEnd message
+
+When the silence threshold is reached, the server sends:
+
+```json
+{
+  "type": "UtteranceEnd",
+  "channel": [0],
+  "last_word_end": 2.5
+}
+```
+
+| Field | Description |
+|-------|------------|
+| `type` | Always `"UtteranceEnd"` |
+| `channel` | Array indicating which channel detected the utterance end |
+| `last_word_end` | Timestamp (in seconds) of the last detected word |
+
+Word timestamps must be enabled for `UtteranceEnd` events to fire.
+
+## Next steps
+
+- [Endpointing](/docs/concepts/streaming-controls/endpointing) to fine-tune sentence finalization timing
+- [VAD events](/docs/concepts/streaming-controls/vad-events) to detect when speech starts
+- [WebSocket protocol](/docs/concepts/streaming-controls/websocket-protocol)

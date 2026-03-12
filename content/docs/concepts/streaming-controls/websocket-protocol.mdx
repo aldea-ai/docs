@@ -1,0 +1,144 @@
+---
+title: WebSocket protocol
+description: Message types, keep-alive, finalize, and graceful disconnect for streaming
+---
+
+The Aldea streaming API uses WebSocket for bidirectional communication. Your client sends binary audio frames and JSON control messages; the server responds with JSON transcript messages.
+
+## Connection
+
+Connect to one of two endpoints:
+
+| Endpoint | Accepts |
+|----------|--------|
+| `wss://api.aldea.ai/v1/listen` | Encoded audio (MP3, AAC, FLAC, WAV, OGG, WebM, Opus, M4A) and raw PCM |
+| `wss://api.aldea.ai/v1/listen/pcm` | Raw PCM only (optimized) |
+
+Authenticate with the `Sec-WebSocket-Protocol` header:
+
+```
+Sec-WebSocket-Protocol: token, YOUR_ALDEA_API_KEY
+```
+
+After a successful handshake, the server returns `101 Switching Protocols`.
+
+## Client messages
+
+Your client can send the following:
+
+### Binary audio frames
+
+Send audio data as binary WebSocket frames. Supported formats:
+
+- **Encoded:** MP3, AAC, FLAC, WAV, OGG, WebM, Opus, M4A (auto-detected)
+- **Raw PCM:** 16-bit signed little-endian (s16le), configurable sample rate via `sample_rate` parameter
+
+### Control messages
+
+| Message | Description |
+|---------|------------|
+| `{"type": "KeepAlive"}` | Prevents the connection from timing out during periods of silence |
+| `{"type": "Finalize"}` | Flushes the server buffer and returns any remaining results as final |
+| `{"type": "CloseStream"}` | Gracefully closes the connection after processing remaining audio |
+
+## Server messages
+
+The server sends the following JSON message types:
+
+### Metadata
+
+Sent once upon connection. Contains session information:
+
+```json
+{
+  "type": "Metadata",
+  "request_id": "abc-123",
+  "created": "2026-03-04T12:00:00.000000Z",
+  "duration": 0.0,
+  "channels": 1,
+  "model_info": {
+    "name": "<model_id>",
+    "version": "",
+    "arch": "aldea-asr"
+  }
+}
+```
+
+### Results
+
+Transcript data, sent continuously as audio is processed:
+
+```json
+{
+  "type": "Results",
+  "channel_index": [0],
+  "duration": 1.98,
+  "start": 0.00,
+  "is_final": false,
+  "speech_final": false,
+  "channel": {
+    "alternatives": [{
+      "transcript": "Hello world",
+      "confidence": 0.95,
+      "words": [
+        ["Hello", 0, 320],
+        ["world", 320, 640]
+      ]
+    }]
+  }
+}
+```
+
+| Field | Description |
+|-------|------------|
+| `is_final` | `true` when the transcript for this segment is stable |
+| `speech_final` | `true` when the speaker has finished an utterance |
+| `words` | Array of `[word, start_ms, end_ms]`. Timestamps are in milliseconds |
+| `confidence` | Confidence score (0–1) |
+
+### SpeechStarted
+
+Sent when voice activity is detected (requires `vad_events=true`):
+
+```json
+{
+  "type": "SpeechStarted",
+  "channel": [0],
+  "timestamp": 0.0
+}
+```
+
+### UtteranceEnd
+
+Sent when a silence threshold is reached (requires `utterance_end_ms` parameter and word timestamps):
+
+```json
+{
+  "type": "UtteranceEnd",
+  "channel": [0],
+  "last_word_end": 2.5
+}
+```
+
+## Query parameters
+
+Append these to the WebSocket URL to configure the stream:
+
+| Parameter | Default | Description |
+|-----------|---------|------------|
+| `encoding` | auto-detect | Audio format: `pcm`, `mp3`, `aac`, `flac`, `wav`, `ogg`, `webm`, `opus`, `m4a` |
+| `sample_rate` | `16000` | Sample rate in Hz (for PCM audio) |
+| `interim_results` | `true` | Send partial transcripts while streaming |
+| `endpointing` | server default | Sentence finalization latency in ms, or `false` to disable |
+| `utterance_end_ms` | — | Silence duration (ms) to trigger `UtteranceEnd` |
+| `vad_events` | `false` | Send `SpeechStarted` events |
+| `language` | `en` | Language code (`en`, `es`, or `auto`) |
+| `keywords` | — | Keyword boosting (repeatable) |
+| `redact` | — | PII redaction: `pii`, `pci`, `numbers`, or `true` |
+
+## Next steps
+
+- [Interim results](/docs/concepts/streaming-controls/interim-results)
+- [Endpointing](/docs/concepts/streaming-controls/endpointing)
+- [Streaming quickstart](/docs/getting-started/quickstart/streaming)
+- [API reference](/docs/api-reference)

@@ -1,0 +1,14 @@
+{
+  "title": "Build with Aldea API Platform",
+  "pages": [
+    "overview",
+    "migrate-from-deepgram",
+    "setup",
+    "transcribe-file",
+    "transcribe-url",
+    "streaming",
+    "raw-http",
+    "browser",
+    "mobile"
+  ]
+}
