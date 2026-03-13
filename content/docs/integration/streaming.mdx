@@ -7,10 +7,199 @@ import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
 # Real-time streaming
 
+Streaming transcription delivers results as audio is being spoken. You open a WebSocket connection to the Aldea API, send binary audio frames, and receive JSON transcript messages back in real time. This is ideal for live conversations, voice assistants, call center monitoring, live captioning, and any scenario where waiting for a full recording isn't practical.
+
+The WebSocket endpoint is `wss://api.aldea.ai/v1/listen`. You specify the audio encoding and sample rate as query parameters, authenticate with a `Bearer` token in the headers, and start sending audio. For background on how streaming differs from pre-recorded transcription, see [Transcription modes](/docs/concepts/transcription-modes).
+
 <Tabs items={['Python', 'Node.js', 'Go', 'Rust']}>
 <Tab value="Python">
 
-Stream audio for real-time transcription using Python.
+## Prerequisites
+
+- Python 3.8 or later
+- `websockets` installed (see [Setup & installation](/docs/integration/setup))
+- An audio source to stream (a file, microphone, or network stream)
+
+## Stream audio from a file
+
+The following example opens a WebSocket connection to the Aldea API, streams a local audio file in chunks, and prints finalized transcripts as they arrive:
+
+```python title="stream.py"
+import asyncio
+import json
+import os
+import websockets
+
+ALDEA_API_KEY = os.environ["ALDEA_API_KEY"]
+AUDIO_FILE = "audio.wav"
+WS_URL = "wss://api.aldea.ai/v1/listen?encoding=linear16&sample_rate=16000"
+
+async def stream():
+    # Authenticate using a Bearer token in the WebSocket handshake headers
+    headers = {"Authorization": f"Bearer {ALDEA_API_KEY}"}
+
+    async with websockets.connect(WS_URL, additional_headers=headers) as ws:
+
+        async def send_audio():
+            """Read audio from a file and send it in 4 KB chunks."""
+            with open(AUDIO_FILE, "rb") as f:
+                while chunk := f.read(4096):
+                    await ws.send(chunk)
+            # Signal the server that no more audio is coming
+            await ws.send(json.dumps({"type": "CloseStream"}))
+
+        async def receive_transcripts():
+            """Listen for messages and print final transcripts."""
+            async for message in ws:
+                data = json.loads(message)
+                if data.get("type") == "Results" and data.get("is_final"):
+                    transcript = data["channel"]["alternatives"][0]["transcript"]
+                    if transcript:
+                        print(transcript)
+
+        # Send and receive concurrently
+        await asyncio.gather(send_audio(), receive_transcripts())
+
+asyncio.run(stream())
+```
+
+Run it:
+
+```bash
+python stream.py
+```
+
+## Code walkthrough
+
+1. **Connect with authentication.** `websockets.connect()` opens a WebSocket to `wss://api.aldea.ai/v1/listen`. The `Authorization: Bearer` header authenticates the connection during the handshake. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio. Adjust these to match your audio format.
+
+2. **Send audio frames.** The `send_audio` coroutine reads the file in 4 KB chunks and sends each as a binary WebSocket frame. The chunk size isn't critical. 4096 bytes is a common default that balances latency and overhead. In production, you'd read from a microphone or network stream instead of a file.
+
+3. **Receive transcript messages.** The `receive_transcripts` coroutine listens for JSON messages from the server. It filters for `Results` messages where `is_final` is `true`. These are finalized transcript segments. Interim results (where `is_final` is `false`) contain partial transcripts that may change as more audio arrives.
+
+4. **Close the stream.** Sending `{"type": "CloseStream"}` tells the server no more audio is coming. The server finishes processing any remaining audio, sends final results, and closes the connection. `asyncio.gather()` ensures both coroutines run concurrently and the connection stays open until both complete.
+
+<Callout type="warn">
+The `encoding` and `sample_rate` parameters must match your audio format. If they don't, the API will attempt to decode the audio incorrectly and you'll get garbled or empty transcripts. Common combinations: `linear16` at `16000` Hz for WAV, `mp3` for MP3 files, `opus` for Opus-encoded audio.
+</Callout>
+
+## Stream from a live source
+
+To stream from a live audio source instead of a file, replace the `send_audio` function. The following example streams from an internet radio station using `httpx`:
+
+```bash
+pip install httpx
+```
+
+```python title="stream_live.py"
+import asyncio
+import json
+import os
+import httpx
+import websockets
+
+ALDEA_API_KEY = os.environ["ALDEA_API_KEY"]
+STREAM_URL = "http://icecast.omroep.nl/radio1-bb-mp3"
+WS_URL = "wss://api.aldea.ai/v1/listen?encoding=mp3"
+
+async def stream_live():
+    headers = {"Authorization": f"Bearer {ALDEA_API_KEY}"}
+
+    async with websockets.connect(WS_URL, additional_headers=headers) as ws:
+
+        async def send_audio():
+            """Stream audio from a live source."""
+            with httpx.stream("GET", STREAM_URL) as r:
+                for chunk in r.iter_bytes(4096):
+                    await ws.send(chunk)
+
+        async def receive_transcripts():
+            """Print final transcripts as they arrive."""
+            async for message in ws:
+                data = json.loads(message)
+                if data.get("type") == "Results" and data.get("is_final"):
+                    transcript = data["channel"]["alternatives"][0]["transcript"]
+                    if transcript:
+                        print(transcript)
+
+        await asyncio.gather(send_audio(), receive_transcripts())
+
+asyncio.run(stream_live())
+```
+
+The only differences from the file example are the audio source (`httpx.stream` instead of `open`) and the encoding parameter (`mp3` instead of `linear16`).
+
+## Understanding streaming messages
+
+The server sends several types of JSON messages during a streaming session:
+
+| Message type | Description |
+|-------------|-------------|
+| `Results` | Contains transcript data. Check `is_final` to distinguish interim from final results. |
+| `UtteranceEnd` | Signals that the speaker finished a turn. Requires [`utterance_end_ms`](/docs/concepts/streaming-controls/utterance-detection). |
+| `SpeechStarted` | Indicates that speech was detected after a period of silence. See [VAD events](/docs/concepts/streaming-controls/vad-events). |
+| `Metadata` | Connection metadata sent at the start of the session. |
+
+Key fields in a `Results` message:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `type` | string | Always `"Results"`. |
+| `is_final` | boolean | `true` for finalized segments, `false` for interim results that may change. |
+| `speech_final` | boolean | `true` when endpointing determines the speaker has paused. See [Endpointing](/docs/concepts/streaming-controls/endpointing). |
+| `channel.alternatives[0].transcript` | string | The transcript text. |
+| `channel.alternatives[0].words` | array | Per-word details with `word`, `start`, `end`, and `confidence`. |
+
+Example `Results` message:
+
+```json
+{
+  "type": "Results",
+  "is_final": true,
+  "speech_final": true,
+  "channel": {
+    "alternatives": [
+      {
+        "transcript": "Houston we've had a problem",
+        "confidence": 0.98,
+        "words": [
+          { "word": "houston", "start": 0.08, "end": 0.56, "confidence": 0.99 },
+          { "word": "we've", "start": 0.56, "end": 0.72, "confidence": 0.97 }
+        ]
+      }
+    ]
+  }
+}
+```
+
+## Streaming query parameters
+
+Add these parameters to the WebSocket URL to control streaming behavior:
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `encoding` | string | Audio encoding: `linear16`, `mp3`, `opus`, `flac`, `aac`, etc. Required for raw audio. |
+| `sample_rate` | integer | Sample rate in Hz (e.g., `16000`, `44100`). Required for raw audio. |
+| `channels` | integer | Number of audio channels. Defaults to `1`. |
+| `utterance_end_ms` | integer | Silence threshold in ms to trigger `UtteranceEnd`. See [Utterance detection](/docs/concepts/streaming-controls/utterance-detection). |
+| `interim_results` | boolean | Whether to receive interim (non-final) results. Defaults to `true`. |
+| `punctuate` | boolean | Add punctuation to the transcript. |
+| `smart_format` | boolean | Apply smart formatting for numbers, dates, etc. |
+
+Example with multiple parameters:
+
+```
+wss://api.aldea.ai/v1/listen?encoding=linear16&sample_rate=16000&punctuate=true&utterance_end_ms=1000
+```
+
+For the full list, see the [Parameters reference](/docs/api-reference/parameters).
+
+## Next steps
+
+- [Utterance detection](/docs/concepts/streaming-controls/utterance-detection) - detect when a speaker finishes a turn
+- [Endpointing](/docs/concepts/streaming-controls/endpointing) - fine-tune when transcript segments are finalized
+- [VAD events](/docs/concepts/streaming-controls/vad-events) - detect when speech starts and stops
+- [Transcribe a file](/docs/integration/transcribe-file) - transcribe pre-recorded audio instead
 
 </Tab>
 <Tab value="Node.js">

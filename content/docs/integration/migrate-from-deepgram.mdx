@@ -18,10 +18,7 @@ Aldea implements Deepgram-compatible APIs. If you already use a Deepgram SDK, yo
 | Auth header (REST) | `Authorization: Token dg_...` | `Authorization: Bearer org_...` |
 | Auth header (WebSocket) | `Sec-WebSocket-Protocol: token, dg_...` | `Sec-WebSocket-Protocol: token, org_...` |
 
-The API endpoints (`/v1/listen`), query parameters, and JSON response format are identical. Your existing parsing logic 
-
-
-does not need to change.
+The API endpoints (`/v1/listen`), query parameters, and JSON response format are identical. Your existing parsing logic does not need to change.
 
 ## Step 1: Get an Aldea API key
 
@@ -34,13 +31,16 @@ The only code change is pointing the SDK to `api.aldea.ai` instead of `api.deepg
 <Tabs items={['Python', 'Node.js', 'Go']}>
 <Tab value="Python">
 
-The Python SDK uses `DeepgramClientEnvironment` to override the base URL. Replace your existing client setup:
+The Python Deepgram SDK uses a `DeepgramClientEnvironment` object to configure where API requests are sent. By default, it points at `api.deepgram.com`. To migrate, you create a custom environment that redirects all REST and WebSocket traffic to `api.aldea.ai` instead.
+
+Replace your existing client setup:
 
 **Before (Deepgram):**
 
 ```python
 from deepgram import DeepgramClient
 
+# The default client connects to api.deepgram.com
 client = DeepgramClient("dg_YOUR_DEEPGRAM_KEY")
 ```
 
@@ -49,29 +49,33 @@ client = DeepgramClient("dg_YOUR_DEEPGRAM_KEY")
 ```python
 from deepgram import DeepgramClient, DeepgramClientEnvironment
 
+# Redirect all SDK traffic to the Aldea API
 config = DeepgramClientEnvironment(
-    base="https://api.aldea.ai",
-    production="wss://api.aldea.ai",
-    agent="wss://api.aldea.ai"
+    base="https://api.aldea.ai",        # REST endpoint for pre-recorded transcription
+    production="wss://api.aldea.ai",     # WebSocket endpoint for streaming
+    agent="wss://api.aldea.ai"           # Agent WebSocket (set to same as production)
 )
 
 client = DeepgramClient(api_key="YOUR_ALDEA_API_KEY", environment=config)
 ```
 
-The rest of your code stays the same. Any calls to `client.listen.v1.media.transcribe_file()`, `transcribe_url()`, or `client.listen.v1.connect()` work without changes.
+The three fields in `DeepgramClientEnvironment` control where each type of request is routed. `base` handles REST calls like `transcribe_file()` and `transcribe_url()`. `production` handles WebSocket connections for streaming. `agent` is used for agent-based connections and should be set to the same value as `production`.
 
-**Requirements:** Python 3.10+, `deepgram-sdk>=3.4.0`
+After this change, the rest of your code stays exactly the same. Any calls to `client.listen.v1.media.transcribe_file()`, `transcribe_url()`, or `client.listen.v1.connect()` work without modification. Only the destination changes.
+
+**Requirements:** Python 3.8+, `deepgram-sdk>=3.4.0`
 
 </Tab>
 <Tab value="Node.js">
 
-The Node.js SDK accepts a `global.url` option to redirect all requests.
+The Node.js SDK accepts a `global.url` option that overrides the base URL for all requests. Setting this to `https://api.aldea.ai` redirects both REST and WebSocket traffic.
 
 **Before (Deepgram):**
 
 ```javascript
 import { createClient } from "@deepgram/sdk";
 
+// The default client connects to api.deepgram.com
 const client = createClient({ key: "dg_YOUR_DEEPGRAM_KEY" });
 ```
 
@@ -80,13 +84,16 @@ const client = createClient({ key: "dg_YOUR_DEEPGRAM_KEY" });
 ```javascript
 import { createClient } from "@deepgram/sdk";
 
+// Redirect all SDK traffic to the Aldea API
 const client = createClient({
   key: "YOUR_ALDEA_API_KEY",
   global: { url: "https://api.aldea.ai" }
 });
 ```
 
-For pre-recorded transcription, use `accessToken` instead of `key`:
+The `global.url` field sets the base URL for every SDK request. The SDK automatically derives the WebSocket URL from this, so both pre-recorded and streaming calls are redirected.
+
+For pre-recorded transcription, the Node.js SDK may require `accessToken` instead of `key` depending on your SDK version:
 
 ```javascript
 const client = createClient({
@@ -95,41 +102,47 @@ const client = createClient({
 });
 ```
 
-All `client.listen.prerecorded` and `client.listen.live` calls work as before.
+All `client.listen.prerecorded` and `client.listen.live` calls work as before. Only the destination changes.
 
 </Tab>
 <Tab value="Go">
 
-The Go SDK accepts `Host` and `AccessToken` in `ClientOptions`.
+The Go SDK accepts `Host` and `AccessToken` fields in the `ClientOptions` struct. Setting `Host` to `https://api.aldea.ai` redirects all API calls. Pass your Aldea key via `AccessToken` instead of the first positional argument.
 
 **Before (Deepgram):**
 
 ```go
+// The default client connects to api.deepgram.com
 client := dglisten.NewREST("dg_YOUR_DEEPGRAM_KEY", nil)
 ```
 
 **After (Aldea):**
 
 ```go
+// Redirect all SDK traffic to the Aldea API
 client := dglisten.NewREST("", &dgi.ClientOptions{
-    Host:        "https://api.aldea.ai",
-    AccessToken: "YOUR_ALDEA_API_KEY",
+    Host:        "https://api.aldea.ai",   // REST and WebSocket base URL
+    AccessToken: "YOUR_ALDEA_API_KEY",      // Aldea API key (starts with org_)
 })
 ```
 
-The `DoFile()`, `DoURL()`, and WebSocket methods work identically.
+The first argument is left empty because the API key is provided through `AccessToken` in the options struct instead. The `DoFile()`, `DoURL()`, and WebSocket methods work identically. Only the destination changes.
 
 </Tab>
 </Tabs>
 
 ## Step 3: Verify it works
 
-Run a quick test to confirm the migration. These examples use the same SDK methods you already have, just with the Aldea configuration from Step 2.
+Run a quick test to confirm the migration is working. These examples use the same SDK methods you already have. The only difference is the client configuration from Step 2. If the test produces a transcript, your migration is complete.
 
 ### Pre-recorded transcription
 
+Send a local audio file through the SDK to verify that REST transcription works with the Aldea backend.
+
 <Tabs items={['Python', 'Node.js', 'Go']}>
 <Tab value="Python">
+
+This reads `audio.wav` from disk, sends it to Aldea via the SDK's `transcribe_file()` method, and prints the top transcript result:
 
 ```python
 with open("audio.wav", "rb") as f:
@@ -139,6 +152,8 @@ with open("audio.wav", "rb") as f:
 
 </Tab>
 <Tab value="Node.js">
+
+This creates a read stream from `audio.wav`, sends it to Aldea for transcription, and logs the result. The `response?.result ?? response` pattern handles different SDK response wrapper versions:
 
 ```javascript
 import fs from "fs";
@@ -155,6 +170,8 @@ console.log(result.results.channels[0].alternatives[0].transcript);
 </Tab>
 <Tab value="Go">
 
+This sends `audio.wav` to Aldea using the SDK's `DoFile()` method. The response is unmarshalled into a `Response` struct, and the transcript is extracted from the first channel's top alternative:
+
 ```go
 var resp Response
 if err := client.DoFile(ctx, "audio.wav",
@@ -169,8 +186,12 @@ fmt.Println(resp.Results.Channels[0].Alternatives[0].Transcript)
 
 ### Real-time streaming
 
+Streaming verification confirms that WebSocket connections work with the Aldea backend. This example connects to a live audio stream and prints transcripts as they arrive.
+
 <Tabs items={['Node.js']}>
 <Tab value="Node.js">
+
+This opens a WebSocket connection to `wss://api.aldea.ai/v1/listen` through the SDK, listens for transcript events, and streams audio from a live internet radio source. The `LiveTranscriptionEvents.Transcript` event fires each time the server sends a transcript message, and the `LiveTranscriptionEvents.Open` event fires once the connection is established:
 
 ```javascript
 import { createClient, LiveTranscriptionEvents } from "@deepgram/sdk";
@@ -180,16 +201,19 @@ const client = createClient({
   global: { url: "https://api.aldea.ai" }
 });
 
+// Open a live transcription connection with MP3 encoding
 const connection = client.listen.live({
   encoding: "mp3",
   interim_results: true
 });
 
+// Print transcripts as they arrive
 connection.on(LiveTranscriptionEvents.Transcript, (data) => {
   const transcript = data?.channel?.alternatives?.[0]?.transcript;
   if (transcript) console.log(transcript);
 });
 
+// Once the connection is open, start streaming audio
 connection.on(LiveTranscriptionEvents.Open, async () => {
   const stream = await fetch("http://icecast.omroep.nl/radio1-bb-mp3");
   const reader = stream.body.getReader();
@@ -210,10 +234,12 @@ The Python and Go Deepgram SDKs may produce authentication errors during WebSock
 
 ## Without the Deepgram SDK
 
-If you prefer not to use a Deepgram SDK, you can call the API directly. The endpoint and response format are the same.
+If you prefer not to use a Deepgram SDK, you can call the Aldea API directly using standard HTTP clients. The endpoint (`POST /v1/listen`) and JSON response format are identical whether you use an SDK or not. This approach gives you full control over the request and removes the Deepgram SDK dependency entirely.
 
 <Tabs items={['Python (httpx)', 'Node.js (fetch)', 'Go (net/http)']}>
 <Tab value="Python (httpx)">
+
+Send audio bytes directly to the Aldea REST endpoint using `httpx`. The `Bearer` token authenticates the request, and the transcript is extracted from the JSON response:
 
 ```python
 import httpx
@@ -232,6 +258,8 @@ print(result["results"]["channels"][0]["alternatives"][0]["transcript"])
 </Tab>
 <Tab value="Node.js (fetch)">
 
+Use the built-in `fetch` API to POST audio bytes to Aldea. The response JSON follows the same structure as the SDK response:
+
 ```javascript
 import { readFileSync } from "fs";
 
@@ -247,6 +275,8 @@ console.log(result.results.channels[0].alternatives[0].transcript);
 
 </Tab>
 <Tab value="Go (net/http)">
+
+Read the audio file, create an HTTP request with a `Bearer` auth header, and parse the JSON response. The type assertions navigate the nested response structure to extract the transcript:
 
 ```go
 audioData, _ := os.ReadFile("audio.wav")
@@ -274,6 +304,8 @@ fmt.Println(transcript)
 </Tabs>
 
 ## Troubleshooting
+
+If you run into issues after migrating, the most common causes are URL typos, incorrect API keys, or SDK-specific WebSocket authentication behavior. The following table covers the errors you're most likely to encounter and how to resolve them.
 
 | Error | Fix |
 |-------|-----|

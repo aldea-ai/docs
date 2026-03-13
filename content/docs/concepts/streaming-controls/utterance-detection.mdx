@@ -11,8 +11,9 @@ An *utterance* is a continuous segment of speech, that contains everything a per
 
 In a conversation, utterances roughly correspond to "turns." For example, in a voice assistant interaction, the user's question is one utterance and the assistant's response is another. You can use utterance detection to segment conversations, trigger processing between turns, or build turn-based interaction flows.
 
-> [!IMPORTANT]
-> Word timestamps must be enabled for `UtteranceEnd` events to fire. Word timestamps are included by default in `Results` messages.
+<Callout type="warn">
+Word timestamps must be enabled for `UtteranceEnd` events to fire. Word timestamps are included by default in `Results` messages.
+</Callout>
 
 ## Configure the silence threshold
 

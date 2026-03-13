@@ -32,14 +32,18 @@ After a successful handshake, the server returns `101 Switching Protocols`.
 
 Your client can send two types of messages: binary audio frames and JSON control messages.
 
-### Binary audio frames
+**Binary audio frames**
 
-Send audio data as binary WebSocket frames. Supported formats:
+Send audio data as binary WebSocket frames. The API supports the following formats:
 
-- **Encoded:** MP3, AAC, FLAC, WAV, OGG, WebM, Opus, M4A (auto-detected)
-- **Raw PCM:** 16-bit signed little-endian (s16le), configurable sample rate via `sample_rate` parameter
+- **Encoded audio:** MP3, AAC, FLAC, WAV, OGG, WebM, Opus, M4A (auto-detected)
+- **Raw PCM:** 16-bit signed little-endian (s16le), with a configurable sample rate through the `sample_rate` parameter
 
-### Control messages
+There's no required chunk size. You can send audio frames as they become available such as when your microphone produces them. The server buffers and processes audio continuously.
+
+**Control messages**
+
+You send JSON control messages to manage the stream:
 
 | Message | Description |
 |---------|------------|
@@ -47,13 +51,13 @@ Send audio data as binary WebSocket frames. Supported formats:
 | `{"type": "Finalize"}` | Flushes the server buffer and returns any remaining results as final |
 | `{"type": "CloseStream"}` | Gracefully closes the connection after processing remaining audio |
 
-## Server messages
+## Receive server messages
 
 The server sends the following JSON message types:
 
-### Metadata
+**Metadata**
 
-Sent once upon connection. Contains session information:
+The server sends medatata once when the connection opens. It contains session information:
 
 ```json
 {
@@ -70,9 +74,9 @@ Sent once upon connection. Contains session information:
 }
 ```
 
-### Results
+**Results**
 
-Transcript data, sent continuously as audio is processed:
+The server sends transcript data continuously as audio is processed:
 
 ```json
 {
@@ -102,9 +106,9 @@ Transcript data, sent continuously as audio is processed:
 | `words` | Array of `[word, start_ms, end_ms]`. Timestamps are in milliseconds |
 | `confidence` | Confidence score (0–1) |
 
-### SpeechStarted
+**SpeechStarted**
 
-Sent when voice activity is detected (requires `vad_events=true`):
+When the server detects voice activity, it sends `SpeechStarted` if [`vad_events=true`](/docs/concepts/streaming-controls/vad-events) is already configured:
 
 ```json
 {
@@ -114,9 +118,9 @@ Sent when voice activity is detected (requires `vad_events=true`):
 }
 ```
 
-### UtteranceEnd
+**UtteranceEnd**
 
-Sent when a silence threshold is reached (requires `utterance_end_ms` parameter and word timestamps):
+When a silence threshold is reached, the server sends `UtteranceEnd`. It requires you to have the [`utterance_end_ms`](/docs/concepts/streaming-controls/utterance-detection) parameter and word timestamps set:
 
 ```json
 {
@@ -126,9 +130,9 @@ Sent when a silence threshold is reached (requires `utterance_end_ms` parameter 
 }
 ```
 
-## Query parameters
+## Configure query parameters
 
-Append these parameters to the WebSocket URL to configure the stream:
+You can append these parameters to the WebSocket URL to configure the stream:
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
@@ -136,15 +140,15 @@ Append these parameters to the WebSocket URL to configure the stream:
 | `sample_rate` | `16000` | Sample rate in Hz. Applies to PCM audio only. |
 | `interim_results` | `true` | Send partial transcripts while audio is streaming. |
 | `endpointing` | Server default | Sentence finalization delay in milliseconds, or `false` to disable. |
-| `utterance_end_ms` | — | Silence duration (in milliseconds) that triggers an `UtteranceEnd` event. |
+| `utterance_end_ms` | - | Silence duration (in milliseconds) that triggers an `UtteranceEnd` event. |
 | `vad_events` | `false` | Send `SpeechStarted` events when voice activity is detected. |
 | `language` | `en` | Language code: `en`, `es`, or `auto`. |
-| `keywords` | — | Keyword boosting. This parameter is repeatable. |
-| `redact` | — | PII redaction mode: `pii`, `pci`, `numbers`, or `true`. |
+| `keywords` | - | Keyword boosting. This parameter is repeatable. |
+| `redact` | - | PII redaction mode: `pii`, `pci`, `numbers`, or `true`. |
 
 ## Related content
 
-- [Interim results](/docs/concepts/streaming-controls/interim-results) — Display partial transcripts in real time
-- [Endpointing](/docs/concepts/streaming-controls/endpointing) — Control sentence finalization timing
-- [Streaming quickstart](/docs/getting-started/quickstart/streaming) — Get started with your first streaming integration
-- [API reference](/docs/api-reference) — Complete API documentation
+- [Interim results](/docs/concepts/streaming-controls/interim-results) - display partial transcripts in real time
+- [Endpointing](/docs/concepts/streaming-controls/endpointing) - control sentence finalization timing
+- [Streaming quickstart](/docs/getting-started/quickstart/streaming) - get started with your first streaming integration
+- [API reference](/docs/api-reference) - complete API documentation
