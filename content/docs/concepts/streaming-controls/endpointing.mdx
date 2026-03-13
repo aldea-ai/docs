@@ -3,11 +3,19 @@ title: Endpointing
 description: Configure speech endpoint detection with endpointing parameter
 ---
 
-Endpointing controls how quickly the API finalizes a sentence during streaming. It determines how long the server waits after the last detected speech before marking a result as `is_final: true`.
+Endpointing controls how long the server waits after detecting the last spoken word before it marks a transcript segment as final (`is_final: true`). Use this parameter to balance transcription speed against sentence completeness.
+
+## Why do you need endpointing?
+
+When speaking, it is natural to pause between words, thoughts, and sentences. A speech-to-text system needs to decide which pauses are mid-sentence breathers and which signal the end of a complete thought. This decision is called *endpointing*.
+
+Without endpointing, the system would either finalize too early (splitting `"Hello world"` into `"Hello"` and `"world"` as separate results) or wait indefinitely for more speech. The `endpointing` parameter gives you control over how quickly the API finalizes sentences during streaming.
+
+A lower value finalizes results faster but might split sentences mid-thought. A higher value waits longer and produces more complete sentences, but adds latency.
 
 ## Usage
 
-Set the `endpointing` parameter in the WebSocket query string. The value is in milliseconds:
+To set the endpointing value, add the `endpointing` parameter in the WebSocket query string. You specify the value in milliseconds:
 
 ```bash
 # Faster finalization (300ms)
@@ -17,15 +25,15 @@ wss://api.aldea.ai/v1/listen?endpointing=300&encoding=mp3
 wss://api.aldea.ai/v1/listen?endpointing=800&encoding=mp3
 ```
 
-To disable endpointing entirely, set it to `false`:
+To disable automatic finalization, set `endpointing` to `false` as follows:
 
 ```bash
 wss://api.aldea.ai/v1/listen?endpointing=false&encoding=mp3
 ```
 
-When endpointing is disabled, results are only finalized when you send a `Finalize` or `CloseStream` message.
+When you disable endpointing, the server finalizes results only when you send a [`Finalize` or `CloseStream`](/docs/concepts/streaming-controls/websocket-protocol) message. This is useful when your application needs full control over when transcription segments are committed. For example, a dictation app where the user explicitly presses a button to finish a sentence.
 
-## Choosing a value
+## Choosing an endpointing value
 
 | Value | Use case |
 |-------|----------|
@@ -33,8 +41,6 @@ When endpointing is disabled, results are only finalized when you send a `Finali
 | `300`–`500` ms | General purpose. Balanced speed and accuracy |
 | `500`–`1000` ms | Speakers who pause often. Avoid premature sentence breaks |
 | `false` | Manual control. Finalize only on explicit command |
-
-Lower values produce faster results but may split sentences mid-thought. Higher values wait longer, producing more complete sentences at the cost of latency.
 
 ## Next steps
 

@@ -9,6 +9,7 @@ Aldea implements Deepgram-compatible APIs. If you already use a Deepgram SDK, yo
 
 ## What changes
 
+
 | | Deepgram | Aldea |
 |---|---|---|
 | REST base URL | `https://api.deepgram.com` | `https://api.aldea.ai` |
@@ -17,7 +18,10 @@ Aldea implements Deepgram-compatible APIs. If you already use a Deepgram SDK, yo
 | Auth header (REST) | `Authorization: Token dg_...` | `Authorization: Bearer org_...` |
 | Auth header (WebSocket) | `Sec-WebSocket-Protocol: token, dg_...` | `Sec-WebSocket-Protocol: token, org_...` |
 
-The API endpoints (`/v1/listen`), query parameters, and JSON response format are identical. Your existing parsing logic does not need to change.
+The API endpoints (`/v1/listen`), query parameters, and JSON response format are identical. Your existing parsing logic 
+
+
+does not need to change.
 
 ## Step 1: Get an Aldea API key
 
