@@ -5,8 +5,6 @@ description: Display partial transcription results in real time by using the int
 
 Interim results provide partial transcripts while the speaker is still talking. The transcript updates progressively as more audio arrives, so you can display text with low latency before the server finalizes a sentence.
 
-## What are interim results?
-
 In a non-streaming speech-to-text workflow, you send a complete audio file and wait for the full transcript. Streaming works differently in that audio flows to the server continuously, and the server sends back transcript data as it processes each chunk.
 
 Interim results are the server's best guess *so far*. As more audio arrives, the server refines its prediction. Think of it like watching someone type a message in a chat app: you see the words appear in real time, and occasionally earlier words change as the system corrects itself. When the server is confident in a segment, it marks the result as final, and the transcript for that segment won't change.

@@ -1,20 +1,26 @@
 ---
 title: WebSocket protocol
-description: Message types, keep-alive, finalize, and graceful disconnect for streaming
+description: Connect to the streaming API and exchange audio, control messages, and transcript results over WebSocket.
 ---
 
-The Aldea streaming API uses WebSocket for bidirectional communication. Your client sends binary audio frames and JSON control messages; the server responds with JSON transcript messages.
+The Aldea streaming API uses WebSocket for bidirectional communication. Your client sends binary audio frames and JSON control messages. The server responds with JSON messages that contain transcripts, metadata, and events.
 
-## Connection
+## Why WebSocket?
 
-Connect to one of two endpoints:
+A traditional REST API follows a request-response pattern: you send a request, wait for the response, and the connection closes. This works well for batch transcription where you upload a complete audio file, but it doesn't work for real-time streaming.
+
+Streaming speech-to-text requires a persistent, two-way connection. Your application needs to send audio continuously while simultaneously receiving transcript updates. WebSocket provides this bidirectional channel over a single connection where your client pushes audio frames in one direction, while the server simultaneously responds with transcript results.
+
+## Connect to the API
+
+To get started, you connect to one of the following endpoints:
 
 | Endpoint | Accepts |
-|----------|--------|
+|----------|---------|
 | `wss://api.aldea.ai/v1/listen` | Encoded audio (MP3, AAC, FLAC, WAV, OGG, WebM, Opus, M4A) and raw PCM |
-| `wss://api.aldea.ai/v1/listen/pcm` | Raw PCM only (optimized) |
+| `wss://api.aldea.ai/v1/listen/pcm` | Raw PCM only (optimized for low-latency PCM streams) |
 
-Authenticate with the `Sec-WebSocket-Protocol` header:
+To establish a secure connection, authenticate with the `Sec-WebSocket-Protocol` header:
 
 ```
 Sec-WebSocket-Protocol: token, YOUR_ALDEA_API_KEY
@@ -22,9 +28,9 @@ Sec-WebSocket-Protocol: token, YOUR_ALDEA_API_KEY
 
 After a successful handshake, the server returns `101 Switching Protocols`.
 
-## Client messages
+## Send client messages
 
-Your client can send the following:
+Your client can send two types of messages: binary audio frames and JSON control messages.
 
 ### Binary audio frames
 
@@ -122,23 +128,23 @@ Sent when a silence threshold is reached (requires `utterance_end_ms` parameter 
 
 ## Query parameters
 
-Append these to the WebSocket URL to configure the stream:
+Append these parameters to the WebSocket URL to configure the stream:
 
 | Parameter | Default | Description |
-|-----------|---------|------------|
-| `encoding` | auto-detect | Audio format: `pcm`, `mp3`, `aac`, `flac`, `wav`, `ogg`, `webm`, `opus`, `m4a` |
-| `sample_rate` | `16000` | Sample rate in Hz (for PCM audio) |
-| `interim_results` | `true` | Send partial transcripts while streaming |
-| `endpointing` | server default | Sentence finalization latency in ms, or `false` to disable |
-| `utterance_end_ms` | — | Silence duration (ms) to trigger `UtteranceEnd` |
-| `vad_events` | `false` | Send `SpeechStarted` events |
-| `language` | `en` | Language code (`en`, `es`, or `auto`) |
-| `keywords` | — | Keyword boosting (repeatable) |
-| `redact` | — | PII redaction: `pii`, `pci`, `numbers`, or `true` |
+|-----------|---------|-------------|
+| `encoding` | Auto-detect | Audio format: `pcm`, `mp3`, `aac`, `flac`, `wav`, `ogg`, `webm`, `opus`, `m4a`. |
+| `sample_rate` | `16000` | Sample rate in Hz. Applies to PCM audio only. |
+| `interim_results` | `true` | Send partial transcripts while audio is streaming. |
+| `endpointing` | Server default | Sentence finalization delay in milliseconds, or `false` to disable. |
+| `utterance_end_ms` | — | Silence duration (in milliseconds) that triggers an `UtteranceEnd` event. |
+| `vad_events` | `false` | Send `SpeechStarted` events when voice activity is detected. |
+| `language` | `en` | Language code: `en`, `es`, or `auto`. |
+| `keywords` | — | Keyword boosting. This parameter is repeatable. |
+| `redact` | — | PII redaction mode: `pii`, `pci`, `numbers`, or `true`. |
 
-## Next steps
+## Related content
 
-- [Interim results](/docs/concepts/streaming-controls/interim-results)
-- [Endpointing](/docs/concepts/streaming-controls/endpointing)
-- [Streaming quickstart](/docs/getting-started/quickstart/streaming)
-- [API reference](/docs/api-reference)
+- [Interim results](/docs/concepts/streaming-controls/interim-results) — Display partial transcripts in real time
+- [Endpointing](/docs/concepts/streaming-controls/endpointing) — Control sentence finalization timing
+- [Streaming quickstart](/docs/getting-started/quickstart/streaming) — Get started with your first streaming integration
+- [API reference](/docs/api-reference) — Complete API documentation
