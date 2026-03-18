@@ -7,10 +7,157 @@ import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
 # Transcribe a file
 
+Use file transcription when you have audio stored locally: recordings, voicemails, podcast episodes, meeting captures, or any other pre-recorded audio. You send the file contents in a single `POST` request to `/v1/listen` and receive the complete transcript in the response.
+
+The Aldea API accepts most common audio formats including MP3, WAV, AAC, FLAC, OGG, Opus, WebM, M4A, and raw PCM. For details on how pre-recorded and streaming transcription differ, see [Transcription modes](/docs/concepts/transcription-modes).
+
 <Tabs items={['Python', 'Node.js', 'Go', 'Rust']}>
 <Tab value="Python">
 
-Transcribe a local audio file using Python.
+## Prerequisites
+
+- Python 3.8 or later
+- `httpx` installed (see [Setup & installation](/docs/integration/setup))
+- A local audio file in a supported format (MP3, WAV, FLAC, etc.)
+
+## Transcribe a local file
+
+The following example reads an audio file from disk and sends it to the Aldea API for transcription:
+
+```python title="transcribe_file.py"
+import os
+import httpx
+
+ALDEA_API_KEY = os.environ["ALDEA_API_KEY"]
+
+# Read the audio file as raw bytes
+with open("audio.wav", "rb") as f:
+    audio_data = f.read()
+
+# Send the audio to the Aldea API
+response = httpx.post(
+    "https://api.aldea.ai/v1/listen",
+    headers={"Authorization": f"Bearer {ALDEA_API_KEY}"},
+    content=audio_data,
+    timeout=60.0
+)
+
+result = response.json()
+
+# Extract and print the transcript
+transcript = (
+    result.get("results", {})
+    .get("channels", [{}])[0]
+    .get("alternatives", [{}])[0]
+    .get("transcript", "")
+)
+
+print(transcript)
+```
+
+Run it:
+
+```bash
+python transcribe_file.py
+```
+
+## Code walkthrough
+
+1. **Read the file.** `open("audio.wav", "rb").read()` loads the entire file into memory as raw bytes. The API detects the audio format automatically from the file contents, so you don't need to specify a content type.
+
+2. **POST to `/v1/listen`.** `httpx.post()` sends the audio bytes as the request body to the Aldea API. The `Authorization` header authenticates the request with your API key using the `Bearer` scheme. The `timeout=60.0` sets a 60-second timeout but you can increase it for longer files.
+
+3. **Parse the response.** The transcript sits inside a nested JSON structure: `results` → `channels` → `alternatives`. The chained `.get()` calls navigate this safely, returning empty defaults if any key is missing. This avoids `KeyError` exceptions if the response structure is unexpected.
+
+## Response structure
+
+The API returns a JSON response with the following key fields:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `results.channels` | array | One entry per audio channel. Mono audio has one channel. |
+| `channels[].alternatives` | array | Ranked transcript alternatives. The first alternative (`[0]`) has the highest confidence. |
+| `alternatives[].transcript` | string | The full transcript text for this alternative. |
+| `alternatives[].confidence` | float | Confidence score from 0.0 to 1.0. |
+| `alternatives[].words` | array | Per-word details including `word`, `start`, `end`, and `confidence`. |
+
+Example response (abbreviated):
+
+```json
+{
+  "results": {
+    "channels": [
+      {
+        "alternatives": [
+          {
+            "transcript": "Houston we've had a problem",
+            "confidence": 0.98,
+            "words": [
+              { "word": "houston", "start": 0.08, "end": 0.56, "confidence": 0.99 },
+              { "word": "we've", "start": 0.56, "end": 0.72, "confidence": 0.97 }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+## Add transcription options
+
+Append query parameters to the URL to customize the transcription. Some commonly used options:
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `punctuate` | boolean | Add punctuation to the transcript. |
+| `diarize` | boolean | Identify different speakers in the audio. |
+| `language` | string | Language code (e.g., `en`, `es`). Defaults to English. |
+| `detect_language` | boolean | Automatically detect the spoken language. |
+| `smart_format` | boolean | Apply formatting for readability (numbers, dates, etc.). |
+
+Pass them using the `params` argument:
+
+```python
+response = httpx.post(
+    "https://api.aldea.ai/v1/listen",
+    headers={"Authorization": f"Bearer {ALDEA_API_KEY}"},
+    params={"punctuate": "true", "diarize": "true", "language": "en"},
+    content=audio_data,
+    timeout=60.0
+)
+```
+
+For the full list of available parameters, see the [Parameters reference](/docs/api-reference/parameters).
+
+## Handle errors
+
+Check the HTTP status code before parsing the response:
+
+```python
+if response.status_code == 200:
+    transcript = (
+        result.get("results", {})
+        .get("channels", [{}])[0]
+        .get("alternatives", [{}])[0]
+        .get("transcript", "")
+    )
+    print(transcript)
+elif response.status_code == 401:
+    print("Authentication failed. Check your API key.")
+elif response.status_code == 400:
+    print(f"Bad request: {result}")
+else:
+    print(f"Error {response.status_code}: {result}")
+```
+
+For a complete list of error codes, see [Error codes](/docs/api-reference/error-codes).
+
+## Next steps
+
+- [Transcribe from URL](/docs/integration/transcribe-url) - transcribe a remote audio file without downloading it first
+- [Real-time streaming](/docs/integration/streaming) - transcribe audio as it's being recorded
+- [PII redaction](/docs/concepts/privacy-compliance/pii-redaction) - automatically remove sensitive data from transcripts
 
 </Tab>
 <Tab value="Node.js">

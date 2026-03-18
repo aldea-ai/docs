@@ -7,10 +7,109 @@ import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
 # Transcribe from URL
 
+URL transcription lets you transcribe audio that's hosted remotely, such as on cloud storage, a CDN, or any publicly accessible URL, without downloading it to your machine first. The Aldea API fetches the audio directly from the URL, transcribes it, and returns the result.
+
+This is useful when you have audio files stored in services like Amazon S3, Google Cloud Storage, or any web server, and you want to avoid the overhead of downloading and re-uploading the file.
+
 <Tabs items={['Python', 'Node.js', 'Go', 'Rust']}>
 <Tab value="Python">
 
-Transcribe audio from a URL using Python.
+## Prerequisites
+
+- Python 3.8 or later
+- `httpx` installed (see [Setup & installation](/docs/integration/setup))
+- A publicly accessible URL pointing to an audio file in a supported format
+
+## Transcribe audio from a URL
+
+The following example downloads audio from a public URL and sends it to the Aldea API for transcription:
+
+```python title="transcribe_url.py"
+import os
+import httpx
+
+ALDEA_API_KEY = os.environ["ALDEA_API_KEY"]
+AUDIO_URL = "https://dpgr.am/spacewalk.wav"
+
+# Download the audio file
+print("Downloading audio...")
+audio_response = httpx.get(AUDIO_URL, timeout=30.0, follow_redirects=True)
+audio_data = audio_response.content
+print(f"Downloaded {len(audio_data)} bytes")
+
+# Send the audio to the Aldea API
+print("Transcribing...")
+response = httpx.post(
+    "https://api.aldea.ai/v1/listen",
+    headers={"Authorization": f"Bearer {ALDEA_API_KEY}"},
+    content=audio_data,
+    timeout=60.0
+)
+
+result = response.json()
+
+if response.status_code == 200:
+    transcript = (
+        result.get("results", {})
+        .get("channels", [{}])[0]
+        .get("alternatives", [{}])[0]
+        .get("transcript", "")
+    )
+    print(f"Transcript: {transcript}")
+else:
+    print(f"Error {response.status_code}: {result}")
+```
+
+Run it:
+
+```bash
+python transcribe_url.py
+```
+
+## Code walkthrough
+
+1. **Download the audio.** `httpx.get()` fetches the audio file from the URL. The `follow_redirects=True` parameter handles HTTP redirects automatically. This is important for URLs from storage services that often redirect to a CDN. The `timeout=30.0` prevents the request from hanging on slow connections.
+
+2. **POST to `/v1/listen`.** The downloaded audio bytes are sent to the Aldea API in the request body. This is the same endpoint and format used in [Transcribe a file](/docs/integration/transcribe-file). The only difference is where the audio comes from.
+
+3. **Parse the response.** The response structure is identical to file transcription. See the [response structure in Transcribe a file](/docs/integration/transcribe-file) for full field descriptions.
+
+<Callout type="info">
+The URL must be publicly accessible. If your audio is behind authentication (for example, a private S3 bucket), generate a pre-signed URL first. Pre-signed URLs are time-limited public URLs that grant temporary access to private resources.
+</Callout>
+
+## Comparison with file transcription
+
+The approach is the same as [Transcribe a file](/docs/integration/transcribe-file): you're sending audio bytes to `POST /v1/listen`. The difference is just where the bytes come from:
+
+| Approach | Source | When to use |
+|----------|--------|-------------|
+| File | `open("audio.wav", "rb").read()` | Audio is on your local disk |
+| URL | `httpx.get(url).content` | Audio is hosted remotely |
+
+Both approaches use the same API endpoint, authentication, query parameters, and response format.
+
+## Add transcription options
+
+Pass query parameters the same way as file transcription:
+
+```python
+response = httpx.post(
+    "https://api.aldea.ai/v1/listen",
+    headers={"Authorization": f"Bearer {ALDEA_API_KEY}"},
+    params={"punctuate": "true", "diarize": "true", "smart_format": "true"},
+    content=audio_data,
+    timeout=60.0
+)
+```
+
+For the full list of available parameters, see the [Parameters reference](/docs/api-reference/parameters).
+
+## Next steps
+
+- [Transcribe a file](/docs/integration/transcribe-file) - transcribe audio from your local filesystem
+- [Real-time streaming](/docs/integration/streaming) - transcribe audio as it's being recorded or received
+- [Migrate from Deepgram](/docs/integration/migrate-from-deepgram) - already using the Deepgram SDK? Switch to Aldea with a 2-line change
 
 </Tab>
 <Tab value="Node.js">

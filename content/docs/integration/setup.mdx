@@ -1,31 +1,152 @@
 ---
-title: Setup & installation
-description: Install and configure the Deepgram SDK for use with Aldea
+title: Setup and installation
+description: Install dependencies and configure your environment to use the Aldea API
 ---
 
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
-# Setup & installation
+The Aldea API is a standard REST and WebSocket API. You call it directly using an HTTP client for pre-recorded transcription and a WebSocket client for real-time streaming. No proprietary SDK is required.
+
+This guide walks you through installing the dependencies, setting up your API key, and verifying connectivity.
+
+## Prerequisites
+
+- An Aldea API key. If you don't have one yet, follow the [Get an API key](/docs/getting-started/get-api-key) guide. Your key starts with `org_`.
+
+## Install dependencies
 
 <Tabs items={['Python', 'Node.js', 'Go', 'Rust']}>
 <Tab value="Python">
 
-Install and configure the Deepgram SDK for use with Aldea in Python.
+**Requirements:** Python 3.8 or later.
+
+Install the HTTP and WebSocket libraries:
+
+```bash
+pip install httpx websockets
+```
+
+| Package | Purpose |
+|---------|---------|
+| `httpx` | Send HTTP requests for pre-recorded transcription (`POST /v1/listen`). |
+| `websockets` | Connect to the WebSocket endpoint for real-time streaming (`wss://api.aldea.ai/v1/listen`). |
+
+If you only need pre-recorded transcription, `httpx` alone is sufficient. If you only need streaming, install `websockets` alone.
+
+## Set up your API key
+
+Store your API key in an environment variable so it isn't hardcoded in your source files:
+
+<Tabs items={['Linux / macOS', 'Windows (PowerShell)', 'Windows (cmd)']}>
+<Tab value="Linux / macOS">
+
+```bash
+export ALDEA_API_KEY="org_YOUR_API_KEY"
+```
+
+To persist it, add the line to your `~/.bashrc`, `~/.zshrc`, or equivalent.
+
+</Tab>
+<Tab value="Windows (PowerShell)">
+
+```powershell
+$env:ALDEA_API_KEY = "org_YOUR_API_KEY"
+```
+
+To persist it, use `[System.Environment]::SetEnvironmentVariable("ALDEA_API_KEY", "org_YOUR_API_KEY", "User")`.
+
+</Tab>
+<Tab value="Windows (cmd)">
+
+```cmd
+set ALDEA_API_KEY=org_YOUR_API_KEY
+```
+
+To persist it, use `setx ALDEA_API_KEY "org_YOUR_API_KEY"`.
+
+</Tab>
+</Tabs>
+
+Then read it in Python:
+
+```python
+import os
+
+ALDEA_API_KEY = os.environ["ALDEA_API_KEY"]
+```
+
+<Callout type="warn">
+Never commit API keys to version control. Use environment variables, `.env` files (with `.gitignore`), or a secrets manager.
+</Callout>
+
+## Verify the setup
+
+Run a quick test to confirm you can reach the Aldea API. This example transcribes a short public audio file:
+
+```python title="verify_setup.py"
+import os
+import httpx
+
+ALDEA_API_KEY = os.environ["ALDEA_API_KEY"]
+AUDIO_URL = "https://dpgr.am/spacewalk.wav"
+
+# Download a sample audio file
+audio = httpx.get(AUDIO_URL, follow_redirects=True).content
+
+# Send it to the Aldea API for transcription
+response = httpx.post(
+    "https://api.aldea.ai/v1/listen",
+    headers={"Authorization": f"Bearer {ALDEA_API_KEY}"},
+    content=audio,
+    timeout=60.0
+)
+
+result = response.json()
+
+if response.status_code == 200:
+    transcript = (
+        result.get("results", {})
+        .get("channels", [{}])[0]
+        .get("alternatives", [{}])[0]
+        .get("transcript", "")
+    )
+    print(transcript)
+else:
+    print(f"Error {response.status_code}: {result}")
+```
+
+Run it:
+
+```bash
+python verify_setup.py
+```
+
+If the setup is correct, you see a transcript printed to the console. If you get a `401` error, verify that your API key starts with `org_` and that the `ALDEA_API_KEY` environment variable is set.
+
+<Callout type="info">
+Already using the Deepgram SDK? Aldea is fully compatible. See [Migrate from Deepgram](/docs/integration/migrate-from-deepgram) for a 2-line configuration change.
+</Callout>
 
 </Tab>
 <Tab value="Node.js">
 
-Install and configure the Deepgram SDK for use with Aldea in Node.js.
+Install and configure your environment for the Aldea API in Node.js.
 
 </Tab>
 <Tab value="Go">
 
-Install and configure the Deepgram SDK for use with Aldea in Go.
+Install and configure your environment for the Aldea API in Go.
 
 </Tab>
 <Tab value="Rust">
 
-Configure Cargo.toml and set up the Deepgram SDK for use with Aldea in Rust.
+Install and configure your environment for the Aldea API in Rust.
 
 </Tab>
 </Tabs>
+
+## Next steps
+
+- [Transcribe a file](/docs/integration/transcribe-file) - transcribe a local audio file from disk
+- [Transcribe from URL](/docs/integration/transcribe-url) - transcribe a remote audio file by URL
+- [Real-time streaming](/docs/integration/streaming) - stream audio and receive transcripts in real time
