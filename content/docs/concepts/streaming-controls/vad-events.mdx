@@ -1,0 +1,62 @@
+---
+title: VAD events
+description: Receive notifications when speech starts by enabling Voice Activity Detection (VAD) events.
+---
+
+Voice Activity Detection (VAD) events notify your application when the API detects that someone has started speaking. You can use VAD events to build UI indicators such as "listening" animations, trigger recording, or implement push-to-talk workflows.
+
+## Why do you need Voice Activity Detection?
+
+Audio streams often contain a mix of speech, background noise, and silence. *VAD is the process of distinguishing human speech from everything else in the audio signal. The API runs VAD continuously on incoming audio and can notify your application the instant it detects a voice.
+
+This is useful because your application might need to react to the *start* of speech, not just the transcript that follows. For example:
+
+- **UI feedback**: Show a visual indicator such as a pulsing microphone so the user knows the system is hearing them.
+- **Recording triggers**: Start saving audio only when someone is actually speaking, to avoid capturing long stretches of silence.
+- **Push-to-talk**: Confirm that speech has begun after the user activates the microphone.
+
+VAD events tell you *when* speech starts. For *what* was said, use [interim results](/docs/concepts/streaming-controls/interim-results). For *when speech stops*, use [utterance detection](/docs/concepts/streaming-controls/utterance-detection).
+
+## Enable VAD events
+
+VAD events are **disabled by default**. To enable them, add `vad_events=true` to the WebSocket query string:
+
+```bash
+wss://api.aldea.ai/v1/listen?vad_events=true&encoding=mp3
+```
+
+## SpeechStarted message
+
+When the server detects voice activity, it sends a `SpeechStarted` message:
+
+```json
+{
+  "type": "SpeechStarted",
+  "channel": [0],
+  "timestamp": 0.0
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `type` | Always `"SpeechStarted"`. |
+| `channel` | Array that indicates which audio channel detected speech. |
+| `timestamp` | Time offset (in seconds) from the start of the stream when speech was detected. |
+
+## Combine VAD events with other features
+
+VAD events work well alongside other streaming controls to give you full visibility into the speech lifecycle:
+
+| Event | Indicates |
+|-------|-----------|
+| `SpeechStarted` (VAD) | The speaker began talking. |
+| `Results` with `is_final: true` | A sentence was finalized. |
+| `UtteranceEnd` | The speaker stopped talking (silence threshold reached). |
+
+When you enable VAD events, [interim results](/docs/concepts/streaming-controls/interim-results), and [utterance detection](/docs/concepts/streaming-controls/utterance-detection) together, you can track the full arc of each speaker turn - from start, through transcription, to end.
+
+## Related content
+
+- [Interim results](/docs/concepts/streaming-controls/interim-results)
+- [Utterance detection](/docs/concepts/streaming-controls/utterance-detection)
+- [WebSocket protocol](/docs/concepts/streaming-controls/websocket-protocol)

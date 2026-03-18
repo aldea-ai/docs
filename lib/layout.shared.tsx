@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
 
 /**
@@ -9,27 +10,22 @@ import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
  */
 export function baseOptions(): BaseLayoutProps {
   return {
-    githubUrl: "https://github.com",
+    githubUrl: "https://github.com/aldea-ai",
     nav: {
       title: (
-        <>
-          {/* <svg
-            width="24"
-            height="24"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-label="Hackmamba Logo"
-            className="text-green-500"
-          >
-            <path
-              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
-              fill="currentColor"
-            />
-          </svg> */}
-          Hackmamba Docs
-        </>
+        <span className="flex items-center gap-2 font-semibold">
+          <Image
+            src="/aldea-logo.jpg"
+            alt="Aldea"
+            width={24}
+            height={24}
+            className="rounded"
+          />
+          Aldea
+        </span>
       ),
+      url: "/docs",
     },
-    // Navigation tabs with internal docs links and appropriate icons
     links: [
       {
         text: "Home",
@@ -72,8 +68,9 @@ export function baseOptions(): BaseLayoutProps {
         ),
       },
       {
-        text: "Support",
-        url: "https://hackmamba.io/",
+        text: "Dashboard",
+        url: "https://platform.aldea.ai/dashboard",
+        external: true,
         icon: (
           <svg
             width="16"
@@ -83,9 +80,10 @@ export function baseOptions(): BaseLayoutProps {
             stroke="currentColor"
             strokeWidth="2"
           >
-            <path d="M9 12l2 2 4-4" />
-            <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z" />
-            <path d="M12 6v6l4 2" />
+            <rect x="3" y="3" width="7" height="9" rx="1" />
+            <rect x="14" y="3" width="7" height="5" rx="1" />
+            <rect x="14" y="12" width="7" height="9" rx="1" />
+            <rect x="3" y="16" width="7" height="5" rx="1" />
           </svg>
         ),
       },

@@ -1,0 +1,154 @@
+---
+title: WebSocket protocol
+description: Connect to the streaming API and exchange audio, control messages, and transcript results over WebSocket.
+---
+
+The Aldea streaming API uses WebSocket for bidirectional communication. Your client sends binary audio frames and JSON control messages. The server responds with JSON messages that contain transcripts, metadata, and events.
+
+## Why WebSocket?
+
+A traditional REST API follows a request-response pattern: you send a request, wait for the response, and the connection closes. This works well for batch transcription where you upload a complete audio file, but it doesn't work for real-time streaming.
+
+Streaming speech-to-text requires a persistent, two-way connection. Your application needs to send audio continuously while simultaneously receiving transcript updates. WebSocket provides this bidirectional channel over a single connection where your client pushes audio frames in one direction, while the server simultaneously responds with transcript results.
+
+## Connect to the API
+
+To get started, you connect to one of the following endpoints:
+
+| Endpoint | Accepts |
+|----------|---------|
+| `wss://api.aldea.ai/v1/listen` | Encoded audio (MP3, AAC, FLAC, WAV, OGG, WebM, Opus, M4A) and raw PCM |
+| `wss://api.aldea.ai/v1/listen/pcm` | Raw PCM only (optimized for low-latency PCM streams) |
+
+To establish a secure connection, authenticate with the `Sec-WebSocket-Protocol` header:
+
+```
+Sec-WebSocket-Protocol: token, YOUR_ALDEA_API_KEY
+```
+
+After a successful handshake, the server returns `101 Switching Protocols`.
+
+## Send client messages
+
+Your client can send two types of messages: binary audio frames and JSON control messages.
+
+**Binary audio frames**
+
+Send audio data as binary WebSocket frames. The API supports the following formats:
+
+- **Encoded audio:** MP3, AAC, FLAC, WAV, OGG, WebM, Opus, M4A (auto-detected)
+- **Raw PCM:** 16-bit signed little-endian (s16le), with a configurable sample rate through the `sample_rate` parameter
+
+There's no required chunk size. You can send audio frames as they become available such as when your microphone produces them. The server buffers and processes audio continuously.
+
+**Control messages**
+
+You send JSON control messages to manage the stream:
+
+| Message | Description |
+|---------|------------|
+| `{"type": "KeepAlive"}` | Prevents the connection from timing out during periods of silence |
+| `{"type": "Finalize"}` | Flushes the server buffer and returns any remaining results as final |
+| `{"type": "CloseStream"}` | Gracefully closes the connection after processing remaining audio |
+
+## Receive server messages
+
+The server sends the following JSON message types:
+
+**Metadata**
+
+The server sends medatata once when the connection opens. It contains session information:
+
+```json
+{
+  "type": "Metadata",
+  "request_id": "abc-123",
+  "created": "2026-03-04T12:00:00.000000Z",
+  "duration": 0.0,
+  "channels": 1,
+  "model_info": {
+    "name": "<model_id>",
+    "version": "",
+    "arch": "aldea-asr"
+  }
+}
+```
+
+**Results**
+
+The server sends transcript data continuously as audio is processed:
+
+```json
+{
+  "type": "Results",
+  "channel_index": [0],
+  "duration": 1.98,
+  "start": 0.00,
+  "is_final": false,
+  "speech_final": false,
+  "channel": {
+    "alternatives": [{
+      "transcript": "Hello world",
+      "confidence": 0.95,
+      "words": [
+        ["Hello", 0, 320],
+        ["world", 320, 640]
+      ]
+    }]
+  }
+}
+```
+
+| Field | Description |
+|-------|------------|
+| `is_final` | `true` when the transcript for this segment is stable |
+| `speech_final` | `true` when the speaker has finished an utterance |
+| `words` | Array of `[word, start_ms, end_ms]`. Timestamps are in milliseconds |
+| `confidence` | Confidence score (0–1) |
+
+**SpeechStarted**
+
+When the server detects voice activity, it sends `SpeechStarted` if [`vad_events=true`](/docs/concepts/streaming-controls/vad-events) is already configured:
+
+```json
+{
+  "type": "SpeechStarted",
+  "channel": [0],
+  "timestamp": 0.0
+}
+```
+
+**UtteranceEnd**
+
+When a silence threshold is reached, the server sends `UtteranceEnd`. It requires you to have the [`utterance_end_ms`](/docs/concepts/streaming-controls/utterance-detection) parameter and word timestamps set:
+
+```json
+{
+  "type": "UtteranceEnd",
+  "channel": [0],
+  "last_word_end": 2.5
+}
+```
+
+## Configure query parameters
+
+You can append these parameters to the WebSocket URL to configure the stream:
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `encoding` | Auto-detect | Audio format: `pcm`, `mp3`, `aac`, `flac`, `wav`, `ogg`, `webm`, `opus`, `m4a`. |
+| `sample_rate` | `16000` | Sample rate in Hz. Applies to PCM audio only. |
+| `interim_results` | `true` | Send partial transcripts while audio is streaming. |
+| `endpointing` | Server default | Sentence finalization delay in milliseconds, or `false` to disable. |
+| `utterance_end_ms` | - | Silence duration (in milliseconds) that triggers an `UtteranceEnd` event. |
+| `vad_events` | `false` | Send `SpeechStarted` events when voice activity is detected. |
+| `language` | `en` | Language code: `en`, `es`, or `auto`. |
+| `keywords` | - | Keyword boosting. This parameter is repeatable. |
+| `redact` | - | PII redaction mode: `pii`, `pci`, `numbers`, or `true`. |
+
+## Related content
+
+- [Interim results](/docs/concepts/streaming-controls/interim-results) - display partial transcripts in real time
+- [Endpointing](/docs/concepts/streaming-controls/endpointing) - control sentence finalization timing
+- [Streaming quickstart](/docs/getting-started/quickstart/streaming) - get started with your first streaming integration
+- [API reference](/docs/api-reference) - complete API documentation

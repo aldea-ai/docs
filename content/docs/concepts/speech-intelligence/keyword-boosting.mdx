@@ -1,0 +1,37 @@
+---
+title: Keyword boosting
+description: Boost recognition accuracy for specific terms with keywords parameter
+---
+
+Keyword boosting increases the likelihood that specific terms are recognized correctly in the transcript. This is important because speech to text models may carry inherent biases shaped by its training data. While the models excel at common vocabulary, they sometimes struggle with words they encountered less frequently during training. Keyword boosting closes this gap by telling the model which terms matter most in your context. 
+
+When you supply keywords, the transcription engine increases the probability weight of those terms during decoding. Rather than choosing between phonetically similar candidates based on training data frequency, the model factors in your boosted terms. This is useful for domain-specific vocabulary, product names, or proper nouns that the model might not prioritize by default.
+
+## Usage
+
+To enable keyword boosting during transcription, pass one or more `keywords` query parameters. Each keyword is specified separately:
+
+```bash
+curl -X POST "https://api.aldea.ai/v1/listen?keywords=Aldea&keywords=STT" \
+  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+  --data-binary @audio.wav
+```
+
+When transcribing real-time streams, append the same parameters to the WebSocket URL:
+
+```bash
+wss://api.aldea.ai/v1/listen?keywords=Aldea&keywords=STT&interim_results=true
+```
+
+Keyword boosting can significantly improve the quality of transcripts when working with:
+
+- **Brand and product names** that the model may not have seen frequently during training.
+- *Domain-specific terminology** such as terms used in medical, legal, or engineering contexts.
+- **Proper nouns** such as names of people, companies, or geographic locations relevant to your audio.
+- **Acronyms and abbreviations** such as "STT," "NLP," or "HIPAA" that can be confused with phonetically similar words or broken into individual letters.
+
+## Next steps
+
+- [API reference](/docs/api-reference)
+- [Pre-recorded quickstart](/docs/getting-started/quickstart/pre-recorded)
+- [Streaming quickstart](/docs/getting-started/quickstart/streaming)

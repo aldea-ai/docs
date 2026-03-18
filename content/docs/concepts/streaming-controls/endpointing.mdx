@@ -1,0 +1,49 @@
+---
+title: Endpointing
+description: Configure speech endpoint detection with endpointing parameter
+---
+
+Endpointing controls how long the server waits after detecting the last spoken word before it marks a transcript segment as final (`is_final: true`). Use this parameter to balance transcription speed against sentence completeness.
+
+## Why do you need endpointing?
+
+When speaking, it is natural to pause between words, thoughts, and sentences. A speech-to-text system needs to decide which pauses are mid-sentence breathers and which signal the end of a complete thought. This decision is called *endpointing*.
+
+Without endpointing, the system would either finalize too early (splitting `"Hello world"` into `"Hello"` and `"world"` as separate results) or wait indefinitely for more speech. The `endpointing` parameter gives you control over how quickly the API finalizes sentences during streaming.
+
+A lower value finalizes results faster but might split sentences mid-thought. A higher value waits longer and produces more complete sentences, but adds latency.
+
+## Usage
+
+To set the endpointing value, add the `endpointing` parameter in the WebSocket query string. You specify the value in milliseconds:
+
+```bash
+# Faster finalization (300ms)
+wss://api.aldea.ai/v1/listen?endpointing=300&encoding=mp3
+
+# Slower finalization (800ms), better for speakers who pause mid-sentence
+wss://api.aldea.ai/v1/listen?endpointing=800&encoding=mp3
+```
+
+To disable automatic finalization, set `endpointing` to `false` as follows:
+
+```bash
+wss://api.aldea.ai/v1/listen?endpointing=false&encoding=mp3
+```
+
+When you disable endpointing, the server finalizes results only when you send a [`Finalize` or `CloseStream`](/docs/concepts/streaming-controls/websocket-protocol) message. This is useful when your application needs full control over when transcription segments are committed. For example, a dictation app where the user explicitly presses a button to finish a sentence.
+
+## Choosing an endpointing value
+
+| Value | Use case |
+|-------|----------|
+| `100`–`300` ms | Live captions, real-time chat. Prioritize speed |
+| `300`–`500` ms | General purpose. Balanced speed and accuracy |
+| `500`–`1000` ms | Speakers who pause often. Avoid premature sentence breaks |
+| `false` | Manual control. Finalize only on explicit command |
+
+## Next steps
+
+- [Interim results](/docs/concepts/streaming-controls/interim-results)
+- [Utterance detection](/docs/concepts/streaming-controls/utterance-detection)
+- [WebSocket protocol](/docs/concepts/streaming-controls/websocket-protocol)

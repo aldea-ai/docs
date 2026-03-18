@@ -1,0 +1,51 @@
+---
+title: Async callbacks
+description: Receive transcription results via webhook with callback parameter
+---
+
+When you submit a batch-processing job that has long audio files or non-blocking workflows, Aldea can notify you when processing is complete by sending an HTTP POST request to your callback URL. This eliminates the need to continuously poll the for the status and enables event-driven architecture where your application only acts when the results are ready. 
+
+## How it works
+
+To process transcription asynchronously, use the `callback` query parameter. The Aldea API returns a `request_id`, and the results are sent to your webhook URL when transcription completes.
+
+1. Send a pre-recorded transcription request with `?callback=https://your-server.com/webhook` appended to the URL.
+2. The API returns immediately with a `request_id`:
+   ```json
+   {
+     "request_id": "77aaccd1-3b19-4000-9055-3f91009751b4"
+   }
+   ```
+3. When transcription completes, the API sends the full result to your callback URL.
+
+## Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `callback` | string | - | URL to send results to when transcription completes |
+| `callback_method` | string | `POST` | HTTP method used for the callback request |
+| `metadata` | string | - | JSON string passed through to the callback payload |
+
+## Example
+
+```bash
+curl -X POST "https://api.aldea.ai/v1/listen?callback=https://your-server.com/webhook" \
+  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+  --data-binary @long-recording.wav
+```
+
+With optional metadata:
+
+```bash
+curl -X POST "https://api.aldea.ai/v1/listen?callback=https://your-server.com/webhook&metadata=%7B%22job_id%22%3A%22123%22%7D" \
+  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+  --data-binary @long-recording.wav
+```
+
+The `metadata` value is a URL-encoded JSON string (e.g., `{"job_id":"123"}`) that is included in the callback payload, allowing you to correlate results with your internal records.
+
+## Next steps
+
+- [Transcription modes overview](/docs/concepts/transcription-modes)
+- [Pre-recorded quickstart](/docs/getting-started/quickstart/pre-recorded)
+- [API reference](/docs/api-reference)

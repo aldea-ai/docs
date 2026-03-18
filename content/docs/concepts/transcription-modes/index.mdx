@@ -1,0 +1,208 @@
+---
+title: Transcription modes
+description: Pre-recorded and streaming transcription, model selection, and supported audio formats
+---
+
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+Aldea supports two transcription modes: **pre-recorded** for files and URLs, and **real-time streaming** over WebSocket. Both modes use the same `/v1/listen` endpoint with different protocols, but are optimized for different use cases
+
+## Pre-recorded
+
+Pre-recorded or batch transcription processes a completed audio file after recording. You submit one or more audio files to Aldea, and results are returned when processing is complete. Because the full audio is available upfront, Aldea applies multi-pass analysis and higher-precision language models to produce highly accurate output. 
+
+For batch transcription, jobs are queued for processing and results delivered as a complete transcript once the job finishes. Use pre-recorded transcription mode for use cases such as:
+
+- Post-call analytics and compliance review
+- Publishing podcasts
+- Adding subtitles to media
+- Transcribing recorded legal, medical, or financial audio files
+- Processing archived audio libraries at scale. 
+
+You can send audio two ways:
+
+- **Binary audio**: raw file bytes in the request body. The format is auto-detected from binary headers.
+- **URL**: a JSON object `{"url": "https://..."}` with `Content-Type: application/json`. The API downloads and transcribes the audio.
+
+To transcript a file, send a `POST` request to `https://api.aldea.ai/v1/listen` with audio in the request body. The API processes the entire file and returns a single JSON response with the full transcript. You can also add `timestamps: true` header to include per-word timings in the response.
+
+<Tabs items={['cURL (file)', 'cURL (URL)', 'Python', 'Node.js']}>
+<Tab value="cURL (file)">
+
+```bash
+curl -X POST "https://api.aldea.ai/v1/listen" \
+  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+  -H "timestamps: true" \
+  --data-binary @audio.wav
+```
+
+</Tab>
+<Tab value="cURL (URL)">
+
+```bash
+curl -X POST "https://api.aldea.ai/v1/listen" \
+  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "timestamps: true" \
+  -d '{"url": "https://dpgr.am/spacewalk.wav"}'
+```
+
+</Tab>
+<Tab value="Python">
+
+```python
+from deepgram import DeepgramClient, DeepgramClientEnvironment
+
+config = DeepgramClientEnvironment(
+    base="https://api.aldea.ai",
+    production="wss://api.aldea.ai",
+    agent="wss://api.aldea.ai"
+)
+
+client = DeepgramClient(api_key="YOUR_ALDEA_API_KEY", environment=config)
+
+with open("audio.wav", "rb") as f:
+    response = client.listen.v1.media.transcribe_file(request=f.read())
+    print(response.results.channels[0].alternatives[0].transcript)
+```
+
+</Tab>
+<Tab value="Node.js">
+
+```javascript
+import { createClient } from "@deepgram/sdk";
+import fs from "fs";
+
+const client = createClient({
+  accessToken: "YOUR_ALDEA_API_KEY",
+  global: { url: "https://api.aldea.ai" }
+});
+
+const response = await client.listen.prerecorded.transcribeFile(
+  fs.createReadStream("audio.wav"),
+  { mimetype: "audio/wav" }
+);
+
+const result = response?.result ?? response;
+console.log(result.results.channels[0].alternatives[0].transcript);
+```
+
+</Tab>
+</Tabs>
+
+The response includes the transcript, a confidence score, and optional word-level timestamps:
+
+```json
+{
+  "metadata": {
+    "request_id": "77aaccd1-3b19-4000-9055-3f91009751b4",
+    "created": "2026-03-04T12:00:00.000000Z",
+    "duration": 6.916625,
+    "channels": 1
+  },
+  "results": {
+    "channels": [{
+      "alternatives": [{
+        "transcript": "Something, you know, it's just like...",
+        "confidence": 0.802,
+        "words": [
+          { "word": "Something,", "start": 0.04, "end": 0.36 },
+          { "word": "you", "start": 0.44, "end": 0.52 }
+        ]
+      }]
+    }]
+  }
+}
+```
+
+### Alternative endpoints
+
+The following endpoints are aliases and function identically to `/v1/listen`:
+
+- `/v1/listen/media`
+- `/v1/listen/media/transcribe`
+- `/v1/listen/media/transcribe_file`
+
+## Real-time streaming
+
+Real-time streaming transcription processes an audio as it is captured and returns results continuously. Audio is streamed to Aldea over a persistent WebSocket connection and transcript segments returned incrementally  as speech is detected. 
+
+Aldea emits two types of results during real-time streaming transcription:
+
+- Interim results: This is partial, low-latency hypotheses that update as more audio context becomes available. Interim results are useful when displaying live captions but they can change as the utterances progresses.
+- Final results: The stable transcript segment returned once Aldea determines that an utterance is complete. These final results do not change after delivery. 
+
+Real-time streaming transcription is ideal for the following use cases:
+
+- Live captioning and accessibility overlays
+- Voice driven user interfaces and assistants
+- Real-time agent assistants in contact centers
+- Transcribing meetings where participants need immediate visibility.
+
+To transcribe audio in real-time, open a WebSocket connection to `wss://api.aldea.ai/v1/listen`. You then send binary audio frames and receive JSON transcript messages as the speaker talks.
+
+Aldea exposes two WebSocket endpoints:
+
+| Endpoint | Accepts |
+|----------|---------|
+| `/v1/listen` | Encoded audio (MP3, AAC, FLAC, WAV, OGG, WebM, Opus, M4A) and raw PCM |
+| `/v1/listen/pcm` | Raw PCM only (optimized) |
+
+Authenticate by passing your API key in the WebSocket protocol header:
+
+```
+Sec-WebSocket-Protocol: token, YOUR_ALDEA_API_KEY
+```
+
+<Tabs items={['Node.js']}>
+<Tab value="Node.js">
+
+```javascript
+import { createClient, LiveTranscriptionEvents } from "@deepgram/sdk";
+
+const client = createClient({
+  key: "YOUR_ALDEA_API_KEY",
+  global: { url: "https://api.aldea.ai" }
+});
+
+const connection = client.listen.live({
+  encoding: "mp3",
+  interim_results: true
+});
+
+connection.on(LiveTranscriptionEvents.Transcript, (data) => {
+  const transcript = data?.channel?.alternatives?.[0]?.transcript;
+  if (transcript) console.log(transcript);
+});
+
+connection.on(LiveTranscriptionEvents.Open, async () => {
+  const stream = await fetch("http://icecast.omroep.nl/radio1-bb-mp3");
+  const reader = stream.body.getReader();
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    connection.send(value);
+  }
+});
+```
+
+</Tab>
+</Tabs>
+
+Streaming results include `is_final` and `speech_final` fields to distinguish interim from final transcripts. See [streaming controls](/docs/concepts/streaming-controls) for details on interim results, endpointing, and VAD events.
+
+## Supported audio formats
+
+| Format | Type |
+|--------|------|
+| MP3, AAC, FLAC, WAV, OGG, WebM, Opus, M4A | Encoded (auto-detected from binary headers) |
+| 16-bit signed little-endian (s16le) | Raw PCM (configurable sample rate via `sample_rate` parameter, default 16 kHz) |
+
+Multichannel audio is automatically converted to mono.
+
+## Next steps
+
+- [Pre-recorded quickstart](/docs/getting-started/quickstart/pre-recorded)
+- [Streaming quickstart](/docs/getting-started/quickstart/streaming)
+- [Async callbacks](/docs/concepts/transcription-modes/async-callbacks) for non-blocking transcription of long audio files
+- [API reference](/docs/api-reference)

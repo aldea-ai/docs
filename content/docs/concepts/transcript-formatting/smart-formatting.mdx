@@ -1,0 +1,90 @@
+---
+title: Smart formatting
+description: Automatic formatting, numerals, and measurements
+---
+
+Raw speech-to-text output is a continuous stream of words without punctuation, number formatting, or structure. Output in this form works for a search index, but it's unusable real-world applications that require well-formatted text such as customer-facing transcripts, meeting notes, compliance records, or subtitles.
+
+Aldea's smart formatting features transform raw transcripts into polished, human-readable output. You can apply broad formatting with a single parameter or use individual controls for numerals and measurements when you need precision.
+
+## Why formatting matters
+
+Consider the following raw transcript:
+
+***"the patient weighs seventy two kilograms and the appointment is on march sixth twenty twenty six at two thirty pm the copay is twenty five dollars"***
+
+Compare that with it's formatted version:
+
+***"The patient weighs 72 kg, and the appointment is on March 6th, 2026 at 2:30 PM. The copay is $25."***
+
+The content is identical, but the formatted version is immediately scannable and ready for downstream use. You can display the formatted version in a UI, feed it into an NLP pipeline, or archive it for compliance. Without formatting, your application has to handle normalization itself, which adds complexity and introduces inconsistency.
+
+## How to use smart formatting
+
+Smart formatting applies punctuation, capitalization, and number formatting in a single parameter. It combines the behavior of numerals, measurements, and basic punctuation into one setting. It is ideal when you want clean output without fine-tuning individual controls.
+
+To enable smart formatting, add `smart_format=true` as a query parameter:
+
+```bash
+curl -X POST "https://api.aldea.ai/v1/listen?smart_format=true" \
+  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+  --data-binary @audio.wav
+```
+
+The following examples show how Aldea handles raw transcript with smart formatting enabled:
+
+| Before (raw) | After (smart formatted) |
+|---|---|
+| `one hundred twenty three dollars` | `$123` |
+| `march sixth twenty twenty six` | `March 6th, 2026` |
+| `hello how are you doing today` | `Hello, how are you doing today?` |
+| `my phone number is five five five one two three four` | `My phone number is 555-1234.` |
+
+Smart formatting infers context to make decisions. It doesn't blindly convert every number. It recognizes that "five five five one two three four" is a phone number pattern, not a math expression. Similarly, it identifies sentence boundaries and applies punctuation based on speech pauses and intonation cues from the audio, not just text heuristics.
+
+This contextual awareness means smart formatting handles the majority of use cases well. For applications such as meeting transcription, call center logs, podcast subtitles, ensure you set `smart_format=true`.
+
+## Individual formatting controls
+
+When you need more granular behavior, use the individual formatting parameters (`numerals`, `measurements`, [paragraphs](/docs/concepts/transcript-formatting/paragraphs)) to get control over specific transformations.
+
+### Numerals
+
+The `numerals` parameter converts spoken numbers into digit form without affecting punctuation or capitalization. Add `numerals=true` as a query parameter when you need numeric normalization but want to handle other formatting separately. For example, when your application applies its own punctuation rules.
+
+```bash
+curl -X POST "https://api.aldea.ai/v1/listen?numerals=true" \
+  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+  --data-binary @audio.wav
+```
+
+Numeral conversion is particularly valuable in data extraction pipelines. If you're pulling quantities, IDs, or dates from transcripts for structured storage, digit form is far easier to parse programmatically than spelled-out numbers.
+
+| Spoken | Without `numerals` | With `numerals=true` |
+|---|---|---|
+| "twenty three" | twenty three | 23 |
+| "one hundred and fifty" | one hundred and fifty | 150 |
+| "two thousand twenty six" | two thousand twenty six | 2026 |
+
+### Measurements
+
+The `measurements` parameter converts spoken measurement expressions into standard notation. When you add `measurements=true` as a query parameter, Aldea pairs unit names with their symbols and formats values consistently.
+
+```bash
+curl -X POST "https://api.aldea.ai/v1/listen?measurements=true" \
+  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+  --data-binary @audio.wav
+```
+| Spoken | Without `measurements` | With `measurements=true` |
+|---|---|---|
+| "five kilograms" | five kilograms | 5 kg |
+| "ten degrees celsius" | ten degrees celsius | 10°C |
+| "three point five meters" | three point five meters | 3.5 m |
+
+Measurement formatting is useful in domains where unit notation is key, such as healthcare, logistics, engineering, and scientific transcription+. 
+
+## Next steps
+
+- [Paragraphs](/docs/concepts/transcript-formatting/paragraphs)
+- [Filler words](/docs/concepts/transcript-formatting/filler-words)
+- [API reference](/docs/api-reference)

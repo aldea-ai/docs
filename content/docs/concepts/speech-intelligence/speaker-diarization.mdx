@@ -1,0 +1,66 @@
+---
+title: Speaker diarization
+description: Identify and label individual speakers with diarize=true
+---
+
+Speaker diarization is the process of identifying "who spoke when". It breaks down an audio stream into time-labelled segments, attributing each to a distinct speaker. Diarization answers which part of the audio belongs to which speaker without necessarily knowing their real identities. It's helpful when working with meeting transcripts, call center recordings, and podcast transcription to produce labeled output like:
+
+```json
+Speaker 1 [0.00 - 0.08]: "Welcome to our weekly meeting..."
+Speaker 2 [0.09 - 0.36]: "Thank you, I'll go first with my updates..."
+```
+
+## Usage
+
+To enable diarization in your transcript, add `diarize=true` as a query parameter to a pre-recorded transcription request:
+
+```bash
+curl -X POST "https://api.aldea.ai/v1/listen?diarize=true" \
+  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+  -H "timestamps: true" \
+  --data-binary @interview.wav
+```
+
+You can combine it with other parameters:
+
+```bash
+curl -X POST "https://api.aldea.ai/v1/listen?language=es&diarize=true&smart_format=true" \
+  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+  -H "timestamps: true" \
+  --data-binary @interview.mp3
+```
+
+## Response
+
+When diarization is enabled, each word object in the response includes a `speaker` field with an integer identifier:
+
+```json
+{
+  "results": {
+    "channels": [{
+      "alternatives": [{
+        "transcript": "How are you doing today? I'm doing great, thanks.",
+        "confidence": 0.88,
+        "words": [
+          { "word": "How", "start": 0.08, "end": 0.24, "speaker": 0 },
+          { "word": "are", "start": 0.24, "end": 0.36, "speaker": 0 },
+          { "word": "you", "start": 0.36, "end": 0.48, "speaker": 0 },
+          { "word": "doing", "start": 0.48, "end": 0.72, "speaker": 0 },
+          { "word": "today?", "start": 0.72, "end": 1.04, "speaker": 0 },
+          { "word": "I'm", "start": 1.28, "end": 1.44, "speaker": 1 },
+          { "word": "doing", "start": 1.44, "end": 1.68, "speaker": 1 },
+          { "word": "great,", "start": 1.68, "end": 1.92, "speaker": 1 },
+          { "word": "thanks.", "start": 1.92, "end": 2.16, "speaker": 1 }
+        ]
+      }]
+    }]
+  }
+}
+```
+
+Speaker indices start at `0` and are assigned in the order speakers are detected. Word timestamps are required for diarization to work.
+
+## Next steps
+
+- [API reference](/docs/api-reference)
+- [Pre-recorded quickstart](/docs/getting-started/quickstart/pre-recorded)

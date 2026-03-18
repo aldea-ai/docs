@@ -1,0 +1,75 @@
+---
+title: PII redaction
+description: Automatically remove personally identifiable information from transcripts with the redact parameter.
+---
+
+PII redaction automatically removes personally identifiable information (PII) from transcripts before the results reach your application. Sensitive data is replaced in both the transcript text and the word-level output, so your application never sees the original values.
+
+## Why pII redaction matters
+
+People say sensitive things during natural conversations. Fro example, in a customer support call, a caller might read out their credit card number. In a medical consultation, a patient might state their Social Security number or home address. In a legal deposition, witnesses might name individuals who should remain anonymous.
+
+Unlike typed input where you can mask a password field or validate a form, spoken language is unstructured. Sensitive data can appear anywhere in a sentence, without warning. PII redaction solves this by scanning the transcript as it's produced and removing or masking sensitive content before it reaches your application, logs, or storage.
+
+This is especially important for:
+
+- **Regulatory compliance:** Regulations like HIPAA, PCI DSS, and GDPR require that sensitive data is handled carefully. Redacting PII at the transcription layer reduces the scope of data your application needs to protect.
+- **Data minimization:** The less sensitive data you store, the lower your risk. If your application doesn't need Social Security numbers, there's no reason to keep them in your transcripts.
+- **Enforcing protection:** Even if your application has its own redaction logic, applying redaction at the API level adds an additional layer of protection.
+
+## Enable PII redaction
+
+Add one or more `redact` query parameters to your request. PII redaction works with both streaming (WebSocket) and pre-recorded (REST) transcription.
+
+```bash
+# Redact personal information
+wss://api.aldea.ai/v1/listen?redact=pii&encoding=mp3
+
+# Redact payment card data
+wss://api.aldea.ai/v1/listen?redact=pci&encoding=mp3
+
+# Combine multiple redaction types
+wss://api.aldea.ai/v1/listen?redact=pii&redact=pci&encoding=mp3
+
+# Redact all supported types
+wss://api.aldea.ai/v1/listen?redact=true&encoding=mp3
+```
+
+## Redaction types
+
+The following table summarizes values you can redact during transcription:
+
+| Value | What it redacts |
+|-------|----------------|
+| `pii` | Person names, email addresses, phone numbers, physical addresses, Social Security numbers |
+| `pci` | Credit card numbers, bank account numbers |
+| `numbers` | Dates, phone numbers, Social Security numbers, credit card numbers |
+| `true` | All PII types combined |
+
+The `redact` parameter is repeatable in that you can combine multiple types in a single request. For example, `?redact=pii&redact=pci`).
+
+## Redaction mode
+
+
+## Control how redacted content appears
+
+Use the `redact_mode` parameter to choose how redacted content is represented in the transcript:
+
+| Mode | Behavior | Example output |
+|------|----------|----------------|
+| `mask` | Replaces characters with asterisks. | `My SSN is ***-**-****` |
+| `redact` | Removes the content entirely. | `My SSN is` |
+| `replace` | Substitutes with a descriptive type label. | `My SSN is [SSN]` |
+
+```bash
+# Use type labels instead of asterisks
+wss://api.aldea.ai/v1/listen?redact=pii&redact_mode=replace&encoding=mp3
+```
+
+When applying redaction, choose the mode that best fits your use case. `replace` is ideal for transcripts that humans will read, because the labels make it clear that something was redacted and what type of data it was. `mask` is useful when you need to preserve the structure of the original text such as showing that a phone number was 10 digits. `redact` is the most aggressive option and is appropriate when you don't want any trace of the sensitive data.
+
+## Related content
+
+- [Compliance](/docs/concepts/privacy-compliance/compliance)
+- [Streaming quickstart](/docs/getting-started/quickstart/streaming)
+- [API reference](/docs/api-reference)

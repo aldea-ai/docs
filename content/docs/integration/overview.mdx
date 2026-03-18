@@ -1,0 +1,48 @@
+---
+title: Integration overview
+description: Choose an integration approach for the Aldea Speech-to-Text API
+---
+
+# Integration overview
+
+Aldea is a standard REST and WebSocket API. You call it directly with any HTTP client without requiring any proprietary SDK. If you're migrating from Deepgram, you can also reuse Deepgram SDKs by pointing them at Aldea.
+
+## Choose your approach
+
+Use this decision map to pick the right integration path:
+
+![Integration decision flowchart](/images/integration-decision-flowchart.svg)
+
+## Endpoints and protocols
+
+The Aldea API provides two transcription modes, each with its own protocol and use case, as shown:
+
+| | Pre-recorded | Streaming |
+|---|---|---|
+| **Protocol** | HTTPS (REST) | WebSocket |
+| **Endpoint** | `POST https://api.aldea.ai/v1/listen` | `wss://api.aldea.ai/v1/listen` |
+| **Auth** | `Authorization: Bearer org_...` | `Authorization: Bearer org_...` |
+| **Input** | Audio bytes in request body | Binary audio frames over WebSocket |
+| **Output** | Single JSON response with full transcript | Stream of JSON messages (interim + final) |
+| **Use case** | Files, URLs, batch processing | Live audio, real-time captioning, voice assistants |
+
+## Supported platforms
+
+Aldea supports multiple platforms and works with any language that has an HTTP and WebSocket client.
+
+| Platform | REST | WebSocket |
+|----------|------|-----------|
+| **Python** | `httpx` | `websockets` |
+| **Node.js** | `fetch` (built-in) | `ws` |
+| **Go** | `net/http` | `nhooyr.io/websocket` |
+| **Rust** | `reqwest` | `tokio-tungstenite` |
+| **Swift (iOS)** | `URLSession` | `URLSessionWebSocketTask` |
+| **Kotlin (Android)** | OkHttp | OkHttp WebSocket |
+
+## Next steps
+
+- [Setup & installation](/docs/integration/setup) - install dependencies and configure your API key
+- [Transcribe a file](/docs/integration/transcribe-file) - send a local audio file for transcription
+- [Transcribe from URL](/docs/integration/transcribe-url) - transcribe audio hosted at a remote URL
+- [Real-time streaming](/docs/integration/streaming) - stream audio and receive transcripts in real time
+- [Migrate from Deepgram](/docs/integration/migrate-from-deepgram) - switch from Deepgram with a 2-line code change
