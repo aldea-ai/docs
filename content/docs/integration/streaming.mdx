@@ -5,7 +5,7 @@ description: Stream audio for real-time transcription using the Aldea API
 
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
-With streaming transcription, you receive results as audio is being spoken. You open a WebSocket connection to the Aldea API, send binary audio frames, and receive JSON transcript messages back in real time. Use streaming for live conversations, voice assistants, call center monitoring, live captioning, and any scenario where waiting for a full recording is not practical.
+With real-time streaming transcription, you receive results as audio is being spoken. You open a WebSocket connection to the Aldea API, send binary audio frames, and receive JSON transcript messages back in real time. This is useful for streaming for live conversations, voice assistants, call center monitoring, live captioning, and any scenario where waiting for a full recording is not practical.
 
 The WebSocket endpoint is `wss://api.aldea.ai/v1/listen`. You specify the audio encoding and sample rate as query parameters, authenticate with a `Bearer` token in the headers, and start sending audio. To learn how streaming differs from pre-recorded transcription, see [Transcription modes](/docs/concepts/transcription-modes).
 
@@ -79,10 +79,6 @@ To stream audio in real time, you connect to the WebSocket, send audio frames, r
 
 4. **Close the stream.** You send `{"type": "CloseStream"}` to tell the server that no more audio is coming. The server finishes processing any remaining audio, sends final results, and closes the connection. `asyncio.gather()` runs both coroutines concurrently and keeps the connection open until both complete.
 
-<Callout type="warn">
-The `encoding` and `sample_rate` parameters must match your audio format. If they do not match, the API attempts to decode the audio incorrectly and you get garbled or empty transcripts. Common combinations: `linear16` at `16000` Hz for WAV, `mp3` for MP3 files, `opus` for Opus-encoded audio.
-</Callout>
-
 ## Stream from a live source
 
 To stream from a live audio source instead of a file, replace the `send_audio` function. In the following example, you stream from an internet radio station using `httpx`:
@@ -128,8 +124,6 @@ asyncio.run(stream_live())
 ```
 
 The only differences from the file example are the audio source (`httpx.stream` instead of `open`) and the encoding parameter (`mp3` instead of `linear16`).
-
-For details on streaming message types, response fields, and query parameters, see [Streaming controls](/docs/concepts/streaming-controls) and the [Parameters reference](/docs/api-reference/parameters).
 
 </Tab>
 <Tab value="Node.js" id="node">
@@ -208,10 +202,6 @@ To stream audio in real time, you connect to the WebSocket, send audio frames, r
 
 4. **Close the stream.** You send `{"type": "CloseStream"}` to tell the server that no more audio is coming. The server finishes processing any remaining audio, sends final results, and closes the connection.
 
-<Callout type="warn">
-The `encoding` and `sample_rate` parameters must match your audio format. If they do not match, the API attempts to decode the audio incorrectly and you get garbled or empty transcripts. Common combinations: `linear16` at `16000` Hz for WAV, `mp3` for MP3 files, `opus` for Opus-encoded audio.
-</Callout>
-
 ## Stream from a live source
 
 To stream from a live audio source instead of a file, replace the file read logic. In the following example, you stream from an internet radio station:
@@ -256,8 +246,6 @@ ws.on("error", (err) => {
 ```
 
 The only differences from the file example are the audio source (`fetch` stream instead of `createReadStream`) and the encoding parameter (`mp3` instead of `linear16`).
-
-For details on streaming message types, response fields, and query parameters, see [Streaming controls](/docs/concepts/streaming-controls) and the [Parameters reference](/docs/api-reference/parameters).
 
 </Tab>
 <Tab value="Go" id="go">
@@ -360,10 +348,6 @@ To stream audio in real time, you connect to the WebSocket, send audio frames, r
 
 4. **Close the stream.** You send `{"type":"CloseStream"}` to tell the server that no more audio is coming. The server finishes processing, sends final results, and closes the connection.
 
-<Callout type="warn">
-The `encoding` and `sample_rate` parameters must match your audio format. If they do not match, the API attempts to decode the audio incorrectly and you get garbled or empty transcripts. Common combinations: `linear16` at `16000` Hz for WAV, `mp3` for MP3 files, `opus` for Opus-encoded audio.
-</Callout>
-
 ## Stream from a live source
 
 To stream from a live audio source instead of a file, replace the file read with an HTTP stream. In the following example, you stream from an internet radio station:
@@ -442,8 +426,6 @@ func main() {
 ```
 
 The only differences from the file example are the audio source (`http.Get` stream instead of `os.ReadFile`) and the encoding parameter (`mp3` instead of `linear16`).
-
-For details on streaming message types, response fields, and query parameters, see [Streaming controls](/docs/concepts/streaming-controls) and the [Parameters reference](/docs/api-reference/parameters).
 
 </Tab>
 <Tab value="Rust" id="rust">
@@ -567,10 +549,6 @@ To stream audio in real time, you connect to the WebSocket, send audio frames, r
 
 4. **Close the stream.** You send `{"type":"CloseStream"}` to tell the server that no more audio is coming. The server finishes processing, sends final results, and closes the connection.
 
-<Callout type="warn">
-The `encoding` and `sample_rate` parameters must match your audio format. If they do not match, the API attempts to decode the audio incorrectly and you get garbled or empty transcripts. Common combinations: `linear16` at `16000` Hz for WAV, `mp3` for MP3 files, `opus` for Opus-encoded audio.
-</Callout>
-
 ## Stream from a live source
 
 To stream from a live audio source instead of a file, replace the file read with an HTTP stream. In the following example, you stream from an internet radio station:
@@ -663,10 +641,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 The only differences from the file example are the audio source (`reqwest::get` stream instead of `tokio::fs::read`) and the encoding parameter (`mp3` instead of `linear16`).
 
-For details on streaming message types, response fields, and query parameters, see [Streaming controls](/docs/concepts/streaming-controls) and the [Parameters reference](/docs/api-reference/parameters).
-
 </Tab>
 </Tabs>
+
+<Callout type="warn">
+The `encoding` and `sample_rate` parameters must match your audio format. If they do not match, the API attempts to decode the audio incorrectly and you get garbled or empty transcripts. Common combinations: `linear16` at `16000` Hz for WAV, `mp3` for MP3 files, `opus` for Opus-encoded audio.
+</Callout>
+
+For details on streaming message types, response fields, and query parameters, see [Streaming controls](/docs/concepts/streaming-controls) and the [Parameters reference](/docs/api-reference/parameters).
 
 ## Next steps
 

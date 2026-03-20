@@ -69,45 +69,6 @@ To transcribe a file, you read the audio, send it to the API, and extract the tr
 
 3. **Parse the response.** The transcript sits inside a nested JSON structure: `results` → `channels` → `alternatives`. The chained `.get()` calls navigate this safely, returning empty defaults if any key is missing. This avoids `KeyError` exceptions if the response structure is unexpected.
 
-## Response structure
-
-The API returns a JSON response. The key fields are:
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `results.channels` | array | One entry per audio channel. Mono audio has one channel. |
-| `channels[].alternatives` | array | Ranked transcript alternatives. The first alternative (`[0]`) has the highest confidence. |
-| `alternatives[].transcript` | string | The full transcript text for this alternative. |
-| `alternatives[].confidence` | float | Confidence score from 0.0 to 1.0. |
-| `alternatives[].words` | array | Per-word details including `word`, `start`, `end`, and `confidence`. |
-
-Example response:
-
-```json
-{
-  "results": {
-    "channels": [
-      {
-        "alternatives": [
-          {
-            "transcript": "Houston we've had a problem",
-            "confidence": 0.98,
-            "words": [
-              { "word": "houston", "start": 0.08, "end": 0.56, "confidence": 0.99 },
-              { "word": "we've", "start": 0.56, "end": 0.72, "confidence": 0.97 }
-            ]
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-You can customize transcriptions with query parameters for [smart formatting](/docs/concepts/transcript-formatting/smart-formatting), [speaker diarization](/docs/concepts/speech-intelligence/speaker-diarization), [language detection](/docs/concepts/speech-intelligence/language-detection), and more. See the [Parameters reference](/docs/api-reference/parameters) for the full list.
-
-If the request fails, the API returns an HTTP error status with a description. See [Error codes](/docs/api-reference/error-codes) for the full list and troubleshooting guidance.
-
 </Tab>
 <Tab value="Node.js" id="node">
 
@@ -157,45 +118,6 @@ To transcribe a file, you read the audio, send it to the API, and extract the tr
 2. **POST to `/v1/listen`.** `fetch()` sends the audio bytes as the request body to the Aldea API. The `Authorization` header authenticates the request with your API key using the `Bearer` scheme.
 
 3. **Parse the response.** The transcript sits inside a nested JSON structure: `results` → `channels` → `alternatives`. Optional chaining (`?.`) navigates this safely, returning `undefined` if any key is missing. The `?? ""` fallback ensures you always get a string.
-
-## Response structure
-
-The API returns a JSON response. The key fields are:
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `results.channels` | array | One entry per audio channel. Mono audio has one channel. |
-| `channels[].alternatives` | array | Ranked transcript alternatives. The first alternative (`[0]`) has the highest confidence. |
-| `alternatives[].transcript` | string | The full transcript text for this alternative. |
-| `alternatives[].confidence` | float | Confidence score from 0.0 to 1.0. |
-| `alternatives[].words` | array | Per-word details including `word`, `start`, `end`, and `confidence`. |
-
-Example response:
-
-```json
-{
-  "results": {
-    "channels": [
-      {
-        "alternatives": [
-          {
-            "transcript": "Houston we've had a problem",
-            "confidence": 0.98,
-            "words": [
-              { "word": "houston", "start": 0.08, "end": 0.56, "confidence": 0.99 },
-              { "word": "we've", "start": 0.56, "end": 0.72, "confidence": 0.97 }
-            ]
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-You can customize transcriptions with query parameters for [smart formatting](/docs/concepts/transcript-formatting/smart-formatting), [speaker diarization](/docs/concepts/speech-intelligence/speaker-diarization), [language detection](/docs/concepts/speech-intelligence/language-detection), and more. See the [Parameters reference](/docs/api-reference/parameters) for the full list.
-
-If the request fails, the API returns an HTTP error status with a description. See [Error codes](/docs/api-reference/error-codes) for the full list and troubleshooting guidance.
 
 </Tab>
 <Tab value="Go" id="go">
@@ -279,45 +201,6 @@ To transcribe a file, you read the audio, send it to the API, and extract the tr
 
 3. **Parse the response.** You read the response body with `io.ReadAll` and unmarshal it into a struct that mirrors the JSON structure. Go's typed struct fields give you compile-time safety when you access `Results.Channels[0].Alternatives[0].Transcript`.
 
-## Response structure
-
-The API returns a JSON response. The key fields are:
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `results.channels` | array | One entry per audio channel. Mono audio has one channel. |
-| `channels[].alternatives` | array | Ranked transcript alternatives. The first alternative (`[0]`) has the highest confidence. |
-| `alternatives[].transcript` | string | The full transcript text for this alternative. |
-| `alternatives[].confidence` | float | Confidence score from 0.0 to 1.0. |
-| `alternatives[].words` | array | Per-word details including `word`, `start`, `end`, and `confidence`. |
-
-Example response:
-
-```json
-{
-  "results": {
-    "channels": [
-      {
-        "alternatives": [
-          {
-            "transcript": "Houston we've had a problem",
-            "confidence": 0.98,
-            "words": [
-              { "word": "houston", "start": 0.08, "end": 0.56, "confidence": 0.99 },
-              { "word": "we've", "start": 0.56, "end": 0.72, "confidence": 0.97 }
-            ]
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-You can customize transcriptions with query parameters for [smart formatting](/docs/concepts/transcript-formatting/smart-formatting), [speaker diarization](/docs/concepts/speech-intelligence/speaker-diarization), [language detection](/docs/concepts/speech-intelligence/language-detection), and more. See the [Parameters reference](/docs/api-reference/parameters) for the full list.
-
-If the request fails, the API returns an HTTP error status with a description. See [Error codes](/docs/api-reference/error-codes) for the full list and troubleshooting guidance.
-
 </Tab>
 <Tab value="Rust" id="rust">
 
@@ -384,6 +267,9 @@ To transcribe a file, you read the audio, send it to the API, and extract the tr
 
 3. **Parse the response.** You deserialize the response body into a `serde_json::Value` and index it to extract the transcript. The `as_str().unwrap_or("")` chain handles the case where a field is missing.
 
+</Tab>
+</Tabs>
+
 ## Response structure
 
 The API returns a JSON response. The key fields are:
@@ -422,9 +308,6 @@ Example response:
 You can customize transcriptions with query parameters for [smart formatting](/docs/concepts/transcript-formatting/smart-formatting), [speaker diarization](/docs/concepts/speech-intelligence/speaker-diarization), [language detection](/docs/concepts/speech-intelligence/language-detection), and more. See the [Parameters reference](/docs/api-reference/parameters) for the full list.
 
 If the request fails, the API returns an HTTP error status with a description. See [Error codes](/docs/api-reference/error-codes) for the full list and troubleshooting guidance.
-
-</Tab>
-</Tabs>
 
 ## Next steps
 

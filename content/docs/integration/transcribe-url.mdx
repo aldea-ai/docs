@@ -74,20 +74,12 @@ To transcribe from a URL, you download the audio, send it to the API, and extrac
 
 3. **Parse the response.** The response structure is the same as file transcription. For full field descriptions, see the [response structure in Transcribe a file](/docs/integration/transcribe-file).
 
-<Callout type="info">
-The URL must be publicly accessible. If your audio is behind authentication (for example, a private S3 bucket), generate a pre-signed URL first. A pre-signed URL is a time-limited public URL that grants temporary access to a private resource.
-</Callout>
-
 The approach is the same as [Transcribe a file](/docs/integration/transcribe-file): you're sending audio bytes to `POST /v1/listen`. The difference is just where the bytes come from:
 
 | Approach | Source | When to use |
 |----------|--------|-------------|
 | File | `open("audio.wav", "rb").read()` | Audio is on your local disk |
 | URL | `httpx.get(url).content` | Audio is hosted remotely |
-
-Both approaches use the same API endpoint, authentication, query parameters, and response format.
-
-You can customize transcriptions with query parameters for [smart formatting](/docs/concepts/transcript-formatting/smart-formatting), [speaker diarization](/docs/concepts/speech-intelligence/speaker-diarization), [language detection](/docs/concepts/speech-intelligence/language-detection), and more. See the [Parameters reference](/docs/api-reference/parameters) for the full list.
 
 </Tab>
 <Tab value="Node.js" id="node">
@@ -145,20 +137,12 @@ To transcribe from a URL, you download the audio, send it to the API, and extrac
 
 3. **Parse the response.** The response structure is the same as file transcription. For full field descriptions, see the [response structure in Transcribe a file](/docs/integration/transcribe-file).
 
-<Callout type="info">
-The URL must be publicly accessible. If your audio is behind authentication (for example, a private S3 bucket), generate a pre-signed URL first. A pre-signed URL is a time-limited public URL that grants temporary access to a private resource.
-</Callout>
-
 The approach is the same as [Transcribe a file](/docs/integration/transcribe-file): you're sending audio bytes to `POST /v1/listen`. The difference is just where the bytes come from:
 
 | Approach | Source | When to use |
 |----------|--------|-------------|
 | File | `readFileSync("audio.wav")` | Audio is on your local disk |
 | URL | `fetch(url).arrayBuffer()` | Audio is hosted remotely |
-
-Both approaches use the same API endpoint, authentication, query parameters, and response format.
-
-You can customize transcriptions with query parameters for [smart formatting](/docs/concepts/transcript-formatting/smart-formatting), [speaker diarization](/docs/concepts/speech-intelligence/speaker-diarization), [language detection](/docs/concepts/speech-intelligence/language-detection), and more. See the [Parameters reference](/docs/api-reference/parameters) for the full list.
 
 </Tab>
 <Tab value="Go" id="go">
@@ -247,20 +231,12 @@ To transcribe from a URL, you download the audio, send it to the API, and extrac
 
 3. **Parse the response.** The response structure is the same as file transcription. For full field descriptions, see the [response structure in Transcribe a file](/docs/integration/transcribe-file).
 
-<Callout type="info">
-The URL must be publicly accessible. If your audio is behind authentication (for example, a private S3 bucket), generate a pre-signed URL first. A pre-signed URL is a time-limited public URL that grants temporary access to a private resource.
-</Callout>
-
 The approach is the same as [Transcribe a file](/docs/integration/transcribe-file): you're sending audio bytes to `POST /v1/listen`. The difference is just where the bytes come from:
 
 | Approach | Source | When to use |
 |----------|--------|-------------|
 | File | `os.ReadFile("audio.wav")` | Audio is on your local disk |
 | URL | `http.Get(url)` + `io.ReadAll` | Audio is hosted remotely |
-
-Both approaches use the same API endpoint, authentication, query parameters, and response format.
-
-You can customize transcriptions with query parameters for [smart formatting](/docs/concepts/transcript-formatting/smart-formatting), [speaker diarization](/docs/concepts/speech-intelligence/speaker-diarization), [language detection](/docs/concepts/speech-intelligence/language-detection), and more. See the [Parameters reference](/docs/api-reference/parameters) for the full list.
 
 </Tab>
 <Tab value="Rust" id="rust">
@@ -331,10 +307,6 @@ To transcribe from a URL, you download the audio, send it to the API, and extrac
 
 3. **Parse the response.** The response structure is the same as file transcription. For full field descriptions, see the [response structure in Transcribe a file](/docs/integration/transcribe-file).
 
-<Callout type="info">
-The URL must be publicly accessible. If your audio is behind authentication (for example, a private S3 bucket), generate a pre-signed URL first. A pre-signed URL is a time-limited public URL that grants temporary access to a private resource.
-</Callout>
-
 The approach is the same as [Transcribe a file](/docs/integration/transcribe-file): you're sending audio bytes to `POST /v1/listen`. The difference is just where the bytes come from:
 
 | Approach | Source | When to use |
@@ -342,12 +314,14 @@ The approach is the same as [Transcribe a file](/docs/integration/transcribe-fil
 | File | `tokio::fs::read("audio.wav")` | Audio is on your local disk |
 | URL | `reqwest::get(url).await?.bytes()` | Audio is hosted remotely |
 
-Both approaches use the same API endpoint, authentication, query parameters, and response format.
-
-You can customize transcriptions with query parameters for [smart formatting](/docs/concepts/transcript-formatting/smart-formatting), [speaker diarization](/docs/concepts/speech-intelligence/speaker-diarization), [language detection](/docs/concepts/speech-intelligence/language-detection), and more. See the [Parameters reference](/docs/api-reference/parameters) for the full list.
-
 </Tab>
 </Tabs>
+
+<Callout type="info">
+The URL must be publicly accessible. If your audio is behind authentication (for example, a private S3 bucket), generate a pre-signed URL first. A pre-signed URL is a time-limited public URL that grants temporary access to a private resource.
+</Callout>
+
+You can customize transcriptions with query parameters for [smart formatting](/docs/concepts/transcript-formatting/smart-formatting), [speaker diarization](/docs/concepts/speech-intelligence/speaker-diarization), [language detection](/docs/concepts/speech-intelligence/language-detection), and more. See the [Parameters reference](/docs/api-reference/parameters) for the full list.
 
 ## Next steps
 
