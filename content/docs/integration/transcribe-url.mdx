@@ -68,11 +68,11 @@ python transcribe_url.py
 
 To transcribe from a URL, you download the audio, send it to the API, and extract the transcript from the response:
 
-1. **Download the audio.** `httpx.get()` fetches the audio file from the URL. The `follow_redirects=True` parameter handles HTTP redirects automatically. This is important for URLs from storage services that often redirect to a CDN. The `timeout=30.0` prevents the request from hanging on slow connections.
+1. **Download the audio:** `httpx.get()` fetches the audio file from the URL. The `follow_redirects=True` parameter handles HTTP redirects automatically. This is important for URLs from storage services that often redirect to a CDN. The `timeout=30.0` prevents the request from hanging on slow connections.
 
-2. **POST to `/v1/listen`.** You send the downloaded audio bytes to the Aldea API in the request body. This is the same endpoint and format used in [Transcribe a file](/docs/integration/transcribe-file). The only difference is where the audio comes from.
+2. **POST to `/v1/listen`:** You send the downloaded audio bytes to the Aldea API in the request body. This is the same endpoint and format used in [Transcribe a file](/docs/integration/transcribe-file). The only difference is where the audio comes from.
 
-3. **Parse the response.** The response structure is the same as file transcription. For full field descriptions, see the [response structure in Transcribe a file](/docs/integration/transcribe-file).
+3. **Parse the response:** The response structure is the same as file transcription. For full field descriptions, see the [response structure in Transcribe a file](/docs/integration/transcribe-file).
 
 The approach is the same as [Transcribe a file](/docs/integration/transcribe-file): you're sending audio bytes to `POST /v1/listen`. The difference is just where the bytes come from:
 
@@ -131,11 +131,11 @@ node transcribe_url.js
 
 To transcribe from a URL, you download the audio, send it to the API, and extract the transcript from the response:
 
-1. **Download the audio.** `fetch()` retrieves the audio file from the URL. The response is read as an `ArrayBuffer` with `.arrayBuffer()`, which gives you the raw binary data. `fetch` follows redirects automatically, which is important for URLs from storage services that often redirect to a CDN.
+1. **Download the audio:** `fetch()` retrieves the audio file from the URL. The response is read as an `ArrayBuffer` with `.arrayBuffer()`, which gives you the raw binary data. `fetch` follows redirects automatically, which is important for URLs from storage services that often redirect to a CDN.
 
-2. **POST to `/v1/listen`.** You send the downloaded audio bytes to the Aldea API in the request body. This is the same endpoint and format used in [Transcribe a file](/docs/integration/transcribe-file). The only difference is where the audio comes from.
+2. **POST to `/v1/listen`:** You send the downloaded audio bytes to the Aldea API in the request body. This is the same endpoint and format used in [Transcribe a file](/docs/integration/transcribe-file). The only difference is where the audio comes from.
 
-3. **Parse the response.** The response structure is the same as file transcription. For full field descriptions, see the [response structure in Transcribe a file](/docs/integration/transcribe-file).
+3. **Parse the response:** The response structure is the same as file transcription. For full field descriptions, see the [response structure in Transcribe a file](/docs/integration/transcribe-file).
 
 The approach is the same as [Transcribe a file](/docs/integration/transcribe-file): you're sending audio bytes to `POST /v1/listen`. The difference is just where the bytes come from:
 
@@ -225,11 +225,11 @@ go run transcribe_url.go
 
 To transcribe from a URL, you download the audio, send it to the API, and extract the transcript from the response:
 
-1. **Download the audio.** `http.Get()` fetches the audio file from the URL. Go's HTTP client follows redirects automatically, which is important for URLs from storage services that often redirect to a CDN.
+1. **Download the audio:** `http.Get()` fetches the audio file from the URL. Go's HTTP client follows redirects automatically, which is important for URLs from storage services that often redirect to a CDN.
 
-2. **POST to `/v1/listen`.** You send the downloaded audio bytes to the Aldea API in the request body. This is the same endpoint and format used in [Transcribe a file](/docs/integration/transcribe-file). The only difference is where the audio comes from.
+2. **POST to `/v1/listen`:** You send the downloaded audio bytes to the Aldea API in the request body. This is the same endpoint and format used in [Transcribe a file](/docs/integration/transcribe-file). The only difference is where the audio comes from.
 
-3. **Parse the response.** The response structure is the same as file transcription. For full field descriptions, see the [response structure in Transcribe a file](/docs/integration/transcribe-file).
+3. **Parse the response:** The response structure is the same as file transcription. For full field descriptions, see the [response structure in Transcribe a file](/docs/integration/transcribe-file).
 
 The approach is the same as [Transcribe a file](/docs/integration/transcribe-file): you're sending audio bytes to `POST /v1/listen`. The difference is just where the bytes come from:
 
@@ -301,11 +301,11 @@ cargo run --bin transcribe_url
 
 To transcribe from a URL, you download the audio, send it to the API, and extract the transcript from the response:
 
-1. **Download the audio.** `reqwest::get(url).await?.bytes().await?` fetches the audio file into memory. `reqwest` follows redirects automatically, which is important for URLs from storage services that often redirect to a CDN.
+1. **Download the audio:** `reqwest::get(url).await?.bytes().await?` fetches the audio file into memory. `reqwest` follows redirects automatically, which is important for URLs from storage services that often redirect to a CDN.
 
-2. **POST to `/v1/listen`.** You send the downloaded audio bytes to the Aldea API in the request body. This is the same endpoint and format used in [Transcribe a file](/docs/integration/transcribe-file). The only difference is where the audio comes from.
+2. **POST to `/v1/listen`:** You send the downloaded audio bytes to the Aldea API in the request body. This is the same endpoint and format used in [Transcribe a file](/docs/integration/transcribe-file). The only difference is where the audio comes from.
 
-3. **Parse the response.** The response structure is the same as file transcription. For full field descriptions, see the [response structure in Transcribe a file](/docs/integration/transcribe-file).
+3. **Parse the response:** The response structure is the same as file transcription. For full field descriptions, see the [response structure in Transcribe a file](/docs/integration/transcribe-file).
 
 The approach is the same as [Transcribe a file](/docs/integration/transcribe-file): you're sending audio bytes to `POST /v1/listen`. The difference is just where the bytes come from:
 

@@ -71,13 +71,13 @@ python stream.py
 
 To stream audio in real time, you connect to the WebSocket, send audio frames, receive transcript messages as they arrive, and close the stream:
 
-1. **Connect with authentication.** `websockets.connect()` opens a WebSocket to `wss://api.aldea.ai/v1/listen`. The `Authorization: Bearer` header authenticates the connection during the handshake. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio. Adjust these to match your audio format.
+1. **Connect with authentication:** `websockets.connect()` opens a WebSocket to `wss://api.aldea.ai/v1/listen`. The `Authorization: Bearer` header authenticates the connection during the handshake. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio. You can adjust these to match your audio format.
 
-2. **Send audio frames.** In the `send_audio` coroutine, you read the file in 4 KB chunks and send each as a binary WebSocket frame. The chunk size is not critical. 4096 bytes is a common default that balances latency and overhead. In production, you would read from a microphone or network stream instead of a file.
+2. **Send audio frames:** In the `send_audio` coroutine, you read the file in 4 KB chunks and send each as a binary WebSocket frame. The chunk size is not critical. 4096 bytes is a common default that balances latency and overhead. In production, you would read from a microphone or network stream instead of a file.
 
-3. **Receive transcript messages.** In the `receive_transcripts` coroutine, you listen for JSON messages from the server. You filter for `Results` messages where `is_final` is `true`. These are finalized transcript segments. Interim results (where `is_final` is `false`) contain partial transcripts that may change as more audio arrives.
+3. **Receive transcript messages:** In the `receive_transcripts` coroutine, you listen for JSON messages from the server. You filter for `Results` messages where `is_final` is `true`. These are finalized transcript segments. Interim results (where `is_final` is `false`) contain partial transcripts that may change as more audio arrives.
 
-4. **Close the stream.** You send `{"type": "CloseStream"}` to tell the server that no more audio is coming. The server finishes processing any remaining audio, sends final results, and closes the connection. `asyncio.gather()` runs both coroutines concurrently and keeps the connection open until both complete.
+4. **Close the stream:** You send `{"type": "CloseStream"}` to tell the server that no more audio is coming. The server finishes processing any remaining audio, sends final results, and closes the connection. `asyncio.gather()` runs both coroutines concurrently and keeps the connection open until both complete.
 
 ## Stream from a live source
 
@@ -194,13 +194,13 @@ node stream.js
 
 To stream audio in real time, you connect to the WebSocket, send audio frames, receive transcript messages as they arrive, and close the stream:
 
-1. **Connect with authentication.** `new WebSocket(url, { headers })` opens a WebSocket to `wss://api.aldea.ai/v1/listen`. The `Authorization: Bearer` header authenticates the connection during the handshake. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio. Adjust these to match your audio format.
+1. **Connect with authentication:** `new WebSocket(url, { headers })` opens a WebSocket to `wss://api.aldea.ai/v1/listen`. The `Authorization: Bearer` header authenticates the connection during the handshake. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio. Adjust these to match your audio format.
 
-2. **Send audio frames.** You use `createReadStream` to read the file in 4 KB chunks (`highWaterMark: 4096`). Each chunk is sent as a binary WebSocket frame with `ws.send()`. The chunk size is not critical; 4096 bytes is a common default that balances latency and overhead. In production, you would read from a microphone or network stream instead of a file.
+2. **Send audio frames:** You use `createReadStream` to read the file in 4 KB chunks (`highWaterMark: 4096`). Each chunk is sent as a binary WebSocket frame with `ws.send()`. The chunk size is not critical; 4096 bytes is a common default that balances latency and overhead. In production, you would read from a microphone or network stream instead of a file.
 
-3. **Receive transcript messages.** In the `message` event handler, you parse each incoming JSON message. You filter for `Results` messages where `is_final` is `true`. These are finalized transcript segments. Interim results (where `is_final` is `false`) contain partial transcripts that may change as more audio arrives.
+3. **Receive transcript messages:** In the `message` event handler, you parse each incoming JSON message. You filter for `Results` messages where `is_final` is `true`. These are finalized transcript segments. Interim results (where `is_final` is `false`) contain partial transcripts that may change as more audio arrives.
 
-4. **Close the stream.** You send `{"type": "CloseStream"}` to tell the server that no more audio is coming. The server finishes processing any remaining audio, sends final results, and closes the connection.
+4. **Close the stream:** You send `{"type": "CloseStream"}` to tell the server that no more audio is coming. The server finishes processing any remaining audio, sends final results, and closes the connection.
 
 ## Stream from a live source
 
@@ -340,13 +340,13 @@ go run stream.go
 
 To stream audio in real time, you connect to the WebSocket, send audio frames, receive transcript messages as they arrive, and close the stream:
 
-1. **Connect with authentication.** `websocket.DefaultDialer.Dial` opens a WebSocket to `wss://api.aldea.ai/v1/listen`. The `Authorization: Bearer` header is passed via `http.Header`. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio.
+1. **Connect with authentication:** `websocket.DefaultDialer.Dial` opens a WebSocket to `wss://api.aldea.ai/v1/listen`. The `Authorization: Bearer` header is passed via `http.Header`. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio.
 
-2. **Send audio frames.** You read the file into memory and send it in 4 KB chunks as binary WebSocket messages. The chunk size is not critical; 4096 bytes is a common default that balances latency and overhead.
+2. **Send audio frames:** You read the file into memory and send it in 4 KB chunks as binary WebSocket messages. The chunk size is not critical; 4096 bytes is a common default that balances latency and overhead.
 
-3. **Receive transcript messages.** In a goroutine, you read JSON messages from the server and filter for `Results` messages where `is_final` is `true`. These are finalized transcript segments.
+3. **Receive transcript messages:** In a goroutine, you read JSON messages from the server and filter for `Results` messages where `is_final` is `true`. These are finalized transcript segments.
 
-4. **Close the stream.** You send `{"type":"CloseStream"}` to tell the server that no more audio is coming. The server finishes processing, sends final results, and closes the connection.
+4. **Close the stream:** You send `{"type":"CloseStream"}` to tell the server that no more audio is coming. The server finishes processing, sends final results, and closes the connection.
 
 ## Stream from a live source
 
@@ -541,13 +541,13 @@ cargo run --bin stream
 
 To stream audio in real time, you connect to the WebSocket, send audio frames, receive transcript messages as they arrive, and close the stream:
 
-1. **Connect with authentication.** `Request::builder()` constructs a WebSocket upgrade request with the `Authorization: Bearer` header. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio.
+1. **Connect with authentication:** `Request::builder()` constructs a WebSocket upgrade request with the `Authorization: Bearer` header. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio.
 
-2. **Send audio frames.** You read the file into memory and send it in 4 KB chunks as binary WebSocket messages using `write.send(Message::Binary(...))`. The chunk size is not critical; 4096 bytes is a common default that balances latency and overhead.
+2. **Send audio frames:** You read the file into memory and send it in 4 KB chunks as binary WebSocket messages using `write.send(Message::Binary(...))`. The chunk size is not critical; 4096 bytes is a common default that balances latency and overhead.
 
-3. **Receive transcript messages.** You spawn a task with `tokio::spawn` that reads JSON messages from the server, deserializes them into typed structs, and filters for `Results` messages where `is_final` is `true`. These are finalized transcript segments.
+3. **Receive transcript messages:** You spawn a task with `tokio::spawn` that reads JSON messages from the server, deserializes them into typed structs, and filters for `Results` messages where `is_final` is `true`. These are finalized transcript segments.
 
-4. **Close the stream.** You send `{"type":"CloseStream"}` to tell the server that no more audio is coming. The server finishes processing, sends final results, and closes the connection.
+4. **Close the stream:** You send `{"type":"CloseStream"}` to tell the server that no more audio is coming. The server finishes processing, sends final results, and closes the connection.
 
 ## Stream from a live source
 
@@ -648,7 +648,7 @@ The only differences from the file example are the audio source (`reqwest::get` 
 The `encoding` and `sample_rate` parameters must match your audio format. If they do not match, the API attempts to decode the audio incorrectly and you get garbled or empty transcripts. Common combinations: `linear16` at `16000` Hz for WAV, `mp3` for MP3 files, `opus` for Opus-encoded audio.
 </Callout>
 
-For details on streaming message types, response fields, and query parameters, see [Streaming controls](/docs/concepts/streaming-controls) and the [Parameters reference](/docs/api-reference/parameters).
+For details on streaming message types, response fields, and query parameters, see [Streaming controls](/docs/concepts/streaming-controls/interim-results) and the [Parameters reference](/docs/api-reference/parameters).
 
 ## Next steps
 

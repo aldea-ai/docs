@@ -63,11 +63,11 @@ python transcribe_file.py
 
 To transcribe a file, you read the audio, send it to the API, and extract the transcript from the response:
 
-1. **Read the file.** `open("audio.wav", "rb").read()` loads the entire file into memory as raw bytes. The API detects the audio format automatically from the file contents, so you don't need to specify a content type.
+1. **Read the file:** `open("audio.wav", "rb").read()` loads the entire file into memory as raw bytes. The API detects the audio format automatically from the file contents, so you don't need to specify a content type.
 
-2. **POST to `/v1/listen`.** `httpx.post()` sends the audio bytes as the request body to the Aldea API. The `Authorization` header authenticates the request with your API key using the `Bearer` scheme. The `timeout=60.0` sets a 60-second timeout but you can increase it for longer files.
+2. **POST to `/v1/listen`:** `httpx.post()` sends the audio bytes as the request body to the Aldea API. The `Authorization` header authenticates the request with your API key using the `Bearer` scheme. The `timeout=60.0` sets a 60-second timeout but you can increase it for longer files.
 
-3. **Parse the response.** The transcript sits inside a nested JSON structure: `results` → `channels` → `alternatives`. The chained `.get()` calls navigate this safely, returning empty defaults if any key is missing. This avoids `KeyError` exceptions if the response structure is unexpected.
+3. **Parse the response:** The transcript sits inside a nested JSON structure: `results` → `channels` → `alternatives`. The chained `.get()` calls navigate this safely, returning empty defaults if any key is missing. This avoids `KeyError` exceptions if the response structure is unexpected.
 
 </Tab>
 <Tab value="Node.js" id="node">
@@ -113,11 +113,11 @@ node transcribe_file.js
 
 To transcribe a file, you read the audio, send it to the API, and extract the transcript from the response:
 
-1. **Read the file.** `readFileSync("audio.wav")` loads the entire file into memory as a `Buffer`. The API detects the audio format automatically from the file contents, so you don't need to specify a content type.
+1. **Read the file:** `readFileSync("audio.wav")` loads the entire file into memory as a `Buffer`. The API detects the audio format automatically from the file contents, so you don't need to specify a content type.
 
-2. **POST to `/v1/listen`.** `fetch()` sends the audio bytes as the request body to the Aldea API. The `Authorization` header authenticates the request with your API key using the `Bearer` scheme.
+2. **POST to `/v1/listen`:** `fetch()` sends the audio bytes as the request body to the Aldea API. The `Authorization` header authenticates the request with your API key using the `Bearer` scheme.
 
-3. **Parse the response.** The transcript sits inside a nested JSON structure: `results` → `channels` → `alternatives`. Optional chaining (`?.`) navigates this safely, returning `undefined` if any key is missing. The `?? ""` fallback ensures you always get a string.
+3. **Parse the response:** The transcript sits inside a nested JSON structure: `results` → `channels` → `alternatives`. Optional chaining (`?.`) navigates this safely, returning `undefined` if any key is missing. The `?? ""` fallback ensures you always get a string.
 
 </Tab>
 <Tab value="Go" id="go">
@@ -195,11 +195,11 @@ go run transcribe_file.go
 
 To transcribe a file, you read the audio, send it to the API, and extract the transcript from the response:
 
-1. **Read the file.** `os.ReadFile("audio.wav")` loads the entire file into memory as a byte slice. The API detects the audio format automatically from the file contents, so you don't need to set a content type.
+1. **Read the file:** `os.ReadFile("audio.wav")` loads the entire file into memory as a byte slice. The API detects the audio format automatically from the file contents, so you don't need to set a content type.
 
-2. **POST to `/v1/listen`.** `http.NewRequest` builds a POST request with the audio bytes as the body. The `Authorization` header authenticates the request with your API key using the `Bearer` scheme.
+2. **POST to `/v1/listen`:** `http.NewRequest` builds a POST request with the audio bytes as the body. The `Authorization` header authenticates the request with your API key using the `Bearer` scheme.
 
-3. **Parse the response.** You read the response body with `io.ReadAll` and unmarshal it into a struct that mirrors the JSON structure. Go's typed struct fields give you compile-time safety when you access `Results.Channels[0].Alternatives[0].Transcript`.
+3. **Parse the response:** You read the response body with `io.ReadAll` and unmarshal it into a struct that mirrors the JSON structure. Go's typed struct fields give you compile-time safety when you access `Results.Channels[0].Alternatives[0].Transcript`.
 
 </Tab>
 <Tab value="Rust" id="rust">
@@ -261,11 +261,11 @@ cargo run --bin transcribe_file
 
 To transcribe a file, you read the audio, send it to the API, and extract the transcript from the response:
 
-1. **Read the file.** `tokio::fs::read("audio.wav")` loads the entire file into a `Vec<u8>`. The API detects the audio format automatically from the file contents, so you don't need to set a content type.
+1. **Read the file:** `tokio::fs::read("audio.wav")` loads the entire file into a `Vec<u8>`. The API detects the audio format automatically from the file contents, so you don't need to set a content type.
 
-2. **POST to `/v1/listen`.** `reqwest::Client::new().post(url)` builds a POST request. The `.header("Authorization", ...)` call adds Bearer authentication, and `.body(audio_data)` attaches the raw audio bytes.
+2. **POST to `/v1/listen`:** `reqwest::Client::new().post(url)` builds a POST request. The `.header("Authorization", ...)` call adds Bearer authentication, and `.body(audio_data)` attaches the raw audio bytes.
 
-3. **Parse the response.** You deserialize the response body into a `serde_json::Value` and index it to extract the transcript. The `as_str().unwrap_or("")` chain handles the case where a field is missing.
+3. **Parse the response:** You deserialize the response body into a `serde_json::Value` and index it to extract the transcript. The `as_str().unwrap_or("")` chain handles the case where a field is missing.
 
 </Tab>
 </Tabs>
