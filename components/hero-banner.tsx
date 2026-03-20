@@ -7,10 +7,10 @@ export function HeroBanner() {
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='4' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
         }}
       />
-      <h1 className="relative mb-4 text-4xl font-bold tracking-tight text-white dark:text-white md:mb-5 md:text-5xl lg:text-6xl">
+      <h1 className="relative mb-4 font-serif text-4xl font-normal tracking-tight text-white dark:text-white md:mb-5 md:text-5xl lg:text-6xl">
         Aldea speech-to-text documentation
       </h1>
-      <p className="relative mx-auto max-w-2xl text-base text-white/80 dark:text-white/80 md:text-lg">
+      <p className="relative mx-auto max-w-2xl font-mono font-normal text-base text-white/80 dark:text-white/80 md:text-lg">
         Fast, accurate speech-to-text API that is fully compatible with Deepgram
       </p>
     </div>
