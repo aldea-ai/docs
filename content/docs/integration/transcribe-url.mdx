@@ -27,7 +27,7 @@ import os
 import httpx
 
 ALDEA_API_KEY = os.environ["ALDEA_API_KEY"]
-AUDIO_URL = "https://dpgr.am/spacewalk.wav"
+AUDIO_URL = "https://platform.aldea.ai/aldea_sample.wav"
 
 # Download the audio file
 print("Downloading audio...")
@@ -95,7 +95,7 @@ In this example, you download audio from a public URL and send it to the Aldea A
 
 ```javascript title="transcribe_url.js"
 const ALDEA_API_KEY = process.env.ALDEA_API_KEY;
-const AUDIO_URL = "https://dpgr.am/spacewalk.wav";
+const AUDIO_URL = "https://platform.aldea.ai/aldea_sample.wav";
 
 // Download the audio file
 console.log("Downloading audio...");
@@ -170,7 +170,7 @@ import (
 
 func main() {
 	apiKey := os.Getenv("ALDEA_API_KEY")
-	audioURL := "https://dpgr.am/spacewalk.wav"
+	audioURL := "https://platform.aldea.ai/aldea_sample.wav"
 
 	// Download the audio file
 	fmt.Println("Downloading audio...")
@@ -256,7 +256,7 @@ use serde_json::Value;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api_key = std::env::var("ALDEA_API_KEY").expect("ALDEA_API_KEY not set");
-    let audio_url = "https://dpgr.am/spacewalk.wav";
+    let audio_url = "https://platform.aldea.ai/aldea_sample.wav";
 
     // Download the audio file
     println!("Downloading audio...");

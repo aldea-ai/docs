@@ -88,7 +88,7 @@ import os
 import httpx
 
 ALDEA_API_KEY = os.environ["ALDEA_API_KEY"]
-AUDIO_URL = "https://dpgr.am/spacewalk.wav"
+AUDIO_URL = "https://platform.aldea.ai/aldea_sample.wav"
 
 # Download a sample audio file
 audio = httpx.get(AUDIO_URL, follow_redirects=True).content
@@ -196,7 +196,7 @@ Run a quick test to confirm that you can reach the Aldea API. In this example, y
 
 ```javascript title="verify_setup.js"
 const ALDEA_API_KEY = process.env.ALDEA_API_KEY;
-const AUDIO_URL = "https://dpgr.am/spacewalk.wav";
+const AUDIO_URL = "https://platform.aldea.ai/aldea_sample.wav";
 
 // Download a sample audio file
 const audioResponse = await fetch(AUDIO_URL);
@@ -310,7 +310,7 @@ import (
 
 func main() {
 	apiKey := os.Getenv("ALDEA_API_KEY")
-	audioURL := "https://dpgr.am/spacewalk.wav"
+	audioURL := "https://platform.aldea.ai/aldea_sample.wav"
 
 	// Download a sample audio file
 	audioResp, err := http.Get(audioURL)
@@ -445,7 +445,7 @@ use serde_json::Value;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api_key = std::env::var("ALDEA_API_KEY").expect("ALDEA_API_KEY not set");
-    let audio_url = "https://dpgr.am/spacewalk.wav";
+    let audio_url = "https://platform.aldea.ai/aldea_sample.wav";
 
     // Download a sample audio file
     let audio_data = reqwest::get(audio_url).await?.bytes().await?;
