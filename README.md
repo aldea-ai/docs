@@ -1,6 +1,6 @@
-# Aldea Documentation
+# SubQ Documentation
 
-Documentation site for the Aldea Speech-to-Text API, built with Fumadocs and Next.js.
+Documentation site for the SubQ Speech-to-Text API, built with Fumadocs and Next.js.
 
 ## Typography
 

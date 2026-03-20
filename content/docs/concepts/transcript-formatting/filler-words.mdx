@@ -5,13 +5,13 @@ description: Include filler words in transcription with filler_words=true
 
 Filler words such as "um", "uh", "like", and "you know"  are a natural part of spoken language. You can decide whether to include or exclude them from your transcript depending on what you're using the transcript for.
 
-By default, Aldea removes filler words from the output to produce clean, readable text. However, you can preserve every utterance spoken in your verbatim by adding `filler_words=true` as a query parameter. This is useful for verbatim transcription or conversation analysis where hesitations carry meaning.
+By default, SubQ removes filler words from the output to produce clean, readable text. However, you can preserve every utterance spoken in your verbatim by adding `filler_words=true` as a query parameter. This is useful for verbatim transcription or conversation analysis where hesitations carry meaning.
 
 The following request shows how to include filler words in the output:
 
 ```bash
-curl -X POST "https://api.aldea.ai/v1/listen?filler_words=true" \
-  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+curl -X POST "https://api.subquadratic.ai/v1/listen?filler_words=true" \
+  -H "Authorization: Bearer YOUR_SUBQ_API_KEY" \
   --data-binary @audio.wav
 ```
 

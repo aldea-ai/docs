@@ -8,7 +8,7 @@ export function HeroBanner() {
         }}
       />
       <h1 className="relative mb-4 font-serif text-4xl font-normal tracking-tight text-white dark:text-white md:mb-5 md:text-5xl lg:text-6xl">
-        Aldea speech-to-text documentation
+        SubQ speech-to-text documentation
       </h1>
       <p className="relative mx-auto max-w-2xl font-mono font-normal text-base text-white/80 dark:text-white/80 md:text-lg">
         Fast, accurate speech-to-text API that is fully compatible with Deepgram

@@ -11,16 +11,16 @@ Set the `endpointing` parameter in the WebSocket query string. The value is in m
 
 ```bash
 # Faster finalization (300ms)
-wss://api.aldea.ai/v1/listen?endpointing=300&encoding=mp3
+wss://api.subquadratic.ai/v1/listen?endpointing=300&encoding=mp3
 
 # Slower finalization (800ms), better for speakers who pause mid-sentence
-wss://api.aldea.ai/v1/listen?endpointing=800&encoding=mp3
+wss://api.subquadratic.ai/v1/listen?endpointing=800&encoding=mp3
 ```
 
 To disable endpointing entirely, set it to `false`:
 
 ```bash
-wss://api.aldea.ai/v1/listen?endpointing=false&encoding=mp3
+wss://api.subquadratic.ai/v1/listen?endpointing=false&encoding=mp3
 ```
 
 When endpointing is disabled, results are only finalized when you send a `Finalize` or `CloseStream` message.

@@ -5,11 +5,11 @@ description: Pre-recorded and streaming transcription, model selection, and supp
 
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
-Aldea supports two transcription modes: **pre-recorded** for files and URLs, and **real-time streaming** over WebSocket. Both modes use the same `/v1/listen` endpoint with different protocols, but are optimized for different use cases
+SubQ supports two transcription modes: **pre-recorded** for files and URLs, and **real-time streaming** over WebSocket. Both modes use the same `/v1/listen` endpoint with different protocols, but are optimized for different use cases
 
 ## Pre-recorded
 
-Pre-recorded or batch transcription processes a completed audio file after recording. You submit one or more audio files to Aldea, and results are returned when processing is complete. Because the full audio is available upfront, Aldea applies multi-pass analysis and higher-precision language models to produce highly accurate output. 
+Pre-recorded or batch transcription processes a completed audio file after recording. You submit one or more audio files to SubQ, and results are returned when processing is complete. Because the full audio is available upfront, SubQ applies multi-pass analysis and higher-precision language models to produce highly accurate output. 
 
 For batch transcription, jobs are queued for processing and results delivered as a complete transcript once the job finishes. Use pre-recorded transcription mode for use cases such as:
 
@@ -24,14 +24,14 @@ You can send audio two ways:
 - **Binary audio**: raw file bytes in the request body. The format is auto-detected from binary headers.
 - **URL**: a JSON object `{"url": "https://..."}` with `Content-Type: application/json`. The API downloads and transcribes the audio.
 
-To transcript a file, send a `POST` request to `https://api.aldea.ai/v1/listen` with audio in the request body. The API processes the entire file and returns a single JSON response with the full transcript. You can also add `timestamps: true` header to include per-word timings in the response.
+To transcript a file, send a `POST` request to `https://api.subquadratic.ai/v1/listen` with audio in the request body. The API processes the entire file and returns a single JSON response with the full transcript. You can also add `timestamps: true` header to include per-word timings in the response.
 
 <Tabs items={['cURL (file)', 'cURL (URL)', 'Python', 'Node.js']}>
 <Tab value="cURL (file)">
 
 ```bash
-curl -X POST "https://api.aldea.ai/v1/listen" \
-  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+curl -X POST "https://api.subquadratic.ai/v1/listen" \
+  -H "Authorization: Bearer YOUR_SUBQ_API_KEY" \
   -H "timestamps: true" \
   --data-binary @audio.wav
 ```
@@ -40,8 +40,8 @@ curl -X POST "https://api.aldea.ai/v1/listen" \
 <Tab value="cURL (URL)">
 
 ```bash
-curl -X POST "https://api.aldea.ai/v1/listen" \
-  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+curl -X POST "https://api.subquadratic.ai/v1/listen" \
+  -H "Authorization: Bearer YOUR_SUBQ_API_KEY" \
   -H "Content-Type: application/json" \
   -H "timestamps: true" \
   -d '{"url": "https://dpgr.am/spacewalk.wav"}'
@@ -54,12 +54,12 @@ curl -X POST "https://api.aldea.ai/v1/listen" \
 from deepgram import DeepgramClient, DeepgramClientEnvironment
 
 config = DeepgramClientEnvironment(
-    base="https://api.aldea.ai",
-    production="wss://api.aldea.ai",
-    agent="wss://api.aldea.ai"
+    base="https://api.subquadratic.ai",
+    production="wss://api.subquadratic.ai",
+    agent="wss://api.subquadratic.ai"
 )
 
-client = DeepgramClient(api_key="YOUR_ALDEA_API_KEY", environment=config)
+client = DeepgramClient(api_key="YOUR_SUBQ_API_KEY", environment=config)
 
 with open("audio.wav", "rb") as f:
     response = client.listen.v1.media.transcribe_file(request=f.read())
@@ -74,8 +74,8 @@ import { createClient } from "@deepgram/sdk";
 import fs from "fs";
 
 const client = createClient({
-  accessToken: "YOUR_ALDEA_API_KEY",
-  global: { url: "https://api.aldea.ai" }
+  accessToken: "YOUR_SUBQ_API_KEY",
+  global: { url: "https://api.subquadratic.ai" }
 });
 
 const response = await client.listen.prerecorded.transcribeFile(
@@ -125,12 +125,12 @@ The following endpoints are aliases and function identically to `/v1/listen`:
 
 ## Real-time streaming
 
-Real-time streaming transcription processes an audio as it is captured and returns results continuously. Audio is streamed to Aldea over a persistent WebSocket connection and transcript segments returned incrementally  as speech is detected. 
+Real-time streaming transcription processes an audio as it is captured and returns results continuously. Audio is streamed to SubQ over a persistent WebSocket connection and transcript segments returned incrementally  as speech is detected. 
 
-Aldea emits two types of results during real-time streaming transcription:
+SubQ emits two types of results during real-time streaming transcription:
 
 - Interim results: This is partial, low-latency hypotheses that update as more audio context becomes available. Interim results are useful when displaying live captions but they can change as the utterances progresses.
-- Final results: The stable transcript segment returned once Aldea determines that an utterance is complete. These final results do not change after delivery. 
+- Final results: The stable transcript segment returned once SubQ determines that an utterance is complete. These final results do not change after delivery. 
 
 Real-time streaming transcription is ideal for the following use cases:
 
@@ -139,9 +139,9 @@ Real-time streaming transcription is ideal for the following use cases:
 - Real-time agent assistants in contact centers
 - Transcribing meetings where participants need immediate visibility.
 
-To transcribe audio in real-time, open a WebSocket connection to `wss://api.aldea.ai/v1/listen`. You then send binary audio frames and receive JSON transcript messages as the speaker talks.
+To transcribe audio in real-time, open a WebSocket connection to `wss://api.subquadratic.ai/v1/listen`. You then send binary audio frames and receive JSON transcript messages as the speaker talks.
 
-Aldea exposes two WebSocket endpoints:
+SubQ exposes two WebSocket endpoints:
 
 | Endpoint | Accepts |
 |----------|---------|
@@ -151,7 +151,7 @@ Aldea exposes two WebSocket endpoints:
 Authenticate by passing your API key in the WebSocket protocol header:
 
 ```
-Sec-WebSocket-Protocol: token, YOUR_ALDEA_API_KEY
+Sec-WebSocket-Protocol: token, YOUR_SUBQ_API_KEY
 ```
 
 <Tabs items={['Node.js']}>
@@ -161,8 +161,8 @@ Sec-WebSocket-Protocol: token, YOUR_ALDEA_API_KEY
 import { createClient, LiveTranscriptionEvents } from "@deepgram/sdk";
 
 const client = createClient({
-  key: "YOUR_ALDEA_API_KEY",
-  global: { url: "https://api.aldea.ai" }
+  key: "YOUR_SUBQ_API_KEY",
+  global: { url: "https://api.subquadratic.ai" }
 });
 
 const connection = client.listen.live({

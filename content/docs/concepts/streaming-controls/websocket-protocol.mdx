@@ -3,7 +3,7 @@ title: WebSocket protocol
 description: Message types, keep-alive, finalize, and graceful disconnect for streaming
 ---
 
-The Aldea streaming API uses WebSocket for bidirectional communication. Your client sends binary audio frames and JSON control messages; the server responds with JSON transcript messages.
+The SubQ streaming API uses WebSocket for bidirectional communication. Your client sends binary audio frames and JSON control messages; the server responds with JSON transcript messages.
 
 ## Connection
 
@@ -11,13 +11,13 @@ Connect to one of two endpoints:
 
 | Endpoint | Accepts |
 |----------|--------|
-| `wss://api.aldea.ai/v1/listen` | Encoded audio (MP3, AAC, FLAC, WAV, OGG, WebM, Opus, M4A) and raw PCM |
-| `wss://api.aldea.ai/v1/listen/pcm` | Raw PCM only (optimized) |
+| `wss://api.subquadratic.ai/v1/listen` | Encoded audio (MP3, AAC, FLAC, WAV, OGG, WebM, Opus, M4A) and raw PCM |
+| `wss://api.subquadratic.ai/v1/listen/pcm` | Raw PCM only (optimized) |
 
 Authenticate with the `Sec-WebSocket-Protocol` header:
 
 ```
-Sec-WebSocket-Protocol: token, YOUR_ALDEA_API_KEY
+Sec-WebSocket-Protocol: token, YOUR_SUBQ_API_KEY
 ```
 
 After a successful handshake, the server returns `101 Switching Protocols`.
@@ -59,7 +59,7 @@ Sent once upon connection. Contains session information:
   "model_info": {
     "name": "<model_id>",
     "version": "",
-    "arch": "aldea-asr"
+    "arch": "subq-asr"
   }
 }
 ```

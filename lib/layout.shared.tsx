@@ -10,7 +10,7 @@ import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
  */
 export function baseOptions(): BaseLayoutProps {
   return {
-    githubUrl: "https://github.com/aldea-ai",
+    githubUrl: "https://github.com/subquadratic-ai",
     nav: {
       title: (
         <span className="flex items-center gap-2 font-semibold">
@@ -75,7 +75,7 @@ export function baseOptions(): BaseLayoutProps {
       },
       {
         text: "Dashboard",
-        url: "https://platform.aldea.ai/dashboard",
+        url: "https://platform.subquadratic.ai/dashboard",
         external: true,
         icon: (
           <svg

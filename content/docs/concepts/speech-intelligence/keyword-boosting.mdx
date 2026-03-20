@@ -12,15 +12,15 @@ When you supply keywords, the transcription engine increases the probability wei
 To enable keyword boosting during transcription, pass one or more `keywords` query parameters. Each keyword is specified separately:
 
 ```bash
-curl -X POST "https://api.aldea.ai/v1/listen?keywords=Aldea&keywords=STT" \
-  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+curl -X POST "https://api.subquadratic.ai/v1/listen?keywords=SubQ&keywords=STT" \
+  -H "Authorization: Bearer YOUR_SUBQ_API_KEY" \
   --data-binary @audio.wav
 ```
 
 When transcribing real-time streams, append the same parameters to the WebSocket URL:
 
 ```bash
-wss://api.aldea.ai/v1/listen?keywords=Aldea&keywords=STT&interim_results=true
+wss://api.subquadratic.ai/v1/listen?keywords=SubQ&keywords=STT&interim_results=true
 ```
 
 Keyword boosting can significantly improve the quality of transcripts when working with:

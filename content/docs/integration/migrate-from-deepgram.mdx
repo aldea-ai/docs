@@ -1,31 +1,31 @@
 ---
 title: Migrate from Deepgram
-description: Switch from Deepgram to Aldea with a 2-line code change
+description: Switch from Deepgram to SubQ with a 2-line code change
 ---
 
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
-Aldea implements Deepgram-compatible APIs. If you already use a Deepgram SDK, you can switch to Aldea by changing the base URL and API key. The SDKs, request format, and response structure stay the same.
+SubQ implements Deepgram-compatible APIs. If you already use a Deepgram SDK, you can switch to SubQ by changing the base URL and API key. The SDKs, request format, and response structure stay the same.
 
 ## What changes
 
-| | Deepgram | Aldea |
+| | Deepgram | SubQ |
 |---|---|---|
-| REST base URL | `https://api.deepgram.com` | `https://api.aldea.ai` |
-| WebSocket URL | `wss://api.deepgram.com` | `wss://api.aldea.ai` |
+| REST base URL | `https://api.deepgram.com` | `https://api.subquadratic.ai` |
+| WebSocket URL | `wss://api.deepgram.com` | `wss://api.subquadratic.ai` |
 | API key prefix | `dg_` | `org_` |
 | Auth header (REST) | `Authorization: Token dg_...` | `Authorization: Bearer org_...` |
 | Auth header (WebSocket) | `Sec-WebSocket-Protocol: token, dg_...` | `Sec-WebSocket-Protocol: token, org_...` |
 
 The API endpoints (`/v1/listen`), query parameters, and JSON response format are identical. Your existing parsing logic does not need to change.
 
-## Step 1: Get an Aldea API key
+## Step 1: Get a SubQ API key
 
-Sign up at [platform.aldea.ai](https://platform.aldea.ai) and generate an API key from the [API Keys page](/docs/getting-started/get-api-key). Your key starts with `org_`.
+Sign up at [platform.subquadratic.ai](https://platform.subquadratic.ai) and generate an API key from the [API Keys page](/docs/getting-started/get-api-key). Your key starts with `org_`.
 
 ## Step 2: Update the SDK configuration
 
-The only code change is pointing the SDK to `api.aldea.ai` instead of `api.deepgram.com`.
+The only code change is pointing the SDK to `api.subquadratic.ai` instead of `api.deepgram.com`.
 
 <Tabs items={['Python', 'Node.js', 'Go']}>
 <Tab value="Python">
@@ -40,18 +40,18 @@ from deepgram import DeepgramClient
 client = DeepgramClient("dg_YOUR_DEEPGRAM_KEY")
 ```
 
-**After (Aldea):**
+**After (SubQ):**
 
 ```python
 from deepgram import DeepgramClient, DeepgramClientEnvironment
 
 config = DeepgramClientEnvironment(
-    base="https://api.aldea.ai",
-    production="wss://api.aldea.ai",
-    agent="wss://api.aldea.ai"
+    base="https://api.subquadratic.ai",
+    production="wss://api.subquadratic.ai",
+    agent="wss://api.subquadratic.ai"
 )
 
-client = DeepgramClient(api_key="YOUR_ALDEA_API_KEY", environment=config)
+client = DeepgramClient(api_key="YOUR_SUBQ_API_KEY", environment=config)
 ```
 
 The rest of your code stays the same. Any calls to `client.listen.v1.media.transcribe_file()`, `transcribe_url()`, or `client.listen.v1.connect()` work without changes.
@@ -71,14 +71,14 @@ import { createClient } from "@deepgram/sdk";
 const client = createClient({ key: "dg_YOUR_DEEPGRAM_KEY" });
 ```
 
-**After (Aldea):**
+**After (SubQ):**
 
 ```javascript
 import { createClient } from "@deepgram/sdk";
 
 const client = createClient({
-  key: "YOUR_ALDEA_API_KEY",
-  global: { url: "https://api.aldea.ai" }
+  key: "YOUR_SUBQ_API_KEY",
+  global: { url: "https://api.subquadratic.ai" }
 });
 ```
 
@@ -86,8 +86,8 @@ For pre-recorded transcription, use `accessToken` instead of `key`:
 
 ```javascript
 const client = createClient({
-  accessToken: "YOUR_ALDEA_API_KEY",
-  global: { url: "https://api.aldea.ai" }
+  accessToken: "YOUR_SUBQ_API_KEY",
+  global: { url: "https://api.subquadratic.ai" }
 });
 ```
 
@@ -104,12 +104,12 @@ The Go SDK accepts `Host` and `AccessToken` in `ClientOptions`.
 client := dglisten.NewREST("dg_YOUR_DEEPGRAM_KEY", nil)
 ```
 
-**After (Aldea):**
+**After (SubQ):**
 
 ```go
 client := dglisten.NewREST("", &dgi.ClientOptions{
-    Host:        "https://api.aldea.ai",
-    AccessToken: "YOUR_ALDEA_API_KEY",
+    Host:        "https://api.subquadratic.ai",
+    AccessToken: "YOUR_SUBQ_API_KEY",
 })
 ```
 
@@ -120,7 +120,7 @@ The `DoFile()`, `DoURL()`, and WebSocket methods work identically.
 
 ## Step 3: Verify it works
 
-Run a quick test to confirm the migration. These examples use the same SDK methods you already have, just with the Aldea configuration from Step 2.
+Run a quick test to confirm the migration. These examples use the same SDK methods you already have, just with the SubQ configuration from Step 2.
 
 ### Pre-recorded transcription
 
@@ -172,8 +172,8 @@ fmt.Println(resp.Results.Channels[0].Alternatives[0].Transcript)
 import { createClient, LiveTranscriptionEvents } from "@deepgram/sdk";
 
 const client = createClient({
-  key: "YOUR_ALDEA_API_KEY",
-  global: { url: "https://api.aldea.ai" }
+  key: "YOUR_SUBQ_API_KEY",
+  global: { url: "https://api.subquadratic.ai" }
 });
 
 const connection = client.listen.live({
@@ -215,8 +215,8 @@ If you prefer not to use a Deepgram SDK, you can call the API directly. The endp
 import httpx
 
 response = httpx.post(
-    "https://api.aldea.ai/v1/listen",
-    headers={"Authorization": "Bearer YOUR_ALDEA_API_KEY"},
+    "https://api.subquadratic.ai/v1/listen",
+    headers={"Authorization": "Bearer YOUR_SUBQ_API_KEY"},
     content=open("audio.wav", "rb").read(),
     timeout=60.0
 )
@@ -231,9 +231,9 @@ print(result["results"]["channels"][0]["alternatives"][0]["transcript"])
 ```javascript
 import { readFileSync } from "fs";
 
-const response = await fetch("https://api.aldea.ai/v1/listen", {
+const response = await fetch("https://api.subquadratic.ai/v1/listen", {
   method: "POST",
-  headers: { "Authorization": "Bearer YOUR_ALDEA_API_KEY" },
+  headers: { "Authorization": "Bearer YOUR_SUBQ_API_KEY" },
   body: readFileSync("audio.wav")
 });
 
@@ -248,9 +248,9 @@ console.log(result.results.channels[0].alternatives[0].transcript);
 audioData, _ := os.ReadFile("audio.wav")
 
 req, _ := http.NewRequest("POST",
-    "https://api.aldea.ai/v1/listen",
+    "https://api.subquadratic.ai/v1/listen",
     bytes.NewReader(audioData))
-req.Header.Set("Authorization", "Bearer YOUR_ALDEA_API_KEY")
+req.Header.Set("Authorization", "Bearer YOUR_SUBQ_API_KEY")
 
 resp, err := http.DefaultClient.Do(req)
 if err != nil {
@@ -273,7 +273,7 @@ fmt.Println(transcript)
 
 | Error | Fix |
 |-------|-----|
-| Connection refused | Verify the base URL is `https://api.aldea.ai` |
+| Connection refused | Verify the base URL is `https://api.subquadratic.ai` |
 | 401 Unauthorized | Check that your API key starts with `org_` and is passed correctly |
 | 503 Service Unavailable | Server is busy. Retry after the `Retry-After` header value |
 | 415 Unsupported Media | Verify the audio format is supported (MP3, WAV, AAC, FLAC, OGG, WebM, Opus, M4A) |

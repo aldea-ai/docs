@@ -11,16 +11,16 @@ Add one or more `redact` query parameters to a streaming WebSocket URL:
 
 ```bash
 # Redact personal information
-wss://api.aldea.ai/v1/listen?redact=pii&encoding=mp3
+wss://api.subquadratic.ai/v1/listen?redact=pii&encoding=mp3
 
 # Redact payment card data
-wss://api.aldea.ai/v1/listen?redact=pci&encoding=mp3
+wss://api.subquadratic.ai/v1/listen?redact=pci&encoding=mp3
 
 # Combine multiple redaction types
-wss://api.aldea.ai/v1/listen?redact=pii&redact=pci&encoding=mp3
+wss://api.subquadratic.ai/v1/listen?redact=pii&redact=pci&encoding=mp3
 
 # Redact all supported types
-wss://api.aldea.ai/v1/listen?redact=true&encoding=mp3
+wss://api.subquadratic.ai/v1/listen?redact=true&encoding=mp3
 ```
 
 ## Redaction types
@@ -45,7 +45,7 @@ Control how redacted content appears in the transcript with the `redact_mode` pa
 | `replace` | Substitutes with a type label | `My SSN is [SSN]` |
 
 ```bash
-wss://api.aldea.ai/v1/listen?redact=pii&redact_mode=replace&encoding=mp3
+wss://api.subquadratic.ai/v1/listen?redact=pii&redact_mode=replace&encoding=mp3
 ```
 
 ## Next steps
