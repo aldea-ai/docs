@@ -11,13 +11,13 @@ Streaming transcription delivers results as audio is being spoken. You open a We
 
 The WebSocket endpoint is `wss://api.aldea.ai/v1/listen`. You specify the audio encoding and sample rate as query parameters, authenticate with a `Bearer` token in the headers, and start sending audio. For background on how streaming differs from pre-recorded transcription, see [Transcription modes](/docs/concepts/transcription-modes).
 
-<Tabs items={['Python', 'Node.js', 'Go', 'Rust']}>
-<Tab value="Python">
+<Tabs items={['Python', 'Node.js', 'Go', 'Rust']} groupId="language" persist updateAnchor>
+<Tab value="Python" id="python">
 
 ## Prerequisites
 
 - Python 3.8 or later
-- `websockets` installed (see [Setup & installation](/docs/integration/setup))
+- `websockets` installed. If you haven't already, follow the [set up and installation](/docs/integration/setup) guide.
 - An audio source to stream (a file, microphone, or network stream)
 
 ## Stream audio from a file
@@ -134,12 +134,12 @@ The only differences from the file example are the audio source (`httpx.stream` 
 For details on streaming message types, response fields, and query parameters, see [Streaming controls](/docs/concepts/streaming-controls) and the [Parameters reference](/docs/api-reference/parameters).
 
 </Tab>
-<Tab value="Node.js">
+<Tab value="Node.js" id="node">
 
 ## Prerequisites
 
 - Node.js 18 or later
-- `ws` installed (see [Setup & installation](/docs/integration/setup))
+- `ws` installed. If you haven't already, follow the [set up and installation](/docs/integration/setup) guide.
 - An audio source to stream (a file, microphone, or network stream)
 
 ## Stream audio from a file
@@ -262,12 +262,12 @@ The only differences from the file example are the audio source (`fetch` stream 
 For details on streaming message types, response fields, and query parameters, see [Streaming controls](/docs/concepts/streaming-controls) and the [Parameters reference](/docs/api-reference/parameters).
 
 </Tab>
-<Tab value="Go">
+<Tab value="Go" id="go">
 
 ## Prerequisites
 
 - Go 1.21 or later
-- `github.com/gorilla/websocket` installed (see [Setup & installation](/docs/integration/setup))
+- `github.com/gorilla/websocket` installed. If you haven't already, follow the [set up and installation](/docs/integration/setup) guide.
 - An audio source to stream (a file, microphone, or network stream)
 
 ## Stream audio from a file
@@ -448,11 +448,11 @@ The only differences from the file example are the audio source (`http.Get` stre
 For details on streaming message types, response fields, and query parameters, see [Streaming controls](/docs/concepts/streaming-controls) and the [Parameters reference](/docs/api-reference/parameters).
 
 </Tab>
-<Tab value="Rust">
+<Tab value="Rust" id="rust">
 
 ## Prerequisites
 
-- Rust 1.70 or later with `tokio-tungstenite`, `futures`, `serde`, `serde_json`, and `reqwest` in your `Cargo.toml` (see [Setup & installation](/docs/integration/setup))
+- Rust 1.70 or later with `tokio-tungstenite`, `futures`, `serde`, `serde_json`, and `reqwest` in your `Cargo.toml` . If you haven't already, follow the [set up and installation](/docs/integration/setup) guide.
 - An audio source to stream (a file, microphone, or network stream)
 
 ## Stream audio from a file

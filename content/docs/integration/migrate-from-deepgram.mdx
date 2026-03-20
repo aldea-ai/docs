@@ -28,8 +28,8 @@ Sign up at [platform.aldea.ai](https://platform.aldea.ai) and generate an API ke
 
 The only code change is pointing the SDK to `api.aldea.ai` instead of `api.deepgram.com`.
 
-<Tabs items={['Python', 'Node.js', 'Go']}>
-<Tab value="Python">
+<Tabs items={['Python', 'Node.js', 'Go']} groupId="language" persist updateAnchor>
+<Tab value="Python" id="python">
 
 The Python Deepgram SDK uses a `DeepgramClientEnvironment` object to configure where API requests are sent. By default, it points at `api.deepgram.com`. To migrate, you create a custom environment that redirects all REST and WebSocket traffic to `api.aldea.ai` instead.
 
@@ -66,7 +66,7 @@ After this change, the rest of your code stays exactly the same. Any calls to `c
 **Requirements:** Python 3.8+, `deepgram-sdk>=3.4.0`
 
 </Tab>
-<Tab value="Node.js">
+<Tab value="Node.js" id="node">
 
 The Node.js SDK accepts a `global.url` option that overrides the base URL for all requests. Setting this to `https://api.aldea.ai` redirects both REST and WebSocket traffic.
 
@@ -105,7 +105,7 @@ const client = createClient({
 All `client.listen.prerecorded` and `client.listen.live` calls work as before. Only the destination changes.
 
 </Tab>
-<Tab value="Go">
+<Tab value="Go" id="go">
 
 The Go SDK accepts `Host` and `AccessToken` fields in the `ClientOptions` struct. Setting `Host` to `https://api.aldea.ai` redirects all API calls. Pass your Aldea key via `AccessToken` instead of the first positional argument.
 
@@ -139,8 +139,8 @@ Run a quick test to confirm the migration is working. These examples use the sam
 
 Send a local audio file through the SDK to verify that REST transcription works with the Aldea backend.
 
-<Tabs items={['Python', 'Node.js', 'Go']}>
-<Tab value="Python">
+<Tabs items={['Python', 'Node.js', 'Go']} groupId="language" persist updateAnchor>
+<Tab value="Python" id="python">
 
 This reads `audio.wav` from disk, sends it to Aldea via the SDK's `transcribe_file()` method, and prints the top transcript result:
 
@@ -151,7 +151,7 @@ with open("audio.wav", "rb") as f:
 ```
 
 </Tab>
-<Tab value="Node.js">
+<Tab value="Node.js" id="node">
 
 This creates a read stream from `audio.wav`, sends it to Aldea for transcription, and logs the result. The `response?.result ?? response` pattern handles different SDK response wrapper versions:
 
@@ -168,7 +168,7 @@ console.log(result.results.channels[0].alternatives[0].transcript);
 ```
 
 </Tab>
-<Tab value="Go">
+<Tab value="Go" id="go">
 
 This sends `audio.wav` to Aldea using the SDK's `DoFile()` method. The response is unmarshalled into a `Response` struct, and the transcript is extracted from the first channel's top alternative:
 
@@ -189,7 +189,7 @@ fmt.Println(resp.Results.Channels[0].Alternatives[0].Transcript)
 Streaming verification confirms that WebSocket connections work with the Aldea backend. This example connects to a live audio stream and prints transcripts as they arrive.
 
 <Tabs items={['Node.js']}>
-<Tab value="Node.js">
+<Tab value="Node.js" id="node">
 
 This opens a WebSocket connection to `wss://api.aldea.ai/v1/listen` through the SDK, listens for transcript events, and streams audio from a live internet radio source. The `LiveTranscriptionEvents.Transcript` event fires each time the server sends a transcript message, and the `LiveTranscriptionEvents.Open` event fires once the connection is established:
 

@@ -9,13 +9,13 @@ URL transcription lets you transcribe audio that's hosted remotely, such as on c
 
 This is useful when you have audio files stored in services like Amazon S3, Google Cloud Storage, or any web server, and you want to avoid the overhead of downloading and re-uploading the file.
 
-<Tabs items={['Python', 'Node.js', 'Go', 'Rust']}>
-<Tab value="Python">
+<Tabs items={['Python', 'Node.js', 'Go', 'Rust']} groupId="language" persist updateAnchor>
+<Tab value="Python" id="python">
 
 ## Prerequisites
 
 - Python 3.8 or later
-- `httpx` installed (see [Setup & installation](/docs/integration/setup))
+- `httpx` installed. If you haven't already, follow the [set up and installation](/docs/integration/setup) guide.
 - A publicly accessible URL pointing to an audio file in a supported format
 
 ## Transcribe audio from a URL
@@ -90,7 +90,7 @@ Both approaches use the same API endpoint, authentication, query parameters, and
 You can customize transcriptions with query parameters for [smart formatting](/docs/concepts/transcript-formatting/smart-formatting), [speaker diarization](/docs/concepts/speech-intelligence/speaker-diarization), [language detection](/docs/concepts/speech-intelligence/language-detection), and more. See the [Parameters reference](/docs/api-reference/parameters) for the full list.
 
 </Tab>
-<Tab value="Node.js">
+<Tab value="Node.js" id="node">
 
 ## Prerequisites
 
@@ -161,7 +161,7 @@ Both approaches use the same API endpoint, authentication, query parameters, and
 You can customize transcriptions with query parameters for [smart formatting](/docs/concepts/transcript-formatting/smart-formatting), [speaker diarization](/docs/concepts/speech-intelligence/speaker-diarization), [language detection](/docs/concepts/speech-intelligence/language-detection), and more. See the [Parameters reference](/docs/api-reference/parameters) for the full list.
 
 </Tab>
-<Tab value="Go">
+<Tab value="Go" id="go">
 
 ## Prerequisites
 
@@ -263,11 +263,11 @@ Both approaches use the same API endpoint, authentication, query parameters, and
 You can customize transcriptions with query parameters for [smart formatting](/docs/concepts/transcript-formatting/smart-formatting), [speaker diarization](/docs/concepts/speech-intelligence/speaker-diarization), [language detection](/docs/concepts/speech-intelligence/language-detection), and more. See the [Parameters reference](/docs/api-reference/parameters) for the full list.
 
 </Tab>
-<Tab value="Rust">
+<Tab value="Rust" id="rust">
 
 ## Prerequisites
 
-- Rust 1.70 or later with `reqwest`, `tokio`, and `serde_json` in your `Cargo.toml` (see [Setup & installation](/docs/integration/setup))
+- Rust 1.70 or later with `reqwest`, `tokio`, and `serde_json` in your `Cargo.toml`, If you haven't already, follow the [set up and installation](/docs/integration/setup) guide.
 - A publicly accessible URL pointing to an audio file in a supported format
 
 ## Transcribe audio from a URL

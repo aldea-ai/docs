@@ -9,13 +9,13 @@ Use file transcription when you have audio stored locally: recordings, voicemail
 
 The Aldea API accepts most common audio formats including MP3, WAV, AAC, FLAC, OGG, Opus, WebM, M4A, and raw PCM. For details on how pre-recorded and streaming transcription differ, see [Transcription modes](/docs/concepts/transcription-modes).
 
-<Tabs items={['Python', 'Node.js', 'Go', 'Rust']}>
-<Tab value="Python">
+<Tabs items={['Python', 'Node.js', 'Go', 'Rust']} groupId="language" persist updateAnchor>
+<Tab value="Python" id="python">
 
 ## Prerequisites
 
 - Python 3.8 or later
-- `httpx` installed (see [Setup & installation](/docs/integration/setup))
+- `httpx` installed. If you haven't already, follow the [set up and installation](/docs/integration/setup) guide.
 - A local audio file in a supported format (MP3, WAV, FLAC, etc.)
 
 ## Transcribe a local file
@@ -109,7 +109,7 @@ You can customize transcriptions with query parameters for [smart formatting](/d
 If the request fails, the API returns an HTTP error status with a description. See [Error codes](/docs/api-reference/error-codes) for the full list and troubleshooting guidance.
 
 </Tab>
-<Tab value="Node.js">
+<Tab value="Node.js" id="node">
 
 ## Prerequisites
 
@@ -198,7 +198,7 @@ You can customize transcriptions with query parameters for [smart formatting](/d
 If the request fails, the API returns an HTTP error status with a description. See [Error codes](/docs/api-reference/error-codes) for the full list and troubleshooting guidance.
 
 </Tab>
-<Tab value="Go">
+<Tab value="Go" id="go">
 
 ## Prerequisites
 
@@ -319,11 +319,11 @@ You can customize transcriptions with query parameters for [smart formatting](/d
 If the request fails, the API returns an HTTP error status with a description. See [Error codes](/docs/api-reference/error-codes) for the full list and troubleshooting guidance.
 
 </Tab>
-<Tab value="Rust">
+<Tab value="Rust" id="rust">
 
 ## Prerequisites
 
-- Rust 1.70 or later with `reqwest`, `tokio`, and `serde_json` in your `Cargo.toml` (see [Setup & installation](/docs/integration/setup))
+- Rust 1.70 or later with `reqwest`, `tokio`, and `serde_json` in your `Cargo.toml`. If you haven't already, follow the [set up and installation](/docs/integration/setup) guide.
 - A local audio file in a supported format (MP3, WAV, FLAC, etc.)
 
 ## Transcribe a local file
