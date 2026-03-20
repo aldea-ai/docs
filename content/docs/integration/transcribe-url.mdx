@@ -5,9 +5,9 @@ description: Transcribe audio from a URL using the Aldea API
 
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
-URL transcription lets you transcribe audio that's hosted remotely, such as on cloud storage, a CDN, or any publicly accessible URL, without downloading it to your machine first. The Aldea API fetches the audio directly from the URL, transcribes it, and returns the result.
+With URL transcription, you transcribe audio hosted remotely on cloud storage, a CDN, or any publicly accessible URL without downloading it to your machine first. You download the audio, send the bytes to the API, and get the transcript back.
 
-This is useful when you have audio files stored in services like Amazon S3, Google Cloud Storage, or any web server, and you want to avoid the overhead of downloading and re-uploading the file.
+This approach is useful when your audio files are stored in services like Amazon S3, Google Cloud Storage, or any web server.
 
 <Tabs items={['Python', 'Node.js', 'Go', 'Rust']} groupId="language" persist updateAnchor>
 <Tab value="Python" id="python">
@@ -20,7 +20,7 @@ This is useful when you have audio files stored in services like Amazon S3, Goog
 
 ## Transcribe audio from a URL
 
-The following example downloads audio from a public URL and sends it to the Aldea API for transcription:
+In this example, you download audio from a public URL and send it to the Aldea API for transcription:
 
 ```python title="transcribe_url.py"
 import os
@@ -66,16 +66,16 @@ python transcribe_url.py
 
 ## How it works
 
-To transcribe from a URL, you follow three steps: download the audio, send it to the API, and extract the transcript from the response.
+To transcribe from a URL, you download the audio, send it to the API, and extract the transcript from the response:
 
 1. **Download the audio.** `httpx.get()` fetches the audio file from the URL. The `follow_redirects=True` parameter handles HTTP redirects automatically. This is important for URLs from storage services that often redirect to a CDN. The `timeout=30.0` prevents the request from hanging on slow connections.
 
-2. **POST to `/v1/listen`.** The downloaded audio bytes are sent to the Aldea API in the request body. This is the same endpoint and format used in [Transcribe a file](/docs/integration/transcribe-file). The only difference is where the audio comes from.
+2. **POST to `/v1/listen`.** You send the downloaded audio bytes to the Aldea API in the request body. This is the same endpoint and format used in [Transcribe a file](/docs/integration/transcribe-file). The only difference is where the audio comes from.
 
-3. **Parse the response.** The response structure is identical to file transcription. See the [response structure in Transcribe a file](/docs/integration/transcribe-file) for full field descriptions.
+3. **Parse the response.** The response structure is the same as file transcription. For full field descriptions, see the [response structure in Transcribe a file](/docs/integration/transcribe-file).
 
 <Callout type="info">
-The URL must be publicly accessible. If your audio is behind authentication (for example, a private S3 bucket), generate a pre-signed URL first. Pre-signed URLs are time-limited public URLs that grant temporary access to private resources.
+The URL must be publicly accessible. If your audio is behind authentication (for example, a private S3 bucket), generate a pre-signed URL first. A pre-signed URL is a time-limited public URL that grants temporary access to a private resource.
 </Callout>
 
 The approach is the same as [Transcribe a file](/docs/integration/transcribe-file): you're sending audio bytes to `POST /v1/listen`. The difference is just where the bytes come from:
@@ -99,7 +99,7 @@ You can customize transcriptions with query parameters for [smart formatting](/d
 
 ## Transcribe audio from a URL
 
-The following example downloads audio from a public URL and sends it to the Aldea API for transcription:
+In this example, you download audio from a public URL and send it to the Aldea API for transcription:
 
 ```javascript title="transcribe_url.js"
 const ALDEA_API_KEY = process.env.ALDEA_API_KEY;
@@ -137,16 +137,16 @@ node transcribe_url.js
 
 ## How it works
 
-To transcribe from a URL, you follow three steps: download the audio, send it to the API, and extract the transcript from the response.
+To transcribe from a URL, you download the audio, send it to the API, and extract the transcript from the response:
 
 1. **Download the audio.** `fetch()` retrieves the audio file from the URL. The response is read as an `ArrayBuffer` with `.arrayBuffer()`, which gives you the raw binary data. `fetch` follows redirects automatically, which is important for URLs from storage services that often redirect to a CDN.
 
-2. **POST to `/v1/listen`.** The downloaded audio bytes are sent to the Aldea API in the request body. This is the same endpoint and format used in [Transcribe a file](/docs/integration/transcribe-file). The only difference is where the audio comes from.
+2. **POST to `/v1/listen`.** You send the downloaded audio bytes to the Aldea API in the request body. This is the same endpoint and format used in [Transcribe a file](/docs/integration/transcribe-file). The only difference is where the audio comes from.
 
-3. **Parse the response.** The response structure is identical to file transcription. See the [response structure in Transcribe a file](/docs/integration/transcribe-file) for full field descriptions.
+3. **Parse the response.** The response structure is the same as file transcription. For full field descriptions, see the [response structure in Transcribe a file](/docs/integration/transcribe-file).
 
 <Callout type="info">
-The URL must be publicly accessible. If your audio is behind authentication (for example, a private S3 bucket), generate a pre-signed URL first. Pre-signed URLs are time-limited public URLs that grant temporary access to private resources.
+The URL must be publicly accessible. If your audio is behind authentication (for example, a private S3 bucket), generate a pre-signed URL first. A pre-signed URL is a time-limited public URL that grants temporary access to a private resource.
 </Callout>
 
 The approach is the same as [Transcribe a file](/docs/integration/transcribe-file): you're sending audio bytes to `POST /v1/listen`. The difference is just where the bytes come from:
@@ -170,7 +170,7 @@ You can customize transcriptions with query parameters for [smart formatting](/d
 
 ## Transcribe audio from a URL
 
-The following example downloads audio from a public URL and sends it to the Aldea API for transcription:
+In this example, you download audio from a public URL and send it to the Aldea API for transcription:
 
 ```go title="transcribe_url.go"
 package main
@@ -239,16 +239,16 @@ go run transcribe_url.go
 
 ## How it works
 
-To transcribe from a URL, you follow three steps: download the audio, send it to the API, and extract the transcript from the response.
+To transcribe from a URL, you download the audio, send it to the API, and extract the transcript from the response:
 
 1. **Download the audio.** `http.Get()` fetches the audio file from the URL. Go's HTTP client follows redirects automatically, which is important for URLs from storage services that often redirect to a CDN.
 
-2. **POST to `/v1/listen`.** The downloaded audio bytes are sent to the Aldea API in the request body. This is the same endpoint and format used in [Transcribe a file](/docs/integration/transcribe-file). The only difference is where the audio comes from.
+2. **POST to `/v1/listen`.** You send the downloaded audio bytes to the Aldea API in the request body. This is the same endpoint and format used in [Transcribe a file](/docs/integration/transcribe-file). The only difference is where the audio comes from.
 
-3. **Parse the response.** The response structure is identical to file transcription. See the [response structure in Transcribe a file](/docs/integration/transcribe-file) for full field descriptions.
+3. **Parse the response.** The response structure is the same as file transcription. For full field descriptions, see the [response structure in Transcribe a file](/docs/integration/transcribe-file).
 
 <Callout type="info">
-The URL must be publicly accessible. If your audio is behind authentication (for example, a private S3 bucket), generate a pre-signed URL first. Pre-signed URLs are time-limited public URLs that grant temporary access to private resources.
+The URL must be publicly accessible. If your audio is behind authentication (for example, a private S3 bucket), generate a pre-signed URL first. A pre-signed URL is a time-limited public URL that grants temporary access to a private resource.
 </Callout>
 
 The approach is the same as [Transcribe a file](/docs/integration/transcribe-file): you're sending audio bytes to `POST /v1/listen`. The difference is just where the bytes come from:
@@ -272,7 +272,7 @@ You can customize transcriptions with query parameters for [smart formatting](/d
 
 ## Transcribe audio from a URL
 
-The following example downloads audio from a public URL and sends it to the Aldea API for transcription:
+In this example, you download audio from a public URL and send it to the Aldea API for transcription:
 
 ```rust title="transcribe_url.rs"
 use serde_json::Value;
@@ -323,16 +323,16 @@ cargo run --bin transcribe_url
 
 ## How it works
 
-To transcribe from a URL, you follow three steps: download the audio, send it to the API, and extract the transcript from the response.
+To transcribe from a URL, you download the audio, send it to the API, and extract the transcript from the response:
 
 1. **Download the audio.** `reqwest::get(url).await?.bytes().await?` fetches the audio file into memory. `reqwest` follows redirects automatically, which is important for URLs from storage services that often redirect to a CDN.
 
-2. **POST to `/v1/listen`.** The downloaded audio bytes are sent to the Aldea API in the request body. This is the same endpoint and format used in [Transcribe a file](/docs/integration/transcribe-file). The only difference is where the audio comes from.
+2. **POST to `/v1/listen`.** You send the downloaded audio bytes to the Aldea API in the request body. This is the same endpoint and format used in [Transcribe a file](/docs/integration/transcribe-file). The only difference is where the audio comes from.
 
-3. **Parse the response.** The response structure is identical to file transcription. See the [response structure in Transcribe a file](/docs/integration/transcribe-file) for full field descriptions.
+3. **Parse the response.** The response structure is the same as file transcription. For full field descriptions, see the [response structure in Transcribe a file](/docs/integration/transcribe-file).
 
 <Callout type="info">
-The URL must be publicly accessible. If your audio is behind authentication (for example, a private S3 bucket), generate a pre-signed URL first. Pre-signed URLs are time-limited public URLs that grant temporary access to private resources.
+The URL must be publicly accessible. If your audio is behind authentication (for example, a private S3 bucket), generate a pre-signed URL first. A pre-signed URL is a time-limited public URL that grants temporary access to a private resource.
 </Callout>
 
 The approach is the same as [Transcribe a file](/docs/integration/transcribe-file): you're sending audio bytes to `POST /v1/listen`. The difference is just where the bytes come from:

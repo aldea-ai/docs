@@ -20,7 +20,7 @@ The Aldea API accepts most common audio formats including MP3, WAV, AAC, FLAC, O
 
 ## Transcribe a local file
 
-The following example reads an audio file from disk and sends it to the Aldea API for transcription:
+In this example, you read an audio file from disk and send it to the Aldea API for transcription:
 
 ```python title="transcribe_file.py"
 import os
@@ -61,7 +61,7 @@ python transcribe_file.py
 
 ## How it works
 
-To transcribe a file, you follow three steps: read the audio file, send it to the API, and extract the transcript from the response.
+To transcribe a file, you read the audio, send it to the API, and extract the transcript from the response:
 
 1. **Read the file.** `open("audio.wav", "rb").read()` loads the entire file into memory as raw bytes. The API detects the audio format automatically from the file contents, so you don't need to specify a content type.
 
@@ -71,7 +71,7 @@ To transcribe a file, you follow three steps: read the audio file, send it to th
 
 ## Response structure
 
-The API returns a JSON response with the following key fields:
+The API returns a JSON response. The key fields are:
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -118,7 +118,7 @@ If the request fails, the API returns an HTTP error status with a description. S
 
 ## Transcribe a local file
 
-The following example reads an audio file from disk and sends it to the Aldea API for transcription:
+In this example, you read an audio file from disk and send it to the Aldea API for transcription:
 
 ```javascript title="transcribe_file.js"
 import { readFileSync } from "node:fs";
@@ -150,7 +150,7 @@ node transcribe_file.js
 
 ## How it works
 
-To transcribe a file, you follow three steps: read the audio file, send it to the API, and extract the transcript from the response.
+To transcribe a file, you read the audio, send it to the API, and extract the transcript from the response:
 
 1. **Read the file.** `readFileSync("audio.wav")` loads the entire file into memory as a `Buffer`. The API detects the audio format automatically from the file contents, so you don't need to specify a content type.
 
@@ -160,7 +160,7 @@ To transcribe a file, you follow three steps: read the audio file, send it to th
 
 ## Response structure
 
-The API returns a JSON response with the following key fields:
+The API returns a JSON response. The key fields are:
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -207,7 +207,7 @@ If the request fails, the API returns an HTTP error status with a description. S
 
 ## Transcribe a local file
 
-The following example reads an audio file from disk and sends it to the Aldea API for transcription:
+In this example, you read an audio file from disk and send it to the Aldea API for transcription:
 
 ```go title="transcribe_file.go"
 package main
@@ -271,17 +271,17 @@ go run transcribe_file.go
 
 ## How it works
 
-To transcribe a file, you follow three steps: read the audio file, send it to the API, and extract the transcript from the response.
+To transcribe a file, you read the audio, send it to the API, and extract the transcript from the response:
 
 1. **Read the file.** `os.ReadFile("audio.wav")` loads the entire file into memory as a byte slice. The API detects the audio format automatically from the file contents, so you don't need to set a content type.
 
 2. **POST to `/v1/listen`.** `http.NewRequest` builds a POST request with the audio bytes as the body. The `Authorization` header authenticates the request with your API key using the `Bearer` scheme.
 
-3. **Parse the response.** The response body is read with `io.ReadAll` and unmarshalled into a struct that mirrors the JSON structure. Go's typed struct fields give you compile-time safety when accessing `Results.Channels[0].Alternatives[0].Transcript`.
+3. **Parse the response.** You read the response body with `io.ReadAll` and unmarshal it into a struct that mirrors the JSON structure. Go's typed struct fields give you compile-time safety when you access `Results.Channels[0].Alternatives[0].Transcript`.
 
 ## Response structure
 
-The API returns a JSON response with the following key fields:
+The API returns a JSON response. The key fields are:
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -328,7 +328,7 @@ If the request fails, the API returns an HTTP error status with a description. S
 
 ## Transcribe a local file
 
-The following example reads an audio file from disk and sends it to the Aldea API for transcription:
+In this example, you read an audio file from disk and send it to the Aldea API for transcription:
 
 ```rust title="transcribe_file.rs"
 use serde_json::Value;
@@ -376,17 +376,17 @@ cargo run --bin transcribe_file
 
 ## How it works
 
-To transcribe a file, you follow three steps: read the audio file, send it to the API, and extract the transcript from the response.
+To transcribe a file, you read the audio, send it to the API, and extract the transcript from the response:
 
 1. **Read the file.** `tokio::fs::read("audio.wav")` loads the entire file into a `Vec<u8>`. The API detects the audio format automatically from the file contents, so you don't need to set a content type.
 
 2. **POST to `/v1/listen`.** `reqwest::Client::new().post(url)` builds a POST request. The `.header("Authorization", ...)` call adds Bearer authentication, and `.body(audio_data)` attaches the raw audio bytes.
 
-3. **Parse the response.** The response body is deserialized into a `serde_json::Value` and indexed to extract the transcript. The `as_str().unwrap_or("")` chain handles the case where a field is missing.
+3. **Parse the response.** You deserialize the response body into a `serde_json::Value` and index it to extract the transcript. The `as_str().unwrap_or("")` chain handles the case where a field is missing.
 
 ## Response structure
 
-The API returns a JSON response with the following key fields:
+The API returns a JSON response. The key fields are:
 
 | Field | Type | Description |
 |-------|------|-------------|

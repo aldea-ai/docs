@@ -5,11 +5,9 @@ description: Stream audio for real-time transcription using the Aldea API
 
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
-# Real-time streaming
+With streaming transcription, you receive results as audio is being spoken. You open a WebSocket connection to the Aldea API, send binary audio frames, and receive JSON transcript messages back in real time. Use streaming for live conversations, voice assistants, call center monitoring, live captioning, and any scenario where waiting for a full recording is not practical.
 
-Streaming transcription delivers results as audio is being spoken. You open a WebSocket connection to the Aldea API, send binary audio frames, and receive JSON transcript messages back in real time. This is ideal for live conversations, voice assistants, call center monitoring, live captioning, and any scenario where waiting for a full recording isn't practical.
-
-The WebSocket endpoint is `wss://api.aldea.ai/v1/listen`. You specify the audio encoding and sample rate as query parameters, authenticate with a `Bearer` token in the headers, and start sending audio. For background on how streaming differs from pre-recorded transcription, see [Transcription modes](/docs/concepts/transcription-modes).
+The WebSocket endpoint is `wss://api.aldea.ai/v1/listen`. You specify the audio encoding and sample rate as query parameters, authenticate with a `Bearer` token in the headers, and start sending audio. To learn how streaming differs from pre-recorded transcription, see [Transcription modes](/docs/concepts/transcription-modes).
 
 <Tabs items={['Python', 'Node.js', 'Go', 'Rust']} groupId="language" persist updateAnchor>
 <Tab value="Python" id="python">
@@ -18,11 +16,11 @@ The WebSocket endpoint is `wss://api.aldea.ai/v1/listen`. You specify the audio 
 
 - Python 3.8 or later
 - `websockets` installed. If you haven't already, follow the [set up and installation](/docs/integration/setup) guide.
-- An audio source to stream (a file, microphone, or network stream)
+- An audio source to stream such as a file, microphone, or network stream
 
 ## Stream audio from a file
 
-The following example opens a WebSocket connection to the Aldea API, streams a local audio file in chunks, and prints finalized transcripts as they arrive:
+In this example, you open a WebSocket connection to the Aldea API, stream a local audio file in chunks, and print finalized transcripts as they arrive:
 
 ```python title="stream.py"
 import asyncio
@@ -71,23 +69,23 @@ python stream.py
 
 ## How it works
 
-To stream audio in real time, you follow four steps: connect to the WebSocket, send audio frames, receive transcript messages as they arrive, and close the stream.
+To stream audio in real time, you connect to the WebSocket, send audio frames, receive transcript messages as they arrive, and close the stream:
 
 1. **Connect with authentication.** `websockets.connect()` opens a WebSocket to `wss://api.aldea.ai/v1/listen`. The `Authorization: Bearer` header authenticates the connection during the handshake. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio. Adjust these to match your audio format.
 
-2. **Send audio frames.** The `send_audio` coroutine reads the file in 4 KB chunks and sends each as a binary WebSocket frame. The chunk size isn't critical. 4096 bytes is a common default that balances latency and overhead. In production, you'd read from a microphone or network stream instead of a file.
+2. **Send audio frames.** In the `send_audio` coroutine, you read the file in 4 KB chunks and send each as a binary WebSocket frame. The chunk size is not critical. 4096 bytes is a common default that balances latency and overhead. In production, you would read from a microphone or network stream instead of a file.
 
-3. **Receive transcript messages.** The `receive_transcripts` coroutine listens for JSON messages from the server. It filters for `Results` messages where `is_final` is `true`. These are finalized transcript segments. Interim results (where `is_final` is `false`) contain partial transcripts that may change as more audio arrives.
+3. **Receive transcript messages.** In the `receive_transcripts` coroutine, you listen for JSON messages from the server. You filter for `Results` messages where `is_final` is `true`. These are finalized transcript segments. Interim results (where `is_final` is `false`) contain partial transcripts that may change as more audio arrives.
 
-4. **Close the stream.** Sending `{"type": "CloseStream"}` tells the server no more audio is coming. The server finishes processing any remaining audio, sends final results, and closes the connection. `asyncio.gather()` ensures both coroutines run concurrently and the connection stays open until both complete.
+4. **Close the stream.** You send `{"type": "CloseStream"}` to tell the server that no more audio is coming. The server finishes processing any remaining audio, sends final results, and closes the connection. `asyncio.gather()` runs both coroutines concurrently and keeps the connection open until both complete.
 
 <Callout type="warn">
-The `encoding` and `sample_rate` parameters must match your audio format. If they don't, the API will attempt to decode the audio incorrectly and you'll get garbled or empty transcripts. Common combinations: `linear16` at `16000` Hz for WAV, `mp3` for MP3 files, `opus` for Opus-encoded audio.
+The `encoding` and `sample_rate` parameters must match your audio format. If they do not match, the API attempts to decode the audio incorrectly and you get garbled or empty transcripts. Common combinations: `linear16` at `16000` Hz for WAV, `mp3` for MP3 files, `opus` for Opus-encoded audio.
 </Callout>
 
 ## Stream from a live source
 
-To stream from a live audio source instead of a file, replace the `send_audio` function. The following example streams from an internet radio station using `httpx`:
+To stream from a live audio source instead of a file, replace the `send_audio` function. In the following example, you stream from an internet radio station using `httpx`:
 
 ```bash
 pip install httpx
@@ -140,11 +138,11 @@ For details on streaming message types, response fields, and query parameters, s
 
 - Node.js 18 or later
 - `ws` installed. If you haven't already, follow the [set up and installation](/docs/integration/setup) guide.
-- An audio source to stream (a file, microphone, or network stream)
+- An audio source to stream such as a file, microphone, or network stream
 
 ## Stream audio from a file
 
-The following example opens a WebSocket connection to the Aldea API, streams a local audio file in chunks, and prints finalized transcripts as they arrive:
+In this example, you open a WebSocket connection to the Aldea API, stream a local audio file in chunks, and print finalized transcripts as they arrive:
 
 ```javascript title="stream.js"
 import { createReadStream } from "node:fs";
@@ -200,23 +198,23 @@ node stream.js
 
 ## How it works
 
-To stream audio in real time, you follow four steps: connect to the WebSocket, send audio frames, receive transcript messages as they arrive, and close the stream.
+To stream audio in real time, you connect to the WebSocket, send audio frames, receive transcript messages as they arrive, and close the stream:
 
 1. **Connect with authentication.** `new WebSocket(url, { headers })` opens a WebSocket to `wss://api.aldea.ai/v1/listen`. The `Authorization: Bearer` header authenticates the connection during the handshake. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio. Adjust these to match your audio format.
 
-2. **Send audio frames.** `createReadStream` reads the file in 4 KB chunks (`highWaterMark: 4096`). Each chunk is sent as a binary WebSocket frame with `ws.send()`. The chunk size isn't critical; 4096 bytes is a common default that balances latency and overhead. In production, you'd read from a microphone or network stream instead of a file.
+2. **Send audio frames.** You use `createReadStream` to read the file in 4 KB chunks (`highWaterMark: 4096`). Each chunk is sent as a binary WebSocket frame with `ws.send()`. The chunk size is not critical; 4096 bytes is a common default that balances latency and overhead. In production, you would read from a microphone or network stream instead of a file.
 
-3. **Receive transcript messages.** The `message` event handler parses each incoming JSON message. It filters for `Results` messages where `is_final` is `true`. These are finalized transcript segments. Interim results (where `is_final` is `false`) contain partial transcripts that may change as more audio arrives.
+3. **Receive transcript messages.** In the `message` event handler, you parse each incoming JSON message. You filter for `Results` messages where `is_final` is `true`. These are finalized transcript segments. Interim results (where `is_final` is `false`) contain partial transcripts that may change as more audio arrives.
 
-4. **Close the stream.** Sending `{"type": "CloseStream"}` tells the server no more audio is coming. The server finishes processing any remaining audio, sends final results, and closes the connection.
+4. **Close the stream.** You send `{"type": "CloseStream"}` to tell the server that no more audio is coming. The server finishes processing any remaining audio, sends final results, and closes the connection.
 
 <Callout type="warn">
-The `encoding` and `sample_rate` parameters must match your audio format. If they don't, the API will attempt to decode the audio incorrectly and you'll get garbled or empty transcripts. Common combinations: `linear16` at `16000` Hz for WAV, `mp3` for MP3 files, `opus` for Opus-encoded audio.
+The `encoding` and `sample_rate` parameters must match your audio format. If they do not match, the API attempts to decode the audio incorrectly and you get garbled or empty transcripts. Common combinations: `linear16` at `16000` Hz for WAV, `mp3` for MP3 files, `opus` for Opus-encoded audio.
 </Callout>
 
 ## Stream from a live source
 
-To stream from a live audio source instead of a file, replace the file read logic. The following example streams from an internet radio station:
+To stream from a live audio source instead of a file, replace the file read logic. In the following example, you stream from an internet radio station:
 
 ```javascript title="stream_live.js"
 import WebSocket from "ws";
@@ -268,11 +266,11 @@ For details on streaming message types, response fields, and query parameters, s
 
 - Go 1.21 or later
 - `github.com/gorilla/websocket` installed. If you haven't already, follow the [set up and installation](/docs/integration/setup) guide.
-- An audio source to stream (a file, microphone, or network stream)
+- An audio source to stream such as a file, microphone, or network stream
 
 ## Stream audio from a file
 
-The following example opens a WebSocket connection to the Aldea API, streams a local audio file in chunks, and prints finalized transcripts as they arrive:
+In this example, you open a WebSocket connection to the Aldea API, stream a local audio file in chunks, and print finalized transcripts as they arrive:
 
 ```go title="stream.go"
 package main
@@ -352,23 +350,23 @@ go run stream.go
 
 ## How it works
 
-To stream audio in real time, you follow four steps: connect to the WebSocket, send audio frames, receive transcript messages as they arrive, and close the stream.
+To stream audio in real time, you connect to the WebSocket, send audio frames, receive transcript messages as they arrive, and close the stream:
 
 1. **Connect with authentication.** `websocket.DefaultDialer.Dial` opens a WebSocket to `wss://api.aldea.ai/v1/listen`. The `Authorization: Bearer` header is passed via `http.Header`. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio.
 
-2. **Send audio frames.** The file is read into memory and sent in 4 KB chunks as binary WebSocket messages. The chunk size isn't critical; 4096 bytes is a common default that balances latency and overhead.
+2. **Send audio frames.** You read the file into memory and send it in 4 KB chunks as binary WebSocket messages. The chunk size is not critical; 4096 bytes is a common default that balances latency and overhead.
 
-3. **Receive transcript messages.** A goroutine reads JSON messages from the server and filters for `Results` messages where `is_final` is `true`. These are finalized transcript segments.
+3. **Receive transcript messages.** In a goroutine, you read JSON messages from the server and filter for `Results` messages where `is_final` is `true`. These are finalized transcript segments.
 
-4. **Close the stream.** Sending `{"type":"CloseStream"}` tells the server no more audio is coming. The server finishes processing, sends final results, and closes the connection.
+4. **Close the stream.** You send `{"type":"CloseStream"}` to tell the server that no more audio is coming. The server finishes processing, sends final results, and closes the connection.
 
 <Callout type="warn">
-The `encoding` and `sample_rate` parameters must match your audio format. If they don't, the API will attempt to decode the audio incorrectly and you'll get garbled or empty transcripts. Common combinations: `linear16` at `16000` Hz for WAV, `mp3` for MP3 files, `opus` for Opus-encoded audio.
+The `encoding` and `sample_rate` parameters must match your audio format. If they do not match, the API attempts to decode the audio incorrectly and you get garbled or empty transcripts. Common combinations: `linear16` at `16000` Hz for WAV, `mp3` for MP3 files, `opus` for Opus-encoded audio.
 </Callout>
 
 ## Stream from a live source
 
-To stream from a live audio source instead of a file, replace the file read with an HTTP stream. The following example streams from an internet radio station:
+To stream from a live audio source instead of a file, replace the file read with an HTTP stream. In the following example, you stream from an internet radio station:
 
 ```go title="stream_live.go"
 package main
@@ -453,11 +451,11 @@ For details on streaming message types, response fields, and query parameters, s
 ## Prerequisites
 
 - Rust 1.70 or later with `tokio-tungstenite`, `futures`, `serde`, `serde_json`, and `reqwest` in your `Cargo.toml` . If you haven't already, follow the [set up and installation](/docs/integration/setup) guide.
-- An audio source to stream (a file, microphone, or network stream)
+- An audio source to stream such as a file, microphone, or network stream
 
 ## Stream audio from a file
 
-The following example opens a WebSocket connection to the Aldea API, streams a local audio file in chunks, and prints finalized transcripts as they arrive:
+In this example, you open a WebSocket connection to the Aldea API, stream a local audio file in chunks, and print finalized transcripts as they arrive:
 
 ```rust title="stream.rs"
 use futures::{SinkExt, StreamExt};
@@ -559,23 +557,23 @@ cargo run --bin stream
 
 ## How it works
 
-To stream audio in real time, you follow four steps: connect to the WebSocket, send audio frames, receive transcript messages as they arrive, and close the stream.
+To stream audio in real time, you connect to the WebSocket, send audio frames, receive transcript messages as they arrive, and close the stream:
 
 1. **Connect with authentication.** `Request::builder()` constructs a WebSocket upgrade request with the `Authorization: Bearer` header. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio.
 
-2. **Send audio frames.** The file is read into memory and sent in 4 KB chunks as binary WebSocket messages using `write.send(Message::Binary(...))`. The chunk size isn't critical; 4096 bytes is a common default that balances latency and overhead.
+2. **Send audio frames.** You read the file into memory and send it in 4 KB chunks as binary WebSocket messages using `write.send(Message::Binary(...))`. The chunk size is not critical; 4096 bytes is a common default that balances latency and overhead.
 
-3. **Receive transcript messages.** A `tokio::spawn` task reads JSON messages from the server, deserializes them into typed structs, and filters for `Results` messages where `is_final` is `true`. These are finalized transcript segments.
+3. **Receive transcript messages.** You spawn a task with `tokio::spawn` that reads JSON messages from the server, deserializes them into typed structs, and filters for `Results` messages where `is_final` is `true`. These are finalized transcript segments.
 
-4. **Close the stream.** Sending `{"type":"CloseStream"}` tells the server no more audio is coming. The server finishes processing, sends final results, and closes the connection.
+4. **Close the stream.** You send `{"type":"CloseStream"}` to tell the server that no more audio is coming. The server finishes processing, sends final results, and closes the connection.
 
 <Callout type="warn">
-The `encoding` and `sample_rate` parameters must match your audio format. If they don't, the API will attempt to decode the audio incorrectly and you'll get garbled or empty transcripts. Common combinations: `linear16` at `16000` Hz for WAV, `mp3` for MP3 files, `opus` for Opus-encoded audio.
+The `encoding` and `sample_rate` parameters must match your audio format. If they do not match, the API attempts to decode the audio incorrectly and you get garbled or empty transcripts. Common combinations: `linear16` at `16000` Hz for WAV, `mp3` for MP3 files, `opus` for Opus-encoded audio.
 </Callout>
 
 ## Stream from a live source
 
-To stream from a live audio source instead of a file, replace the file read with an HTTP stream. The following example streams from an internet radio station:
+To stream from a live audio source instead of a file, replace the file read with an HTTP stream. In the following example, you stream from an internet radio station:
 
 ```rust title="stream_live.rs"
 use futures::{SinkExt, StreamExt};
