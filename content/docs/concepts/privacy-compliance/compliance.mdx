@@ -1,26 +1,54 @@
 ---
-title: Compliance
-description: HIPAA readiness, data sovereignty, and self-hosting options
+title: Enterprise compliance
+description: HIPAA readiness, data handling, and self-hosting options for enterprise deployments.
 ---
 
-Aldea is built with enterprise security and regulatory requirements in mind.
+Aldea is built with enterprise security and regulatory requirements in mind. In this article, you learn how Aldea handles data, what compliance frameworks it supports, and how it enables organizations to comply with required data governance needs.
+
+## Why compliance matters
+
+Speech-to-text systems process some of the most sensitive data an organization handles. Audio recordings can contain protected health information (PHI), financial data, legal testimony, personal conversations, and proprietary business information.
+
+Unlike text-based systems where you control what data is submitted, audio captures everything that's spoken. A patient on a telehealth call might say their name, date of birth, and medical history in one sentence. A customer calling a bank might read out their full account number. This makes speech-to-text platforms a critical component in an organization's data governance strategy.
+
+Compliance in this context means ensuring that:
+
+- Audio and transcript data is handled according to the regulatory frameworks that apply to your industry.
+- Data exposure is minimized for both data in transit and at rest.
+- Your organization has the controls it needs to meet its legal and contractual obligations.
 
 ## HIPAA
 
-Aldea offers HIPAA compliance with a Business Associate Agreement (BAA) for organizations that handle protected health information (PHI). Contact us to set up a BAA for your account.
+Aldea offers HIPAA compliance with a Business Associate Agreement (BAA) for organizations that handle protected health information (PHI). A BAA is a legal contract between Aldea and your organization that defines how PHI is handled, safeguarded, and reported in the event of a breach.
+
+If your application processes audio that might contain PHI such as telehealth visits, clinical dictation, or patient intake calls, a BAA is required before you can use a third-party transcription service.
 
 ## Data handling
 
-- **No audio storage.** Audio data is processed in real time and not persisted after transcription completes.
-- **Encrypted in transit.** All API communication uses TLS encryption (HTTPS / WSS).
+Aldea applies the following data handling practices by default:
+
+- **No audio storage:** Audio data is processed in real time and is not persisted after transcription completes. Once a streaming session ends or a pre-recorded file is processed, the audio is discarded.
+- **No transcript storage:** Transcript results are delivered to your application and are not stored on Aldea's servers.
+- **Encrypted in transit:** All API communication uses TLS encryption (HTTPS for REST, WSS for WebSocket). Audio and transcript data is never transmitted in plaintext.
+
+These defaults mean that Aldea operates as a *stateless processor* where data flows through the system but isn't retained. This significantly reduces the compliance surface for your organization.
 
 ## Self-hosting
 
-For organizations with strict data sovereignty requirements, Aldea offers self-hosted deployment options. Run the transcription engine in your own infrastructure to keep all audio and transcript data within your controlled environment.
+For organizations with strict data sovereignty requirements, Aldea offers self-hosted deployment options. Self-hosting lets you run the full transcription engine within your own infrastructure, so that audio and transcript data never leaves your controlled environment.
 
-Contact [sales@aldea.ai](mailto:sales@aldea.ai) for self-hosting and enterprise compliance inquiries.
+Self-hosting is appropriate when:
 
-## Next steps
+- **Regulatory requirements** mandate that data stays within a specific geographic region or network boundary.
+- **Security policies** prohibit sending audio to third-party cloud services.
+- **Air-gapped environments** require processing without any external network access.
+
+Self-hosted deployments support the same API surface as the cloud service, so your application code doesn't need to change.
+
+<Callout type="info">
+Contact [sales@aldea.ai](mailto:sales@aldea.ai) to set up a BAA, discuss self-hosting options, or learn more about enterprise compliance.
+</Callout>
+
+## Related content
 
 - [PII redaction](/docs/concepts/privacy-compliance/pii-redaction) to automatically remove sensitive data from transcripts
-- [API reference](/docs/api-reference)

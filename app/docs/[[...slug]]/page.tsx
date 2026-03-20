@@ -18,8 +18,21 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
 
   const MDX = page.data.body;
 
+  // Deduplicate TOC entries with the same title and depth
+  // (tabbed content produces repeated headings like "Prerequisites", "How it works")
+  // Title is a JSX element, so we use the URL anchor for dedup.
+  // Fumadocs appends -1, -2, etc. to duplicate anchors, so we strip those suffixes.
+  const seen = new Set<string>();
+  const toc = page.data.toc.filter((item) => {
+    const baseUrl = item.url.replace(/-\d+$/, "");
+    const key = `${item.depth}-${baseUrl}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
   return (
-    <DocsPage toc={page.data.toc} full={page.data.full}>
+    <DocsPage toc={toc} full={page.data.full}>
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">

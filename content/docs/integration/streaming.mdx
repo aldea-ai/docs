@@ -5,27 +5,654 @@ description: Stream audio for real-time transcription using the Aldea API
 
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
-# Real-time streaming
+With real-time streaming transcription, you receive results as audio is being spoken. You open a WebSocket connection to the Aldea API, send binary audio frames, and receive JSON transcript messages back in real time. This is useful for streaming for live conversations, voice assistants, call center monitoring, live captioning, and any scenario where waiting for a full recording is not practical.
 
-<Tabs items={['Python', 'Node.js', 'Go', 'Rust']}>
-<Tab value="Python">
+The WebSocket endpoint is `wss://api.aldea.ai/v1/listen`. You specify the audio encoding and sample rate as query parameters, authenticate with a `Bearer` token in the headers, and start sending audio. To learn how streaming differs from pre-recorded transcription, see [Transcription modes](/docs/concepts/transcription-modes).
 
-Stream audio for real-time transcription using Python.
+<Tabs items={['Python', 'Node.js', 'Go', 'Rust']} groupId="language" persist updateAnchor>
+<Tab value="Python" id="python">
+
+## Prerequisites
+
+- Python 3.8 or later
+- `websockets` installed. If you haven't already, follow the [set up and installation](/docs/integration/setup) guide.
+- An audio source to stream such as a file, microphone, or network stream
+
+## Stream audio from a file
+
+In this example, you open a WebSocket connection to the Aldea API, stream a local audio file in chunks, and print finalized transcripts as they arrive:
+
+```python title="stream.py"
+import asyncio
+import json
+import os
+import websockets
+
+ALDEA_API_KEY = os.environ["ALDEA_API_KEY"]
+AUDIO_FILE = "audio.wav"
+WS_URL = "wss://api.aldea.ai/v1/listen?encoding=linear16&sample_rate=16000"
+
+async def stream():
+    # Authenticate using a Bearer token in the WebSocket handshake headers
+    headers = {"Authorization": f"Bearer {ALDEA_API_KEY}"}
+
+    async with websockets.connect(WS_URL, additional_headers=headers) as ws:
+
+        async def send_audio():
+            """Read audio from a file and send it in 4 KB chunks."""
+            with open(AUDIO_FILE, "rb") as f:
+                while chunk := f.read(4096):
+                    await ws.send(chunk)
+            # Signal the server that no more audio is coming
+            await ws.send(json.dumps({"type": "CloseStream"}))
+
+        async def receive_transcripts():
+            """Listen for messages and print final transcripts."""
+            async for message in ws:
+                data = json.loads(message)
+                if data.get("type") == "Results" and data.get("is_final"):
+                    transcript = data["channel"]["alternatives"][0]["transcript"]
+                    if transcript:
+                        print(transcript)
+
+        # Send and receive concurrently
+        await asyncio.gather(send_audio(), receive_transcripts())
+
+asyncio.run(stream())
+```
+
+Run it:
+
+```bash
+python stream.py
+```
+
+## How it works
+
+To stream audio in real time, you connect to the WebSocket, send audio frames, receive transcript messages as they arrive, and close the stream:
+
+1. **Connect with authentication:** `websockets.connect()` opens a WebSocket to `wss://api.aldea.ai/v1/listen`. The `Authorization: Bearer` header authenticates the connection during the handshake. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio. You can adjust these to match your audio format.
+
+2. **Send audio frames:** In the `send_audio` coroutine, you read the file in 4 KB chunks and send each as a binary WebSocket frame. The chunk size is not critical. 4096 bytes is a common default that balances latency and overhead. In production, you would read from a microphone or network stream instead of a file.
+
+3. **Receive transcript messages:** In the `receive_transcripts` coroutine, you listen for JSON messages from the server. You filter for `Results` messages where `is_final` is `true`. These are finalized transcript segments. Interim results (where `is_final` is `false`) contain partial transcripts that may change as more audio arrives.
+
+4. **Close the stream:** You send `{"type": "CloseStream"}` to tell the server that no more audio is coming. The server finishes processing any remaining audio, sends final results, and closes the connection. `asyncio.gather()` runs both coroutines concurrently and keeps the connection open until both complete.
+
+## Stream from a live source
+
+To stream from a live audio source instead of a file, replace the `send_audio` function. In the following example, you stream from an internet radio station using `httpx`:
+
+```bash
+pip install httpx
+```
+
+```python title="stream_live.py"
+import asyncio
+import json
+import os
+import httpx
+import websockets
+
+ALDEA_API_KEY = os.environ["ALDEA_API_KEY"]
+STREAM_URL = "http://icecast.omroep.nl/radio1-bb-mp3"
+WS_URL = "wss://api.aldea.ai/v1/listen?encoding=mp3"
+
+async def stream_live():
+    headers = {"Authorization": f"Bearer {ALDEA_API_KEY}"}
+
+    async with websockets.connect(WS_URL, additional_headers=headers) as ws:
+
+        async def send_audio():
+            """Stream audio from a live source."""
+            with httpx.stream("GET", STREAM_URL) as r:
+                for chunk in r.iter_bytes(4096):
+                    await ws.send(chunk)
+
+        async def receive_transcripts():
+            """Print final transcripts as they arrive."""
+            async for message in ws:
+                data = json.loads(message)
+                if data.get("type") == "Results" and data.get("is_final"):
+                    transcript = data["channel"]["alternatives"][0]["transcript"]
+                    if transcript:
+                        print(transcript)
+
+        await asyncio.gather(send_audio(), receive_transcripts())
+
+asyncio.run(stream_live())
+```
+
+The only differences from the file example are the audio source (`httpx.stream` instead of `open`) and the encoding parameter (`mp3` instead of `linear16`).
 
 </Tab>
-<Tab value="Node.js">
+<Tab value="Node.js" id="node">
 
-Stream audio for real-time transcription using Node.js.
+## Prerequisites
+
+- Node.js 18 or later
+- `ws` installed. If you haven't already, follow the [set up and installation](/docs/integration/setup) guide.
+- An audio source to stream such as a file, microphone, or network stream
+
+## Stream audio from a file
+
+In this example, you open a WebSocket connection to the Aldea API, stream a local audio file in chunks, and print finalized transcripts as they arrive:
+
+```javascript title="stream.js"
+import { createReadStream } from "node:fs";
+import WebSocket from "ws";
+
+const ALDEA_API_KEY = process.env.ALDEA_API_KEY;
+const AUDIO_FILE = "audio.wav";
+const WS_URL = "wss://api.aldea.ai/v1/listen?encoding=linear16&sample_rate=16000";
+
+const ws = new WebSocket(WS_URL, {
+  headers: { "Authorization": `Bearer ${ALDEA_API_KEY}` },
+});
+
+ws.on("open", () => {
+  console.log("Connected, streaming audio...");
+
+  const stream = createReadStream(AUDIO_FILE, { highWaterMark: 4096 });
+
+  stream.on("data", (chunk) => {
+    ws.send(chunk);
+  });
+
+  stream.on("end", () => {
+    // Signal the server that no more audio is coming
+    ws.send(JSON.stringify({ type: "CloseStream" }));
+  });
+});
+
+ws.on("message", (data) => {
+  const message = JSON.parse(data);
+  if (message.type === "Results" && message.is_final) {
+    const transcript = message.channel?.alternatives?.[0]?.transcript;
+    if (transcript) {
+      console.log(transcript);
+    }
+  }
+});
+
+ws.on("error", (err) => {
+  console.error("WebSocket error:", err.message);
+});
+
+ws.on("close", () => {
+  console.log("Connection closed.");
+});
+```
+
+Run it:
+
+```bash
+node stream.js
+```
+
+## How it works
+
+To stream audio in real time, you connect to the WebSocket, send audio frames, receive transcript messages as they arrive, and close the stream:
+
+1. **Connect with authentication:** `new WebSocket(url, { headers })` opens a WebSocket to `wss://api.aldea.ai/v1/listen`. The `Authorization: Bearer` header authenticates the connection during the handshake. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio. Adjust these to match your audio format.
+
+2. **Send audio frames:** You use `createReadStream` to read the file in 4 KB chunks (`highWaterMark: 4096`). Each chunk is sent as a binary WebSocket frame with `ws.send()`. The chunk size is not critical; 4096 bytes is a common default that balances latency and overhead. In production, you would read from a microphone or network stream instead of a file.
+
+3. **Receive transcript messages:** In the `message` event handler, you parse each incoming JSON message. You filter for `Results` messages where `is_final` is `true`. These are finalized transcript segments. Interim results (where `is_final` is `false`) contain partial transcripts that may change as more audio arrives.
+
+4. **Close the stream:** You send `{"type": "CloseStream"}` to tell the server that no more audio is coming. The server finishes processing any remaining audio, sends final results, and closes the connection.
+
+## Stream from a live source
+
+To stream from a live audio source instead of a file, replace the file read logic. In the following example, you stream from an internet radio station:
+
+```javascript title="stream_live.js"
+import WebSocket from "ws";
+
+const ALDEA_API_KEY = process.env.ALDEA_API_KEY;
+const STREAM_URL = "http://icecast.omroep.nl/radio1-bb-mp3";
+const WS_URL = "wss://api.aldea.ai/v1/listen?encoding=mp3";
+
+const ws = new WebSocket(WS_URL, {
+  headers: { "Authorization": `Bearer ${ALDEA_API_KEY}` },
+});
+
+ws.on("open", async () => {
+  console.log("Connected, streaming live audio...");
+
+  const response = await fetch(STREAM_URL);
+  const reader = response.body.getReader();
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    ws.send(value);
+  }
+});
+
+ws.on("message", (data) => {
+  const message = JSON.parse(data);
+  if (message.type === "Results" && message.is_final) {
+    const transcript = message.channel?.alternatives?.[0]?.transcript;
+    if (transcript) {
+      console.log(transcript);
+    }
+  }
+});
+
+ws.on("error", (err) => {
+  console.error("WebSocket error:", err.message);
+});
+```
+
+The only differences from the file example are the audio source (`fetch` stream instead of `createReadStream`) and the encoding parameter (`mp3` instead of `linear16`).
 
 </Tab>
-<Tab value="Go">
+<Tab value="Go" id="go">
 
-Stream audio for real-time transcription using Go.
+## Prerequisites
+
+- Go 1.21 or later
+- `github.com/gorilla/websocket` installed. If you haven't already, follow the [set up and installation](/docs/integration/setup) guide.
+- An audio source to stream such as a file, microphone, or network stream
+
+## Stream audio from a file
+
+In this example, you open a WebSocket connection to the Aldea API, stream a local audio file in chunks, and print finalized transcripts as they arrive:
+
+```go title="stream.go"
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"os"
+
+	"github.com/gorilla/websocket"
+)
+
+func main() {
+	apiKey := os.Getenv("ALDEA_API_KEY")
+	wsURL := "wss://api.aldea.ai/v1/listen?encoding=linear16&sample_rate=16000"
+
+	// Connect with authentication
+	headers := http.Header{}
+	headers.Set("Authorization", "Bearer "+apiKey)
+
+	conn, _, err := websocket.DefaultDialer.Dial(wsURL, headers)
+	if err != nil {
+		fmt.Println("Error connecting:", err)
+		return
+	}
+	defer conn.Close()
+
+	// Receive transcripts in a goroutine
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		for {
+			_, msg, err := conn.ReadMessage()
+			if err != nil {
+				return
+			}
+			var data struct {
+				Type    string `json:"type"`
+				IsFinal bool   `json:"is_final"`
+				Channel struct {
+					Alternatives []struct {
+						Transcript string `json:"transcript"`
+					} `json:"alternatives"`
+				} `json:"channel"`
+			}
+			json.Unmarshal(msg, &data)
+			if data.Type == "Results" && data.IsFinal && len(data.Channel.Alternatives) > 0 {
+				if t := data.Channel.Alternatives[0].Transcript; t != "" {
+					fmt.Println(t)
+				}
+			}
+		}
+	}()
+
+	// Read audio file and send in 4 KB chunks
+	audioData, _ := os.ReadFile("audio.wav")
+	for i := 0; i < len(audioData); i += 4096 {
+		end := i + 4096
+		if end > len(audioData) {
+			end = len(audioData)
+		}
+		conn.WriteMessage(websocket.BinaryMessage, audioData[i:end])
+	}
+
+	// Signal the server that no more audio is coming
+	conn.WriteMessage(websocket.TextMessage, []byte(`{"type":"CloseStream"}`))
+	<-done
+}
+```
+
+Run it:
+
+```bash
+go run stream.go
+```
+
+## How it works
+
+To stream audio in real time, you connect to the WebSocket, send audio frames, receive transcript messages as they arrive, and close the stream:
+
+1. **Connect with authentication:** `websocket.DefaultDialer.Dial` opens a WebSocket to `wss://api.aldea.ai/v1/listen`. The `Authorization: Bearer` header is passed via `http.Header`. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio.
+
+2. **Send audio frames:** You read the file into memory and send it in 4 KB chunks as binary WebSocket messages. The chunk size is not critical; 4096 bytes is a common default that balances latency and overhead.
+
+3. **Receive transcript messages:** In a goroutine, you read JSON messages from the server and filter for `Results` messages where `is_final` is `true`. These are finalized transcript segments.
+
+4. **Close the stream:** You send `{"type":"CloseStream"}` to tell the server that no more audio is coming. The server finishes processing, sends final results, and closes the connection.
+
+## Stream from a live source
+
+To stream from a live audio source instead of a file, replace the file read with an HTTP stream. In the following example, you stream from an internet radio station:
+
+```go title="stream_live.go"
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"os"
+
+	"github.com/gorilla/websocket"
+)
+
+func main() {
+	apiKey := os.Getenv("ALDEA_API_KEY")
+	streamURL := "http://icecast.omroep.nl/radio1-bb-mp3"
+	wsURL := "wss://api.aldea.ai/v1/listen?encoding=mp3"
+
+	headers := http.Header{}
+	headers.Set("Authorization", "Bearer "+apiKey)
+
+	conn, _, err := websocket.DefaultDialer.Dial(wsURL, headers)
+	if err != nil {
+		fmt.Println("Error connecting:", err)
+		return
+	}
+	defer conn.Close()
+
+	// Receive transcripts in a goroutine
+	go func() {
+		for {
+			_, msg, err := conn.ReadMessage()
+			if err != nil {
+				return
+			}
+			var data struct {
+				Type    string `json:"type"`
+				IsFinal bool   `json:"is_final"`
+				Channel struct {
+					Alternatives []struct {
+						Transcript string `json:"transcript"`
+					} `json:"alternatives"`
+				} `json:"channel"`
+			}
+			json.Unmarshal(msg, &data)
+			if data.Type == "Results" && data.IsFinal && len(data.Channel.Alternatives) > 0 {
+				if t := data.Channel.Alternatives[0].Transcript; t != "" {
+					fmt.Println(t)
+				}
+			}
+		}
+	}()
+
+	// Stream audio from a live source
+	resp, err := http.Get(streamURL)
+	if err != nil {
+		fmt.Println("Error fetching stream:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	buf := make([]byte, 4096)
+	for {
+		n, err := resp.Body.Read(buf)
+		if n > 0 {
+			conn.WriteMessage(websocket.BinaryMessage, buf[:n])
+		}
+		if err != nil {
+			break
+		}
+	}
+}
+```
+
+The only differences from the file example are the audio source (`http.Get` stream instead of `os.ReadFile`) and the encoding parameter (`mp3` instead of `linear16`).
 
 </Tab>
-<Tab value="Rust">
+<Tab value="Rust" id="rust">
 
-Stream audio for real-time transcription using Rust.
+## Prerequisites
+
+- Rust 1.70 or later with `tokio-tungstenite`, `futures`, `serde`, `serde_json`, and `reqwest` in your `Cargo.toml` . If you haven't already, follow the [set up and installation](/docs/integration/setup) guide.
+- An audio source to stream such as a file, microphone, or network stream
+
+## Stream audio from a file
+
+In this example, you open a WebSocket connection to the Aldea API, stream a local audio file in chunks, and print finalized transcripts as they arrive:
+
+```rust title="stream.rs"
+use futures::{SinkExt, StreamExt};
+use serde::Deserialize;
+use tokio_tungstenite::{
+    connect_async,
+    tungstenite::{http::Request, Message},
+};
+
+#[derive(Debug, Deserialize)]
+struct TranscriptResponse {
+    #[serde(rename = "type")]
+    msg_type: Option<String>,
+    is_final: Option<bool>,
+    channel: Option<Channel>,
+}
+
+#[derive(Debug, Deserialize)]
+struct Channel {
+    alternatives: Option<Vec<Alternative>>,
+}
+
+#[derive(Debug, Deserialize)]
+struct Alternative {
+    transcript: Option<String>,
+}
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let api_key = std::env::var("ALDEA_API_KEY").expect("ALDEA_API_KEY not set");
+    let ws_url = "wss://api.aldea.ai/v1/listen?encoding=linear16&sample_rate=16000";
+
+    // Connect with authentication
+    let request = Request::builder()
+        .uri(ws_url)
+        .header("Authorization", format!("Bearer {}", api_key))
+        .header("Host", "api.aldea.ai")
+        .header("Connection", "Upgrade")
+        .header("Upgrade", "websocket")
+        .header("Sec-WebSocket-Version", "13")
+        .header(
+            "Sec-WebSocket-Key",
+            tokio_tungstenite::tungstenite::handshake::client::generate_key(),
+        )
+        .body(())?;
+
+    let (ws, _) = connect_async(request).await?;
+    let (mut write, mut read) = ws.split();
+
+    // Receive transcripts in a background task
+    tokio::spawn(async move {
+        while let Some(Ok(msg)) = read.next().await {
+            if let Message::Text(text) = msg {
+                if let Ok(data) = serde_json::from_str::<TranscriptResponse>(&text) {
+                    let is_results = data.msg_type.as_deref() == Some("Results");
+                    let is_final = data.is_final.unwrap_or(false);
+                    if is_results && is_final {
+                        if let Some(transcript) = data
+                            .channel
+                            .and_then(|c| c.alternatives)
+                            .and_then(|a| a.into_iter().next())
+                            .and_then(|a| a.transcript)
+                        {
+                            if !transcript.is_empty() {
+                                println!("{}", transcript);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Read audio file and send in 4 KB chunks
+    let audio_data = tokio::fs::read("audio.wav").await?;
+    for chunk in audio_data.chunks(4096) {
+        write.send(Message::Binary(chunk.to_vec())).await?;
+    }
+
+    // Signal the server that no more audio is coming
+    write
+        .send(Message::Text(
+            r#"{"type":"CloseStream"}"#.to_string(),
+        ))
+        .await?;
+
+    // Give the receiver task time to process final messages
+    tokio::time::sleep(std::time::Duration::from_secs(3)).await;
+
+    Ok(())
+}
+```
+
+Run it:
+
+```bash
+cargo run --bin stream
+```
+
+## How it works
+
+To stream audio in real time, you connect to the WebSocket, send audio frames, receive transcript messages as they arrive, and close the stream:
+
+1. **Connect with authentication:** `Request::builder()` constructs a WebSocket upgrade request with the `Authorization: Bearer` header. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio.
+
+2. **Send audio frames:** You read the file into memory and send it in 4 KB chunks as binary WebSocket messages using `write.send(Message::Binary(...))`. The chunk size is not critical; 4096 bytes is a common default that balances latency and overhead.
+
+3. **Receive transcript messages:** You spawn a task with `tokio::spawn` that reads JSON messages from the server, deserializes them into typed structs, and filters for `Results` messages where `is_final` is `true`. These are finalized transcript segments.
+
+4. **Close the stream:** You send `{"type":"CloseStream"}` to tell the server that no more audio is coming. The server finishes processing, sends final results, and closes the connection.
+
+## Stream from a live source
+
+To stream from a live audio source instead of a file, replace the file read with an HTTP stream. In the following example, you stream from an internet radio station:
+
+```rust title="stream_live.rs"
+use futures::{SinkExt, StreamExt};
+use serde::Deserialize;
+use tokio_tungstenite::{
+    connect_async,
+    tungstenite::{http::Request, Message},
+};
+
+#[derive(Debug, Deserialize)]
+struct TranscriptResponse {
+    #[serde(rename = "type")]
+    msg_type: Option<String>,
+    is_final: Option<bool>,
+    channel: Option<Channel>,
+}
+
+#[derive(Debug, Deserialize)]
+struct Channel {
+    alternatives: Option<Vec<Alternative>>,
+}
+
+#[derive(Debug, Deserialize)]
+struct Alternative {
+    transcript: Option<String>,
+}
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let api_key = std::env::var("ALDEA_API_KEY").expect("ALDEA_API_KEY not set");
+    let stream_url = "http://icecast.omroep.nl/radio1-bb-mp3";
+    let ws_url = "wss://api.aldea.ai/v1/listen?encoding=mp3";
+
+    let request = Request::builder()
+        .uri(ws_url)
+        .header("Authorization", format!("Bearer {}", api_key))
+        .header("Host", "api.aldea.ai")
+        .header("Connection", "Upgrade")
+        .header("Upgrade", "websocket")
+        .header("Sec-WebSocket-Version", "13")
+        .header(
+            "Sec-WebSocket-Key",
+            tokio_tungstenite::tungstenite::handshake::client::generate_key(),
+        )
+        .body(())?;
+
+    let (ws, _) = connect_async(request).await?;
+    let (mut write, mut read) = ws.split();
+
+    // Receive transcripts in a background task
+    tokio::spawn(async move {
+        while let Some(Ok(msg)) = read.next().await {
+            if let Message::Text(text) = msg {
+                if let Ok(data) = serde_json::from_str::<TranscriptResponse>(&text) {
+                    let is_results = data.msg_type.as_deref() == Some("Results");
+                    let is_final = data.is_final.unwrap_or(false);
+                    if is_results && is_final {
+                        if let Some(transcript) = data
+                            .channel
+                            .and_then(|c| c.alternatives)
+                            .and_then(|a| a.into_iter().next())
+                            .and_then(|a| a.transcript)
+                        {
+                            if !transcript.is_empty() {
+                                println!("{}", transcript);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Stream audio from a live source
+    let response = reqwest::get(stream_url).await?;
+    let mut audio_stream = response.bytes_stream();
+
+    while let Some(chunk) = audio_stream.next().await {
+        if let Ok(bytes) = chunk {
+            write.send(Message::Binary(bytes.to_vec())).await?;
+        }
+    }
+
+    Ok(())
+}
+```
+
+The only differences from the file example are the audio source (`reqwest::get` stream instead of `tokio::fs::read`) and the encoding parameter (`mp3` instead of `linear16`).
 
 </Tab>
 </Tabs>
+
+<Callout type="warn">
+The `encoding` and `sample_rate` parameters must match your audio format. If they do not match, the API attempts to decode the audio incorrectly and you get garbled or empty transcripts. Common combinations: `linear16` at `16000` Hz for WAV, `mp3` for MP3 files, `opus` for Opus-encoded audio.
+</Callout>
+
+For details on streaming message types, response fields, and query parameters, see [Streaming controls](/docs/concepts/streaming-controls/interim-results) and the [Parameters reference](/docs/api-reference/parameters).
+
+## Next steps
+
+- [Utterance detection](/docs/concepts/streaming-controls/utterance-detection) - detect when a speaker finishes a turn
+- [Endpointing](/docs/concepts/streaming-controls/endpointing) - fine-tune when transcript segments are finalized
+- [VAD events](/docs/concepts/streaming-controls/vad-events) - detect when speech starts and stops
+- [Transcribe a file](/docs/integration/transcribe-file) - transcribe pre-recorded audio instead

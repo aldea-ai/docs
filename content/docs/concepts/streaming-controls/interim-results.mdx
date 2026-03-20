@@ -1,25 +1,33 @@
 ---
 title: Interim results
-description: Get partial transcription results in real-time with interim_results=true
+description: Display partial transcription results in real time by using the interim_results parameter.
 ---
 
-Interim results provide partial transcripts while the speaker is still talking. The transcript updates progressively as more audio arrives, giving your application low-latency feedback before a sentence is finalized.
+Interim results provide partial transcripts while the speaker is still talking. The transcript updates progressively as more audio arrives, so you can display text with low latency before the server finalizes a sentence.
 
-## Usage
+In a non-streaming speech-to-text workflow, you send a complete audio file and wait for the full transcript. Streaming works differently in that audio flows to the server continuously, and the server sends back transcript data as it processes each chunk.
 
-Interim results are **enabled by default**. To disable them and receive only final transcripts, set `interim_results=false` in the WebSocket query string:
+Interim results are the server's best guess *so far*. As more audio arrives, the server refines its prediction. Think of it like watching someone type a message in a chat app: you see the words appear in real time, and occasionally earlier words change as the system corrects itself. When the server is confident in a segment, it marks the result as final, and the transcript for that segment won't change.
+
+This makes interim results ideal for live captioning, real-time transcription displays, and any experience where users expect to see text appear as they speak.
+
+## Enable or disable interim results
+
+Interim results are **enabled by default**. To receive only finalized transcripts, set `interim_results` to `false` in the WebSocket query string:
 
 ```bash
-# Default (interim results enabled)
+# Default behavior (interim results enabled)
 wss://api.aldea.ai/v1/listen?encoding=mp3
 
 # Disable interim results
 wss://api.aldea.ai/v1/listen?encoding=mp3&interim_results=false
 ```
 
+Disabling interim results is useful when you only need the final, stable transcript. For example, when saving transcripts to a database or feeding text into a downstream process that shouldn't act on uncertain data.
+
 ## How it works
 
-As audio streams in, the server sends `Results` messages. Each message contains two key fields:
+As audio streams in, the server sends `Results` messages. Each message includes fields that indicate the state of the transcript:
 
 | Field | Meaning |
 |-------|--------|
@@ -34,9 +42,11 @@ A typical sequence looks like:
 3. `is_final: true` returns `"Hello world, how are you?"`
 4. `speech_final: true` signals utterance complete
 
-Interim results let you display text as the user speaks (like live captions), while final results give you the stable transcript to store or process.
+Interim results let you display text as the speaker talks (like live captions). Final results give you the stable transcript to store or process.
 
 ## Example response
+
+The following example shows an interim `Results` message:
 
 ```json
 {

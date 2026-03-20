@@ -1,23 +1,33 @@
 ---
 title: Utterance detection
-description: Detect end of speech utterances with utterance_end_ms parameter
+description: Detect end of speech utterances by configuring the utterance_end_ms parameter.
 ---
 
-Utterance detection identifies when a speaker has finished a turn by monitoring for a configurable period of silence. When the silence threshold is reached, the server sends an `UtteranceEnd` message.
+Utterance detection identifies when a speaker has finished a turn by monitoring for a period of silence. When the silence period exceeds a threshold you specify, the server sends an `UtteranceEnd` message. 
 
-## Usage
+## Why do you need utterance detection? 
 
-Set the `utterance_end_ms` parameter to the silence duration (in milliseconds) that should trigger an utterance end:
+An *utterance* is a continuous segment of speech, that contains everything a person says before they stop talking. It might be a single sentence, several sentences, or even a few words. The key distinction is the silence that follows. For instance, when a speaker pauses long enough, that silence marks the boundary between one utterance and the next.
+
+In a conversation, utterances roughly correspond to "turns." For example, in a voice assistant interaction, the user's question is one utterance and the assistant's response is another. You can use utterance detection to segment conversations, trigger processing between turns, or build turn-based interaction flows.
+
+<Callout type="warn">
+Word timestamps must be enabled for `UtteranceEnd` events to fire. Word timestamps are included by default in `Results` messages.
+</Callout>
+
+## Configure the silence threshold
+
+To enable utterance detection, add the `utterance_end_ms` parameter in the WebSocket query string. You also specify the silence duration that should trigger an utterance end in milliseconds:
 
 ```bash
 wss://api.aldea.ai/v1/listen?utterance_end_ms=1000&encoding=mp3
 ```
 
-This example fires an `UtteranceEnd` event after 1 second of silence.
+This example fires an `UtteranceEnd` event after 1 second of silence. You choose a value based on your use case. A shorter threshold such as 500 ms responds quickly but might trigger during natural mid-thought pauses. On the other hand, a longer threshold such as 1500 ms is more reliable for detecting true turn endings but adds delay.
 
 ## UtteranceEnd message
 
-When the silence threshold is reached, the server sends:
+When the silence threshold is reached, the server sends a message like this:
 
 ```json
 {
@@ -33,9 +43,16 @@ When the silence threshold is reached, the server sends:
 | `channel` | Array indicating which channel detected the utterance end |
 | `last_word_end` | Timestamp (in seconds) of the last detected word |
 
-Word timestamps must be enabled for `UtteranceEnd` events to fire.
+## Utterance detection vs. endpointing
 
-## Next steps
+Both utterance detection and [endpointing](/docs/concepts/streaming-controls/endpointing) respond to silence, but they serve different purposes. Endpointing finalizes individual transcript segments or sentences within a turn. Utterance detection tells you when the entire turn is over. You can use both together such that endpointing finalizes sentences within a turn, and utterance detection tells you when the entire turn is over.
+
+| Feature | Purpose | Output |
+|---------|---------|--------|
+| **Endpointing** | Finalizes a transcript segment (`is_final: true`) | Updated `Results` message |
+| **Utterance detection** | Signals that a speaker finished a turn | Separate `UtteranceEnd` message |
+
+## Related content
 
 - [Endpointing](/docs/concepts/streaming-controls/endpointing) to fine-tune sentence finalization timing
 - [VAD events](/docs/concepts/streaming-controls/vad-events) to detect when speech starts

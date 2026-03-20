@@ -2,14 +2,18 @@
   "title": "Documentation",
   "pages": [
     "overview",
-    "getting-started",
-    "concepts",
-    "integration",
-    "guides",
+    "---Get started---",
+    "...getting-started",
+    "---Concepts---",
+    "...concepts",
+    "---Build with Aldea API Platform---",
+    "...integration",
+    "---Guides---", 
+    "...guides",
     "---API reference---",
-    "api-reference",
+    "...api-reference",
     "---Resources---",
-    "reference",
+    "...reference",
     "community-support"
   ]
 }
