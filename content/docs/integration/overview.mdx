@@ -21,7 +21,7 @@ The Aldea API provides two transcription modes, each with its own protocol and u
 |---|---|---|
 | **Protocol** | HTTPS (REST) | WebSocket |
 | **Endpoint** | `POST https://api.aldea.ai/v1/listen` | `wss://api.aldea.ai/v1/listen` |
-| **Auth** | `Authorization: Bearer org_...` | `Authorization: Bearer org_...` |
+| **Auth** | `Authorization: Bearer org_...` | `Sec-WebSocket-Protocol: token, org_...` |
 | **Input** | Audio bytes in request body | Binary audio frames over WebSocket |
 | **Output** | Single JSON response with full transcript | Stream of JSON messages (interim + final) |
 | **Use case** | Files, URLs, batch processing | Live audio, real-time captioning, voice assistants |

@@ -7,7 +7,7 @@ import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
 With real-time streaming transcription, you receive results as audio is being spoken. You open a WebSocket connection to the Aldea API, send binary audio frames, and receive JSON transcript messages back in real time. This is useful for streaming for live conversations, voice assistants, call center monitoring, live captioning, and any scenario where waiting for a full recording is not practical.
 
-The WebSocket endpoint is `wss://api.aldea.ai/v1/listen`. You specify the audio encoding and sample rate as query parameters, authenticate with a `Bearer` token in the headers, and start sending audio. To learn how streaming differs from pre-recorded transcription, see [Transcription modes](/docs/concepts/transcription-modes).
+The WebSocket endpoint is `wss://api.aldea.ai/v1/listen`. You specify the audio encoding and sample rate as query parameters, authenticate with the `Sec-WebSocket-Protocol` subprotocol header, and start sending audio. To learn how streaming differs from pre-recorded transcription, see [Transcription modes](/docs/concepts/transcription-modes).
 
 <Tabs items={['Python', 'Node.js', 'Go', 'Rust']} groupId="language" persist updateAnchor>
 <Tab value="Python" id="python">
@@ -33,8 +33,8 @@ AUDIO_FILE = "audio.wav"
 WS_URL = "wss://api.aldea.ai/v1/listen?encoding=linear16&sample_rate=16000"
 
 async def stream():
-    # Authenticate using a Bearer token in the WebSocket handshake headers
-    headers = {"Authorization": f"Bearer {ALDEA_API_KEY}"}
+    # Authenticate using the Sec-WebSocket-Protocol subprotocol header
+    headers = {"Sec-WebSocket-Protocol": f"token, {ALDEA_API_KEY}"}
 
     async with websockets.connect(WS_URL, additional_headers=headers) as ws:
 
@@ -71,7 +71,7 @@ python stream.py
 
 To stream audio in real time, you connect to the WebSocket, send audio frames, receive transcript messages as they arrive, and close the stream:
 
-1. **Connect with authentication:** `websockets.connect()` opens a WebSocket to `wss://api.aldea.ai/v1/listen`. The `Authorization: Bearer` header authenticates the connection during the handshake. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio. You can adjust these to match your audio format.
+1. **Connect with authentication:** `websockets.connect()` opens a WebSocket to `wss://api.aldea.ai/v1/listen`. The `Sec-WebSocket-Protocol` header authenticates the connection during the handshake by passing `token, <your-api-key>` as a subprotocol. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio. You can adjust these to match your audio format.
 
 2. **Send audio frames:** In the `send_audio` coroutine, you read the file in 4 KB chunks and send each as a binary WebSocket frame. The chunk size is not critical. 4096 bytes is a common default that balances latency and overhead. In production, you would read from a microphone or network stream instead of a file.
 
@@ -99,7 +99,7 @@ STREAM_URL = "http://icecast.omroep.nl/radio1-bb-mp3"
 WS_URL = "wss://api.aldea.ai/v1/listen?encoding=mp3"
 
 async def stream_live():
-    headers = {"Authorization": f"Bearer {ALDEA_API_KEY}"}
+    headers = {"Sec-WebSocket-Protocol": f"token, {ALDEA_API_KEY}"}
 
     async with websockets.connect(WS_URL, additional_headers=headers) as ws:
 
@@ -146,9 +146,7 @@ const ALDEA_API_KEY = process.env.ALDEA_API_KEY;
 const AUDIO_FILE = "audio.wav";
 const WS_URL = "wss://api.aldea.ai/v1/listen?encoding=linear16&sample_rate=16000";
 
-const ws = new WebSocket(WS_URL, {
-  headers: { "Authorization": `Bearer ${ALDEA_API_KEY}` },
-});
+const ws = new WebSocket(WS_URL, [`token`, ALDEA_API_KEY]);
 
 ws.on("open", () => {
   console.log("Connected, streaming audio...");
@@ -194,7 +192,7 @@ node stream.js
 
 To stream audio in real time, you connect to the WebSocket, send audio frames, receive transcript messages as they arrive, and close the stream:
 
-1. **Connect with authentication:** `new WebSocket(url, { headers })` opens a WebSocket to `wss://api.aldea.ai/v1/listen`. The `Authorization: Bearer` header authenticates the connection during the handshake. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio. Adjust these to match your audio format.
+1. **Connect with authentication:** `new WebSocket(url, protocols)` opens a WebSocket to `wss://api.aldea.ai/v1/listen`. The second argument sets the `Sec-WebSocket-Protocol` header to `token, <your-api-key>`, which authenticates the connection during the handshake. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio. Adjust these to match your audio format.
 
 2. **Send audio frames:** You use `createReadStream` to read the file in 4 KB chunks (`highWaterMark: 4096`). Each chunk is sent as a binary WebSocket frame with `ws.send()`. The chunk size is not critical; 4096 bytes is a common default that balances latency and overhead. In production, you would read from a microphone or network stream instead of a file.
 
@@ -213,9 +211,7 @@ const ALDEA_API_KEY = process.env.ALDEA_API_KEY;
 const STREAM_URL = "http://icecast.omroep.nl/radio1-bb-mp3";
 const WS_URL = "wss://api.aldea.ai/v1/listen?encoding=mp3";
 
-const ws = new WebSocket(WS_URL, {
-  headers: { "Authorization": `Bearer ${ALDEA_API_KEY}` },
-});
+const ws = new WebSocket(WS_URL, [`token`, ALDEA_API_KEY]);
 
 ws.on("open", async () => {
   console.log("Connected, streaming live audio...");
@@ -278,7 +274,7 @@ func main() {
 
 	// Connect with authentication
 	headers := http.Header{}
-	headers.Set("Authorization", "Bearer "+apiKey)
+	headers.Set("Sec-WebSocket-Protocol", "token, "+apiKey)
 
 	conn, _, err := websocket.DefaultDialer.Dial(wsURL, headers)
 	if err != nil {
@@ -340,7 +336,7 @@ go run stream.go
 
 To stream audio in real time, you connect to the WebSocket, send audio frames, receive transcript messages as they arrive, and close the stream:
 
-1. **Connect with authentication:** `websocket.DefaultDialer.Dial` opens a WebSocket to `wss://api.aldea.ai/v1/listen`. The `Authorization: Bearer` header is passed via `http.Header`. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio.
+1. **Connect with authentication:** `websocket.DefaultDialer.Dial` opens a WebSocket to `wss://api.aldea.ai/v1/listen`. The `Sec-WebSocket-Protocol` header is passed via `http.Header` with value `token, <your-api-key>`. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio.
 
 2. **Send audio frames:** You read the file into memory and send it in 4 KB chunks as binary WebSocket messages. The chunk size is not critical; 4096 bytes is a common default that balances latency and overhead.
 
@@ -370,7 +366,7 @@ func main() {
 	wsURL := "wss://api.aldea.ai/v1/listen?encoding=mp3"
 
 	headers := http.Header{}
-	headers.Set("Authorization", "Bearer "+apiKey)
+	headers.Set("Sec-WebSocket-Protocol", "token, "+apiKey)
 
 	conn, _, err := websocket.DefaultDialer.Dial(wsURL, headers)
 	if err != nil {
@@ -473,7 +469,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Connect with authentication
     let request = Request::builder()
         .uri(ws_url)
-        .header("Authorization", format!("Bearer {}", api_key))
+        .header("Sec-WebSocket-Protocol", format!("token, {}", api_key))
         .header("Host", "api.aldea.ai")
         .header("Connection", "Upgrade")
         .header("Upgrade", "websocket")
@@ -541,7 +537,7 @@ cargo run --bin stream
 
 To stream audio in real time, you connect to the WebSocket, send audio frames, receive transcript messages as they arrive, and close the stream:
 
-1. **Connect with authentication:** `Request::builder()` constructs a WebSocket upgrade request with the `Authorization: Bearer` header. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio.
+1. **Connect with authentication:** `Request::builder()` constructs a WebSocket upgrade request with the `Sec-WebSocket-Protocol` header set to `token, <your-api-key>`. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio.
 
 2. **Send audio frames:** You read the file into memory and send it in 4 KB chunks as binary WebSocket messages using `write.send(Message::Binary(...))`. The chunk size is not critical; 4096 bytes is a common default that balances latency and overhead.
 
@@ -587,7 +583,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let request = Request::builder()
         .uri(ws_url)
-        .header("Authorization", format!("Bearer {}", api_key))
+        .header("Sec-WebSocket-Protocol", format!("token, {}", api_key))
         .header("Host", "api.aldea.ai")
         .header("Connection", "Upgrade")
         .header("Upgrade", "websocket")
