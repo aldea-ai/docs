@@ -15,7 +15,7 @@ export function baseOptions(): BaseLayoutProps {
       title: (
         <span className="flex items-center gap-2 font-semibold">
           <Image
-            src="/subq-logo.png"
+            src="/subq-logo-light.png"
             alt="SubQ"
             width={64}
             height={32}
