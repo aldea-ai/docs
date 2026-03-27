@@ -3,11 +3,11 @@ title: Async callbacks
 description: Receive transcription results via webhook with callback parameter
 ---
 
-When you submit a batch-processing job that has long audio files or non-blocking workflows, Aldea can notify you when processing is complete by sending an HTTP POST request to your callback URL. This eliminates the need to continuously poll the for the status and enables event-driven architecture where your application only acts when the results are ready. 
+When you submit a batch-processing job that has long audio files or non-blocking workflows, SubQ can notify you when processing is complete by sending an HTTP POST request to your callback URL. This eliminates the need to continuously poll the for the status and enables event-driven architecture where your application only acts when the results are ready. 
 
 ## How it works
 
-To process transcription asynchronously, use the `callback` query parameter. The Aldea API returns a `request_id`, and the results are sent to your webhook URL when transcription completes.
+To process transcription asynchronously, use the `callback` query parameter. The SubQ API returns a `request_id`, and the results are sent to your webhook URL when transcription completes.
 
 1. Send a pre-recorded transcription request with `?callback=https://your-server.com/webhook` appended to the URL.
 2. The API returns immediately with a `request_id`:
@@ -29,16 +29,16 @@ To process transcription asynchronously, use the `callback` query parameter. The
 ## Example
 
 ```bash
-curl -X POST "https://api.aldea.ai/v1/listen?callback=https://your-server.com/webhook" \
-  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+curl -X POST "https://api.subquadratic.ai/v1/listen?callback=https://your-server.com/webhook" \
+  -H "Authorization: Bearer YOUR_SUBQ_API_KEY" \
   --data-binary @long-recording.wav
 ```
 
 With optional metadata:
 
 ```bash
-curl -X POST "https://api.aldea.ai/v1/listen?callback=https://your-server.com/webhook&metadata=%7B%22job_id%22%3A%22123%22%7D" \
-  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+curl -X POST "https://api.subquadratic.ai/v1/listen?callback=https://your-server.com/webhook&metadata=%7B%22job_id%22%3A%22123%22%7D" \
+  -H "Authorization: Bearer YOUR_SUBQ_API_KEY" \
   --data-binary @long-recording.wav
 ```
 

@@ -7,13 +7,13 @@ import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
 # Real-time streaming
 
-In this quickstart, you create a WebSocket connection to the Aldea Speech-to-Text API and receive transcripts in real-time as audio streams in. At the end, you'll have a working client that sends audio and returns the transcripts.
+In this quickstart, you create a WebSocket connection to the SubQ Speech-to-Text API and receive transcripts in real-time as audio streams in. At the end, you'll have a working client that sends audio and returns the transcripts.
 
-The API exposes a WebSocket endpoint at `wss://api.aldea.ai/v1/listen`. You send binary audio frames and receive JSON messages containing interim and final transcripts. 
+The API exposes a WebSocket endpoint at `wss://api.subquadratic.ai/v1/listen`. You send binary audio frames and receive JSON messages containing interim and final transcripts. 
 
 ## Prerequisites
 
-- An Aldea API key. Sign up and generate one from the [API Keys page](/docs/getting-started/get-api-key).
+- A SubQ API key. Sign up and generate one from the [API Keys page](/docs/getting-started/get-api-key).
 
 ## Step 1: Connect and stream
 
@@ -35,9 +35,9 @@ import asyncio
 import json
 import websockets
 
-API_KEY = "YOUR_ALDEA_API_KEY"
+API_KEY = "YOUR_SUBQ_API_KEY"
 AUDIO_FILE = "audio.wav"
-WS_URL = "wss://api.aldea.ai/v1/listen?encoding=linear16&sample_rate=16000"
+WS_URL = "wss://api.subquadratic.ai/v1/listen?encoding=linear16&sample_rate=16000"
 
 async def stream():
     headers = {"Authorization": f"Bearer {API_KEY}"}
@@ -69,7 +69,7 @@ Run it:
 python stream.py
 ```
 
-Replace `YOUR_ALDEA_API_KEY` with your API key (starts with `org_`).
+Replace `YOUR_SUBQ_API_KEY` with your API key (starts with `org_`).
 
 <Callout type="warn">
 This example streams a pre-recorded file over WebSocket for simplicity. In production, you'd stream audio from a microphone or live source. The API behaves the same way: send binary audio frames, receive JSON transcripts.
@@ -78,7 +78,7 @@ This example streams a pre-recorded file over WebSocket for simplicity. In produ
 </Tab>
 <Tab value="Node.js">
 
-Install the Deepgram SDK (Aldea is fully compatible):
+Install the Deepgram SDK (SubQ is fully compatible):
 
 ```bash
 npm install @deepgram/sdk
@@ -90,12 +90,12 @@ Stream audio and print transcripts:
 import { createClient, LiveTranscriptionEvents } from "@deepgram/sdk";
 import { createReadStream } from "fs";
 
-const API_KEY = "YOUR_ALDEA_API_KEY";
+const API_KEY = "YOUR_SUBQ_API_KEY";
 const AUDIO_FILE = "audio.wav";
 
 const client = createClient({
   key: API_KEY,
-  global: { url: "https://api.aldea.ai" },
+  global: { url: "https://api.subquadratic.ai" },
 });
 
 const connection = client.listen.live({
@@ -132,25 +132,25 @@ Run it:
 node stream.mjs
 ```
 
-Replace `YOUR_ALDEA_API_KEY` with your API key (starts with `org_`).
+Replace `YOUR_SUBQ_API_KEY` with your API key (starts with `org_`).
 
 </Tab>
 <Tab value="JavaScript (Browser)">
 
-This example uses your microphone to capture audio and stream it to Aldea in real-time. Save it as an HTML file and open it in your browser:
+This example uses your microphone to capture audio and stream it to SubQ in real-time. Save it as an HTML file and open it in your browser:
 
 ```html title="live.html"
 <!DOCTYPE html>
 <html>
 <body>
-  <h1>Aldea Live Transcription</h1>
+  <h1>SubQ Live Transcription</h1>
   <button id="start">Start</button>
   <button id="stop" disabled>Stop</button>
   <div id="transcript" style="margin-top: 1rem; white-space: pre-wrap;"></div>
 
   <script>
-    const API_KEY = "YOUR_ALDEA_API_KEY"; 
-    const WS_URL = "wss://api.aldea.ai/v1/listen";
+    const API_KEY = "YOUR_SUBQ_API_KEY"; 
+    const WS_URL = "wss://api.subquadratic.ai/v1/listen";
 
     let socket, recorder;
 
@@ -232,7 +232,7 @@ Each message from the server is a JSON object. Transcript results look like this
     "model_info": {
       "name": "<model>",
       "version": null,
-      "arch": "aldea-asr"
+      "arch": "subq-asr"
     }
   }
 }

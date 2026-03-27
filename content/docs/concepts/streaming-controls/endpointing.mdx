@@ -19,16 +19,16 @@ To set the endpointing value, add the `endpointing` parameter in the WebSocket q
 
 ```bash
 # Faster finalization (300ms)
-wss://api.aldea.ai/v1/listen?endpointing=300&encoding=mp3
+wss://api.subquadratic.ai/v1/listen?endpointing=300&encoding=mp3
 
 # Slower finalization (800ms), better for speakers who pause mid-sentence
-wss://api.aldea.ai/v1/listen?endpointing=800&encoding=mp3
+wss://api.subquadratic.ai/v1/listen?endpointing=800&encoding=mp3
 ```
 
 To disable automatic finalization, set `endpointing` to `false` as follows:
 
 ```bash
-wss://api.aldea.ai/v1/listen?endpointing=false&encoding=mp3
+wss://api.subquadratic.ai/v1/listen?endpointing=false&encoding=mp3
 ```
 
 When you disable endpointing, the server finalizes results only when you send a [`Finalize` or `CloseStream`](/docs/concepts/streaming-controls/websocket-protocol) message. This is useful when your application needs full control over when transcription segments are committed. For example, a dictation app where the user explicitly presses a button to finish a sentence.

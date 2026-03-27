@@ -10,18 +10,24 @@ import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
  */
 export function baseOptions(): BaseLayoutProps {
   return {
-    githubUrl: "https://github.com/aldea-ai",
+    githubUrl: "https://github.com/subquadratic-ai",
     nav: {
       title: (
         <span className="flex items-center gap-2 font-semibold">
           <Image
-            src="/aldea-logo.jpg"
-            alt="Aldea"
-            width={24}
-            height={24}
-            className="rounded"
+            src="/subq-logo-light.png"
+            alt="SubQ"
+            width={64}
+            height={32}
+            className="rounded dark:hidden"
           />
-          Aldea
+          <Image
+            src="/subq-logo-dark.png"
+            alt="SubQ"
+            width={64}
+            height={32}
+            className="hidden rounded dark:block"
+          />
         </span>
       ),
       url: "/docs",
@@ -69,7 +75,7 @@ export function baseOptions(): BaseLayoutProps {
       },
       {
         text: "Dashboard",
-        url: "https://platform.aldea.ai/dashboard",
+        url: "https://platform.subquadratic.ai/dashboard",
         external: true,
         icon: (
           <svg

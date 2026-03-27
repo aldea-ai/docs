@@ -1,6 +1,10 @@
-# Aldea Documentation
+# SubQ Documentation
 
-Documentation site for the Aldea Speech-to-Text API, built with Fumadocs and Next.js.
+Documentation site for the SubQ Speech-to-Text API, built with Fumadocs and Next.js.
+
+## Typography
+
+Style guide: **large numbers** (Roboto Mono Light) — use Tailwind classes such as `font-mono font-light tabular-nums` with your chosen size (e.g. `text-4xl`).
 
 ## Development
 

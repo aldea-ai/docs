@@ -7,11 +7,11 @@ Paragraph formatting adds line breaks to a transcript based on natural pauses, t
 
 ## How paragraph detection works
 
-Aldea doesn't insert line breaks at fixed intervals or arbitrary word counts. Instead, it analyzes different signals from the audio, such as:
+SubQ doesn't insert line breaks at fixed intervals or arbitrary word counts. Instead, it analyzes different signals from the audio, such as:
 
-- Pause duration: Extended silences between utterances often indicate a transition. In most cases, a speaker finalizing one thought and beginning another. Aldea's STT models use these pauses as signals for potential paragraph boundaries.
+- Pause duration: Extended silences between utterances often indicate a transition. In most cases, a speaker finalizing one thought and beginning another. SubQ's STT models use these pauses as signals for potential paragraph boundaries.
 
-- Change in topic and context: Aldea's models evaluate whether the content that comes before and after a break represents a shift in the subject. For example, a speaker who pauses briefly to breathe mid-sentence won't trigger a paragraph break, but a speaker who finishes discussing Q1 revenue and moves to hiring plans will.
+- Change in topic and context: SubQ's models evaluate whether the content that comes before and after a break represents a shift in the subject. For example, a speaker who pauses briefly to breathe mid-sentence won't trigger a paragraph break, but a speaker who finishes discussing Q1 revenue and moves to hiring plans will.
 
 Paragraph formatting ensures that the final transcript feels natural, aligns with the speaker's intent, and mirrors how the conversation actually flowed.
 
@@ -20,16 +20,16 @@ Paragraph formatting ensures that the final transcript feels natural, aligns wit
 Add `paragraphs=true` as a query parameter:
 
 ```bash
-curl -X POST "https://api.aldea.ai/v1/listen?paragraphs=true" \
-  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+curl -X POST "https://api.subquadratic.ai/v1/listen?paragraphs=true" \
+  -H "Authorization: Bearer YOUR_SUBQ_API_KEY" \
   --data-binary @audio.wav
 ```
 
 You can combine it with other formatting parameters such as smart formatting for fully polished output in a single request:
 
 ```bash
-curl -X POST "https://api.aldea.ai/v1/listen?paragraphs=true&smart_format=true&numerals=true" \
-  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+curl -X POST "https://api.subquadratic.ai/v1/listen?paragraphs=true&smart_format=true&numerals=true" \
+  -H "Authorization: Bearer YOUR_SUBQ_API_KEY" \
   --data-binary @audio.wav
 ```
 

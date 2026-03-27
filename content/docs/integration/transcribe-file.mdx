@@ -1,13 +1,13 @@
 ---
 title: Transcribe a file
-description: Transcribe a local audio file using the Aldea API
+description: Transcribe a local audio file using the SubQ API
 ---
 
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
 Use file transcription when you have audio stored locally: recordings, voicemails, podcast episodes, meeting captures, or any other pre-recorded audio. You send the file contents in a single `POST` request to `/v1/listen` and receive the complete transcript in the response.
 
-The Aldea API accepts most common audio formats including MP3, WAV, AAC, FLAC, OGG, Opus, WebM, M4A, and raw PCM. For details on how pre-recorded and streaming transcription differ, see [Transcription modes](/docs/concepts/transcription-modes).
+The SubQ API accepts most common audio formats including MP3, WAV, AAC, FLAC, OGG, Opus, WebM, M4A, and raw PCM. For details on how pre-recorded and streaming transcription differ, see [Transcription modes](/docs/concepts/transcription-modes).
 
 <Tabs items={['Python', 'Node.js', 'Go', 'Rust']} groupId="language" persist updateAnchor>
 <Tab value="Python" id="python">
@@ -20,7 +20,7 @@ The Aldea API accepts most common audio formats including MP3, WAV, AAC, FLAC, O
 
 ## Transcribe a local file
 
-In this example, you read an audio file from disk and send it to the Aldea API for transcription:
+In this example, you read an audio file from disk and send it to the SubQ API for transcription:
 
 ```python title="transcribe_file.py"
 import os
@@ -32,9 +32,9 @@ ALDEA_API_KEY = os.environ["ALDEA_API_KEY"]
 with open("audio.wav", "rb") as f:
     audio_data = f.read()
 
-# Send the audio to the Aldea API
+# Send the audio to the SubQ API
 response = httpx.post(
-    "https://api.aldea.ai/v1/listen",
+    "https://api.subquadratic.ai/v1/listen",
     headers={"Authorization": f"Bearer {ALDEA_API_KEY}"},
     content=audio_data,
     timeout=60.0
@@ -65,7 +65,7 @@ To transcribe a file, you read the audio, send it to the API, and extract the tr
 
 1. **Read the file:** `open("audio.wav", "rb").read()` loads the entire file into memory as raw bytes. The API detects the audio format automatically from the file contents, so you don't need to specify a content type.
 
-2. **POST to `/v1/listen`:** `httpx.post()` sends the audio bytes as the request body to the Aldea API. The `Authorization` header authenticates the request with your API key using the `Bearer` scheme. The `timeout=60.0` sets a 60-second timeout but you can increase it for longer files.
+2. **POST to `/v1/listen`:** `httpx.post()` sends the audio bytes as the request body to the SubQ API. The `Authorization` header authenticates the request with your API key using the `Bearer` scheme. The `timeout=60.0` sets a 60-second timeout but you can increase it for longer files.
 
 3. **Parse the response:** The transcript sits inside a nested JSON structure: `results` → `channels` → `alternatives`. The chained `.get()` calls navigate this safely, returning empty defaults if any key is missing. This avoids `KeyError` exceptions if the response structure is unexpected.
 
@@ -79,7 +79,7 @@ To transcribe a file, you read the audio, send it to the API, and extract the tr
 
 ## Transcribe a local file
 
-In this example, you read an audio file from disk and send it to the Aldea API for transcription:
+In this example, you read an audio file from disk and send it to the SubQ API for transcription:
 
 ```javascript title="transcribe_file.js"
 import { readFileSync } from "node:fs";
@@ -89,8 +89,8 @@ const ALDEA_API_KEY = process.env.ALDEA_API_KEY;
 // Read the audio file as raw bytes
 const audioData = readFileSync("audio.wav");
 
-// Send the audio to the Aldea API
-const response = await fetch("https://api.aldea.ai/v1/listen", {
+// Send the audio to the SubQ API
+const response = await fetch("https://api.subquadratic.ai/v1/listen", {
   method: "POST",
   headers: { "Authorization": `Bearer ${ALDEA_API_KEY}` },
   body: audioData,
@@ -115,7 +115,7 @@ To transcribe a file, you read the audio, send it to the API, and extract the tr
 
 1. **Read the file:** `readFileSync("audio.wav")` loads the entire file into memory as a `Buffer`. The API detects the audio format automatically from the file contents, so you don't need to specify a content type.
 
-2. **POST to `/v1/listen`:** `fetch()` sends the audio bytes as the request body to the Aldea API. The `Authorization` header authenticates the request with your API key using the `Bearer` scheme.
+2. **POST to `/v1/listen`:** `fetch()` sends the audio bytes as the request body to the SubQ API. The `Authorization` header authenticates the request with your API key using the `Bearer` scheme.
 
 3. **Parse the response:** The transcript sits inside a nested JSON structure: `results` → `channels` → `alternatives`. Optional chaining (`?.`) navigates this safely, returning `undefined` if any key is missing. The `?? ""` fallback ensures you always get a string.
 
@@ -129,7 +129,7 @@ To transcribe a file, you read the audio, send it to the API, and extract the tr
 
 ## Transcribe a local file
 
-In this example, you read an audio file from disk and send it to the Aldea API for transcription:
+In this example, you read an audio file from disk and send it to the SubQ API for transcription:
 
 ```go title="transcribe_file.go"
 package main
@@ -153,8 +153,8 @@ func main() {
 		return
 	}
 
-	// Send the audio to the Aldea API
-	req, _ := http.NewRequest("POST", "https://api.aldea.ai/v1/listen", bytes.NewReader(audioData))
+	// Send the audio to the SubQ API
+	req, _ := http.NewRequest("POST", "https://api.subquadratic.ai/v1/listen", bytes.NewReader(audioData))
 	req.Header.Set("Authorization", "Bearer "+apiKey)
 
 	resp, err := http.DefaultClient.Do(req)
@@ -211,7 +211,7 @@ To transcribe a file, you read the audio, send it to the API, and extract the tr
 
 ## Transcribe a local file
 
-In this example, you read an audio file from disk and send it to the Aldea API for transcription:
+In this example, you read an audio file from disk and send it to the SubQ API for transcription:
 
 ```rust title="transcribe_file.rs"
 use serde_json::Value;
@@ -223,10 +223,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Read the audio file as raw bytes
     let audio_data = tokio::fs::read("audio.wav").await?;
 
-    // Send the audio to the Aldea API
+    // Send the audio to the SubQ API
     let client = reqwest::Client::new();
     let response = client
-        .post("https://api.aldea.ai/v1/listen")
+        .post("https://api.subquadratic.ai/v1/listen")
         .header("Authorization", format!("Bearer {}", api_key))
         .body(audio_data)
         .send()
