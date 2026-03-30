@@ -28,13 +28,13 @@ import json
 import os
 import websockets
 
-ALDEA_API_KEY = os.environ["ALDEA_API_KEY"]
+SUBQ_API_KEY = os.environ["SUBQ_API_KEY"]
 AUDIO_FILE = "audio.wav"
 WS_URL = "wss://api.subquadratic.ai/v1/listen?encoding=linear16&sample_rate=16000"
 
 async def stream():
     # Authenticate using the Sec-WebSocket-Protocol subprotocol header
-    headers = {"Sec-WebSocket-Protocol": f"token, {ALDEA_API_KEY}"}
+    headers = {"Sec-WebSocket-Protocol": f"token, {SUBQ_API_KEY}"}
 
     async with websockets.connect(WS_URL, additional_headers=headers) as ws:
 
@@ -94,12 +94,12 @@ import os
 import httpx
 import websockets
 
-ALDEA_API_KEY = os.environ["ALDEA_API_KEY"]
+SUBQ_API_KEY = os.environ["SUBQ_API_KEY"]
 STREAM_URL = "http://icecast.omroep.nl/radio1-bb-mp3"
 WS_URL = "wss://api.subquadratic.ai/v1/listen?encoding=mp3"
 
 async def stream_live():
-    headers = {"Sec-WebSocket-Protocol": f"token, {ALDEA_API_KEY}"}
+    headers = {"Sec-WebSocket-Protocol": f"token, {SUBQ_API_KEY}"}
 
     async with websockets.connect(WS_URL, additional_headers=headers) as ws:
 
@@ -142,11 +142,11 @@ In this example, you open a WebSocket connection to the SubQ API, stream a local
 import { createReadStream } from "node:fs";
 import WebSocket from "ws";
 
-const ALDEA_API_KEY = process.env.ALDEA_API_KEY;
+const SUBQ_API_KEY = process.env.SUBQ_API_KEY;
 const AUDIO_FILE = "audio.wav";
 const WS_URL = "wss://api.subquadratic.ai/v1/listen?encoding=linear16&sample_rate=16000";
 
-const ws = new WebSocket(WS_URL, [`token`, ALDEA_API_KEY]);
+const ws = new WebSocket(WS_URL, [`token`, SUBQ_API_KEY]);
 
 ws.on("open", () => {
   console.log("Connected, streaming audio...");
@@ -207,11 +207,11 @@ To stream from a live audio source instead of a file, replace the file read logi
 ```javascript title="stream_live.js"
 import WebSocket from "ws";
 
-const ALDEA_API_KEY = process.env.ALDEA_API_KEY;
+const SUBQ_API_KEY = process.env.SUBQ_API_KEY;
 const STREAM_URL = "http://icecast.omroep.nl/radio1-bb-mp3";
 const WS_URL = "wss://api.subquadratic.ai/v1/listen?encoding=mp3";
 
-const ws = new WebSocket(WS_URL, [`token`, ALDEA_API_KEY]);
+const ws = new WebSocket(WS_URL, [`token`, SUBQ_API_KEY]);
 
 ws.on("open", async () => {
   console.log("Connected, streaming live audio...");
@@ -269,7 +269,7 @@ import (
 )
 
 func main() {
-	apiKey := os.Getenv("ALDEA_API_KEY")
+	apiKey := os.Getenv("SUBQ_API_KEY")
 	wsURL := "wss://api.subquadratic.ai/v1/listen?encoding=linear16&sample_rate=16000"
 
 	// Connect with authentication
@@ -361,7 +361,7 @@ import (
 )
 
 func main() {
-	apiKey := os.Getenv("ALDEA_API_KEY")
+	apiKey := os.Getenv("SUBQ_API_KEY")
 	streamURL := "http://icecast.omroep.nl/radio1-bb-mp3"
 	wsURL := "wss://api.subquadratic.ai/v1/listen?encoding=mp3"
 
@@ -463,7 +463,7 @@ struct Alternative {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let api_key = std::env::var("ALDEA_API_KEY").expect("ALDEA_API_KEY not set");
+    let api_key = std::env::var("SUBQ_API_KEY").expect("SUBQ_API_KEY not set");
     let ws_url = "wss://api.subquadratic.ai/v1/listen?encoding=linear16&sample_rate=16000";
 
     // Connect with authentication
@@ -577,7 +577,7 @@ struct Alternative {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let api_key = std::env::var("ALDEA_API_KEY").expect("ALDEA_API_KEY not set");
+    let api_key = std::env::var("SUBQ_API_KEY").expect("SUBQ_API_KEY not set");
     let stream_url = "http://icecast.omroep.nl/radio1-bb-mp3";
     let ws_url = "wss://api.subquadratic.ai/v1/listen?encoding=mp3";
 

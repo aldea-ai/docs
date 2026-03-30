@@ -3,13 +3,13 @@ title: Browser setup
 description: Configure SubQ STT for browser-based transcription
 ---
 
-The browser examples use the [Deepgram JavaScript SDK](https://github.com/deepgram/deepgram-js-sdk) loaded from a CDN, pointed at the Aldea API. Before running either the [pre-recorded](/docs/integration/browser/pre-recorded-upload) or [live recording](/docs/integration/browser/live-recording) example, complete the setup below.
+The browser examples use the [Deepgram JavaScript SDK](https://github.com/deepgram/deepgram-js-sdk) loaded from a CDN, pointed at the SubQ API. Before running either the [pre-recorded](/docs/integration/browser/pre-recorded-upload) or [live recording](/docs/integration/browser/live-recording) example, complete the setup below.
 
 ## Prerequisites
 
 - **Node.js 18** or later and **npm**
 - **OpenSSL** (for generating HTTPS certificates)
-- An **Aldea API key** — if you don't have one yet, follow the [Get an API key](/docs/getting-started/get-api-key) guide
+- An **SubQ API key** — if you don't have one yet, follow the [Get an API key](/docs/getting-started/get-api-key) guide
 
 ## Install dependencies
 
@@ -24,7 +24,7 @@ This installs two packages:
 
 | Package | Purpose |
 |---------|---------|
-| `@deepgram/sdk` | Deepgram-compatible client library, used to call the Aldea API from the browser |
+| `@deepgram/sdk` | Deepgram-compatible client library, used to call the SubQ API from the browser |
 | `http-server` | Lightweight local HTTPS server for serving the example pages |
 
 ## Generate HTTPS certificates
@@ -50,14 +50,14 @@ The browser examples pass the API key via the URL query string:
 https://localhost:3001?key=org_YOUR_API_KEY
 ```
 
-The JavaScript on the page reads the key from the query string and passes it to the Deepgram SDK client, which is configured to point at the Aldea API:
+The JavaScript on the page reads the key from the query string and passes it to the Deepgram SDK client, which is configured to point at the SubQ API:
 
 ```javascript
 const urlParams = new URLSearchParams(window.location.search);
 const apiKey = urlParams.get("key");
 
 const client = deepgram.createClient(apiKey, {
-  global: { url: "https://api.aldea.ai" }
+  global: { url: "https://api.subquadratic.ai" }
 });
 ```
 

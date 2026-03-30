@@ -3,12 +3,12 @@ title: Live recording
 description: Stream live microphone audio for real-time transcription in the browser
 ---
 
-In this example, you capture microphone audio in the browser, stream it to the Aldea API over a WebSocket, and display the transcript in real time on the page. This builds on the same setup used in the [pre-recorded example](/docs/integration/browser/pre-recorded-upload) but introduces WebSocket streaming and microphone access.
+In this example, you capture microphone audio in the browser, stream it to the SubQ API over a WebSocket, and display the transcript in real time on the page. This builds on the same setup used in the [pre-recorded example](/docs/integration/browser/pre-recorded-upload) but introduces WebSocket streaming and microphone access.
 
 ## Prerequisites
 
 - Complete the [browser setup](/docs/integration/browser/setup) (dependencies installed, HTTPS certificates generated)
-- An Aldea API key
+- A SubQ API key
 - A microphone connected to your machine
 
 ## Run the example
@@ -37,17 +37,17 @@ The full source is in `browser-live/index.html`. Here are the key parts:
 
 ### 1. Create a client and open a WebSocket
 
-The page loads the Deepgram SDK from a CDN, creates a client pointed at the Aldea API, and opens a persistent WebSocket connection:
+The page loads the Deepgram SDK from a CDN, creates a client pointed at the SubQ API, and opens a persistent WebSocket connection:
 
 ```javascript
 const client = deepgram.createClient(apiKey, {
-  global: { url: "https://api.aldea.ai" }
+  global: { url: "https://api.subquadratic.ai" }
 });
 
 connection = client.listen.live({});
 ```
 
-`client.listen.live()` opens a WebSocket to `wss://api.aldea.ai/v1/listen` and handles authentication automatically using the API key.
+`client.listen.live()` opens a WebSocket to `wss://api.subquadratic.ai/v1/listen` and handles authentication automatically using the API key.
 
 ### 2. Capture microphone audio
 
@@ -63,7 +63,7 @@ mediaRecorder.ondataavailable = (event) => {
 };
 ```
 
-Each chunk is sent directly to the Aldea API over the WebSocket with `connection.send()`.
+Each chunk is sent directly to the SubQ API over the WebSocket with `connection.send()`.
 
 ### 3. Display transcripts as they arrive
 
@@ -106,7 +106,7 @@ The example also fetches a remote radio stream (`icecast.omroep.nl/radio1-bb-mp3
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Aldea Live Transcription</title>
+    <title>SubQ Live Transcription</title>
   </head>
 
   <body>
@@ -129,13 +129,13 @@ The example also fetches a remote radio stream (`icecast.omroep.nl/radio1-bb-mp3
         const apiKey = urlParams.get("key");
 
         if (!apiKey) {
-          alert("Please add your Aldea API key to the query string, e.g. ?key=org_xxx...");
+          alert("Please add your SubQ API key to the query string, e.g. ?key=org_xxx...");
           return;
         }
 
         const client = deepgram.createClient(apiKey, {
           global: {
-            url: 'https://api.aldea.ai'
+            url: 'https://api.subquadratic.ai'
           }
         });
 

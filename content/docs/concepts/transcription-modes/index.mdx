@@ -53,11 +53,11 @@ curl -X POST "https://api.subquadratic.ai/v1/listen" \
 ```python
 import requests
 
-API_KEY = "YOUR_ALDEA_API_KEY"
+API_KEY = "YOUR_SUBQ_API_KEY"
 
 with open("audio.wav", "rb") as f:
     response = requests.post(
-        "https://api.aldea.ai/v1/listen",
+        "https://api.subquadratic.ai/v1/listen",
         headers={
             "Authorization": f"Bearer {API_KEY}",
             "timestamps": "true",
@@ -80,7 +80,7 @@ const client = createClient({
   global: { url: "https://api.subquadratic.ai" }
 });
 
-const response = await fetch("https://api.aldea.ai/v1/listen", {
+const response = await fetch("https://api.subquadratic.ai/v1/listen", {
   method: "POST",
   headers: {
     Authorization: `Bearer ${API_KEY}`,

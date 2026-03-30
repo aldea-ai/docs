@@ -26,7 +26,7 @@ In this example, you read an audio file from disk and send it to the SubQ API fo
 import os
 import httpx
 
-ALDEA_API_KEY = os.environ["ALDEA_API_KEY"]
+SUBQ_API_KEY = os.environ["SUBQ_API_KEY"]
 
 # Read the audio file as raw bytes
 with open("audio.wav", "rb") as f:
@@ -35,7 +35,7 @@ with open("audio.wav", "rb") as f:
 # Send the audio to the SubQ API
 response = httpx.post(
     "https://api.subquadratic.ai/v1/listen",
-    headers={"Authorization": f"Bearer {ALDEA_API_KEY}"},
+    headers={"Authorization": f"Bearer {SUBQ_API_KEY}"},
     content=audio_data,
     timeout=60.0
 )
@@ -84,7 +84,7 @@ In this example, you read an audio file from disk and send it to the SubQ API fo
 ```javascript title="transcribe_file.js"
 import { readFileSync } from "node:fs";
 
-const ALDEA_API_KEY = process.env.ALDEA_API_KEY;
+const SUBQ_API_KEY = process.env.SUBQ_API_KEY;
 
 // Read the audio file as raw bytes
 const audioData = readFileSync("audio.wav");
@@ -92,7 +92,7 @@ const audioData = readFileSync("audio.wav");
 // Send the audio to the SubQ API
 const response = await fetch("https://api.subquadratic.ai/v1/listen", {
   method: "POST",
-  headers: { "Authorization": `Bearer ${ALDEA_API_KEY}` },
+  headers: { "Authorization": `Bearer ${SUBQ_API_KEY}` },
   body: audioData,
 });
 
@@ -144,7 +144,7 @@ import (
 )
 
 func main() {
-	apiKey := os.Getenv("ALDEA_API_KEY")
+	apiKey := os.Getenv("SUBQ_API_KEY")
 
 	// Read the audio file as raw bytes
 	audioData, err := os.ReadFile("audio.wav")
@@ -218,7 +218,7 @@ use serde_json::Value;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let api_key = std::env::var("ALDEA_API_KEY").expect("ALDEA_API_KEY not set");
+    let api_key = std::env::var("SUBQ_API_KEY").expect("SUBQ_API_KEY not set");
 
     // Read the audio file as raw bytes
     let audio_data = tokio::fs::read("audio.wav").await?;

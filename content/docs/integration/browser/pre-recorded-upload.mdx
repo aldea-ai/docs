@@ -1,14 +1,14 @@
 ---
 title: Pre-recorded upload
-description: Transcribe a remote audio file from the browser using the Aldea API
+description: Transcribe a remote audio file from the browser using the SubQ API
 ---
 
-In this example, you transcribe a remote audio file from a browser page. The Deepgram SDK sends the audio URL to the Aldea API over HTTP and returns the full transcript in a single response. No WebSocket or microphone access is involved, making this the simplest way to verify your browser setup.
+In this example, you transcribe a remote audio file from a browser page. The Deepgram SDK sends the audio URL to the SubQ API over HTTP and returns the full transcript in a single response. No WebSocket or microphone access is involved, making this the simplest way to verify your browser setup.
 
 ## Prerequisites
 
 - Complete the [browser setup](/docs/integration/browser/setup) (dependencies installed, HTTPS certificates generated)
-- An Aldea API key
+- A SubQ API key
 
 ## Run the example
 
@@ -34,7 +34,7 @@ The full source is in `browser-prerecorded/index.html`. Here are the key parts:
 
 ### 1. Load the SDK and create a client
 
-The page loads the Deepgram SDK from a CDN and creates a client pointed at the Aldea API:
+The page loads the Deepgram SDK from a CDN and creates a client pointed at the SubQ API:
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/@deepgram/sdk@4/dist/umd/deepgram.js"></script>
@@ -43,17 +43,17 @@ The page loads the Deepgram SDK from a CDN and creates a client pointed at the A
   const apiKey = urlParams.get("key");
 
   const client = deepgram.createClient(apiKey, {
-    global: { url: "https://api.aldea.ai" }
+    global: { url: "https://api.subquadratic.ai" }
   });
 </script>
 ```
 
 ### 2. Transcribe a remote URL
 
-When the user clicks **Transcribe**, the SDK sends the audio URL to the Aldea API:
+When the user clicks **Transcribe**, the SDK sends the audio URL to the SubQ API:
 
 ```javascript
-const audioUrl = "https://platform.aldea.ai/subq_sample.wav";
+const audioUrl = "https://platform.subquadratic.ai/subq_sample.wav";
 
 const { result, error } = await client.listen.prerecorded.transcribeUrl(
   { url: audioUrl }
@@ -66,7 +66,7 @@ if (error) {
 }
 ```
 
-`transcribeUrl()` sends a `POST` request to `https://api.aldea.ai/v1/listen` with a JSON body containing the URL. The API downloads the audio, transcribes it, and returns the result.
+`transcribeUrl()` sends a `POST` request to `https://api.subquadratic.ai/v1/listen` with a JSON body containing the URL. The API downloads the audio, transcribes it, and returns the result.
 
 ### 3. Read the response
 
@@ -78,11 +78,11 @@ The transcript is at `result.results.channels[0].alternatives[0].transcript`. Th
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Aldea Prerecorded Transcription</title>
+    <title>SubQ Prerecorded Transcription</title>
   </head>
 
   <body>
-    <h1>Aldea Prerecorded Transcription</h1>
+    <h1>SubQ Prerecorded Transcription</h1>
     <p>Open the console to see the transcription results.</p>
     <button onclick="transcribe()">Transcribe</button>
 
@@ -93,13 +93,13 @@ The transcript is at `result.results.channels[0].alternatives[0].transcript`. Th
         const apiKey = urlParams.get("key");
 
         if (!apiKey) {
-          alert("Please add your Aldea API key to the query string, e.g. ?key=org_xxx...");
+          alert("Please add your SubQ API key to the query string, e.g. ?key=org_xxx...");
           return;
         }
 
-        const audioUrl = "https://platform.aldea.ai/subq_sample.wav";
+        const audioUrl = "https://platform.subquadratic.ai/subq_sample.wav";
         const client = deepgram.createClient(apiKey, {
-          global: { url: "https://api.aldea.ai" }
+          global: { url: "https://api.subquadratic.ai" }
         });
 
         const { result, error } = await client.listen.prerecorded.transcribeUrl(
