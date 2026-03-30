@@ -1,6 +1,71 @@
 ---
 title: Browser setup
-description: Set up Aldea STT in the browser
+description: Configure SubQ STT for browser-based transcription
 ---
 
-# Browser setup
+The browser examples use the [Deepgram JavaScript SDK](https://github.com/deepgram/deepgram-js-sdk) loaded from a CDN, pointed at the SubQ API. Before running either the [pre-recorded](/docs/integration/browser/pre-recorded-upload) or [live recording](/docs/integration/browser/live-recording) example, complete the setup below.
+
+## Prerequisites
+
+- **Node.js 18** or later and **npm**
+- **OpenSSL** (for generating HTTPS certificates)
+- An **SubQ API key** — if you don't have one yet, follow the [Get an API key](/docs/getting-started/get-api-key) guide
+
+## Install dependencies
+
+Navigate to the `js/` directory in the SDK samples repository and install packages:
+
+```bash
+cd js/
+npm install
+```
+
+This installs two packages:
+
+| Package | Purpose |
+|---------|---------|
+| `@deepgram/sdk` | Deepgram-compatible client library, used to call the SubQ API from the browser |
+| `http-server` | Lightweight local HTTPS server for serving the example pages |
+
+## Generate HTTPS certificates
+
+The browser's `getUserMedia` API (used for microphone access in the live recording example) requires a **secure context** — meaning the page must be served over HTTPS, even on `localhost`. Generate a self-signed certificate:
+
+```bash
+npm run generate-certs
+```
+
+This runs `openssl` and creates two files in the `js/` directory:
+
+- `cert.pem` — the self-signed certificate
+- `key.pem` — the private key
+
+When you open the example pages, your browser will show a certificate warning. Accept it to proceed — this is expected with self-signed certificates.
+
+## API key handling
+
+The browser examples pass the API key via the URL query string:
+
+```
+https://localhost:3001?key=org_YOUR_API_KEY
+```
+
+The JavaScript on the page reads the key from the query string and passes it to the Deepgram SDK client, which is configured to point at the SubQ API:
+
+```javascript
+const urlParams = new URLSearchParams(window.location.search);
+const apiKey = urlParams.get("key");
+
+const client = deepgram.createClient(apiKey, {
+  global: { url: "https://api.subquadratic.ai" }
+});
+```
+
+<Callout type="warn">
+The API key is visible in the URL and in client-side JavaScript. This is fine for local development and demos. For production deployments, proxy API requests through your own back end so the key is never exposed to the browser.
+</Callout>
+
+## Next steps
+
+- [Pre-recorded upload](/docs/integration/browser/pre-recorded-upload) — transcribe an audio file with a single request (simplest way to verify your setup)
+- [Live recording](/docs/integration/browser/live-recording) — stream microphone audio for real-time transcription

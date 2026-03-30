@@ -1,6 +1,212 @@
 ---
 title: Live recording
-description: Transcribe live microphone audio in the browser
+description: Stream live microphone audio for real-time transcription in the browser
 ---
 
-# Live recording
+In this example, you capture microphone audio in the browser, stream it to the SubQ API over a WebSocket, and display the transcript in real time on the page. This builds on the same setup used in the [pre-recorded example](/docs/integration/browser/pre-recorded-upload) but introduces WebSocket streaming and microphone access.
+
+## Prerequisites
+
+- Complete the [browser setup](/docs/integration/browser/setup) (dependencies installed, HTTPS certificates generated)
+- A SubQ API key
+- A microphone connected to your machine
+
+## Run the example
+
+Start the local HTTPS server:
+
+```bash
+npm run serve:live
+```
+
+Open the page in your browser:
+
+```
+https://localhost:3001?key=org_YOUR_API_KEY
+```
+
+Replace `org_YOUR_API_KEY` with your actual API key. Accept the self-signed certificate warning when prompted.
+
+1. **Allow microphone access** when the browser prompts
+2. Click **Start** — speak into your microphone; the transcript appears in real time on the page
+3. Click **Stop** — ends the recording and closes the WebSocket connection
+
+## How it works
+
+The full source is in `browser-live/index.html`. Here are the key parts:
+
+### 1. Create a client and open a WebSocket
+
+The page loads the Deepgram SDK from a CDN, creates a client pointed at the SubQ API, and opens a persistent WebSocket connection:
+
+```javascript
+const client = deepgram.createClient(apiKey, {
+  global: { url: "https://api.subquadratic.ai" }
+});
+
+connection = client.listen.live({});
+```
+
+`client.listen.live()` opens a WebSocket to `wss://api.subquadratic.ai/v1/listen` and handles authentication automatically using the API key.
+
+### 2. Capture microphone audio
+
+The browser requests microphone access via `getUserMedia` and creates a `MediaRecorder` that emits audio chunks every second:
+
+```javascript
+const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+mediaRecorder = new MediaRecorder(stream);
+mediaRecorder.ondataavailable = (event) => {
+  if (event.data.size > 0) {
+    connection.send(event.data);
+  }
+};
+```
+
+Each chunk is sent directly to the SubQ API over the WebSocket with `connection.send()`.
+
+### 3. Display transcripts as they arrive
+
+The SDK fires a `Transcript` event each time the API returns a result. The handler extracts the transcript text and displays it on the page:
+
+```javascript
+connection.on(deepgram.LiveTranscriptionEvents.Transcript, (data) => {
+  transcriptEl.textContent = data.channel.alternatives[0].transcript;
+});
+```
+
+### 4. Start and stop
+
+Clicking **Start** calls `mediaRecorder.start(1000)`, which begins capturing audio in 1-second intervals. Clicking **Stop** calls `mediaRecorder.stop()` and `connection.finish()` to close the WebSocket gracefully:
+
+```javascript
+startButton.onclick = () => {
+  if (!connection) {
+    setup().then(() => {
+      mediaRecorder.start(1000);
+    });
+  } else {
+    mediaRecorder.start(1000);
+  }
+};
+
+stopButton.onclick = () => {
+  mediaRecorder.stop();
+  connection.finish();
+};
+```
+
+<Callout type="info">
+The example also fetches a remote radio stream (`icecast.omroep.nl/radio1-bb-mp3`) on connection open and sends it alongside the microphone audio. This is a demo artifact included in the sample code. For a clean microphone-only implementation, remove the `fetch` block inside the `Open` event handler.
+</Callout>
+
+## Full source
+
+```html title="browser-live/index.html"
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SubQ Live Transcription</title>
+  </head>
+
+  <body>
+    <h1>Live Transcription</h1>
+    <button id="start">Start</button>
+    <button id="stop">Stop</button>
+    <pre id="transcript"></pre>
+
+    <script src="https://cdn.jsdelivr.net/npm/@deepgram/sdk@4/dist/umd/deepgram.js"></script>
+    <script>
+      const startButton = document.getElementById("start");
+      const stopButton = document.getElementById("stop");
+      const transcriptEl = document.getElementById("transcript");
+
+      let connection;
+      let mediaRecorder;
+
+      const setup = async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const apiKey = urlParams.get("key");
+
+        if (!apiKey) {
+          alert("Please add your SubQ API key to the query string, e.g. ?key=org_xxx...");
+          return;
+        }
+
+        const client = deepgram.createClient(apiKey, {
+          global: {
+            url: 'https://api.subquadratic.ai'
+          }
+        });
+
+        connection = client.listen.live({});
+
+        connection.on(deepgram.LiveTranscriptionEvents.Open, () => {
+          console.log("Connection opened.");
+
+          fetch("https://icecast.omroep.nl/radio1-bb-mp3")
+            .then((response) => response.body)
+            .then((body) => {
+              const reader = body.getReader();
+              function read() {
+                reader
+                  .read()
+                  .then(({ done, value }) => {
+                    if (done) {
+                      console.log("Stream complete");
+                      return;
+                    }
+                    connection.send(value);
+                    read();
+                  })
+                  .catch((error) => {
+                    console.error("Stream read error:", error);
+                  });
+              }
+              read();
+            })
+            .catch((error) => {
+              console.error("Fetch error:", error);
+            });
+        });
+
+        connection.on(deepgram.LiveTranscriptionEvents.Transcript, (data) => {
+          transcriptEl.textContent = data.channel.alternatives[0].transcript;
+        });
+
+        connection.on(deepgram.LiveTranscriptionEvents.Close, () => {
+          console.log("Connection closed.");
+        });
+
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            connection.send(event.data);
+          }
+        };
+      };
+
+      startButton.onclick = () => {
+        if (!connection) {
+          setup().then(() => {
+            mediaRecorder.start(1000);
+          });
+        } else {
+          mediaRecorder.start(1000);
+        }
+      };
+
+      stopButton.onclick = () => {
+        mediaRecorder.stop();
+        connection.finish();
+      };
+    </script>
+  </body>
+</html>
+```
+
+## Next steps
+
+- [Real-time streaming](/docs/integration/streaming) — server-side streaming with Python, Node.js, Go, or Rust
+- [Pre-recorded upload](/docs/integration/browser/pre-recorded-upload) — transcribe a file without microphone access

@@ -2,6 +2,41 @@
 @import "fumadocs-ui/css/black.css";
 @import "fumadocs-ui/css/preset.css";
 
+@theme {
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-libre-baskerville), Georgia, serif;
+  --font-mono: var(--font-roboto-mono), ui-monospace, monospace;
+}
+
 :root {
   --fd-sidebar-width: 280px;
+}
+
+/*
+ * Sidebar header row (fumadocs: SidebarHeader > div.flex) + collapse control.
+ * Persisted from browser preview: center main-axis, align to start on cross-axis,
+ * full-height row, full-height collapse trigger.
+ */
+#nd-sidebar > div:first-child > div.flex:first-child {
+  justify-content: center;
+  align-items: flex-start;
+  height: 100%;
+}
+
+#nd-sidebar button[aria-label="Collapse Sidebar"] {
+  height: 100%;
+  margin-bottom: 0; /* override fumadocs mb-auto so h-full can fill the row */
+}
+
+/* Docs sidebar header row (fumadocs: SidebarHeader > div.flex).
+   justify-center, items-start, h-full on the row; h-full on collapse trigger. */
+#nd-sidebar .flex.flex-col.gap-3.p-4.pb-2 > div.flex:first-child {
+  justify-content: center;
+  align-items: flex-start;
+  height: 100%;
+}
+
+#nd-sidebar button[aria-label="Collapse Sidebar"] {
+  height: 100%;
+  margin-block: 0;
 }

@@ -1,6 +1,122 @@
 ---
 title: Pre-recorded upload
-description: Upload and transcribe audio files from the browser
+description: Transcribe a remote audio file from the browser using the SubQ API
 ---
 
-# Pre-recorded upload
+In this example, you transcribe a remote audio file from a browser page. The Deepgram SDK sends the audio URL to the SubQ API over HTTP and returns the full transcript in a single response. No WebSocket or microphone access is involved, making this the simplest way to verify your browser setup.
+
+## Prerequisites
+
+- Complete the [browser setup](/docs/integration/browser/setup) (dependencies installed, HTTPS certificates generated)
+- A SubQ API key
+
+## Run the example
+
+Start the local HTTPS server:
+
+```bash
+npm run serve:prerecorded
+```
+
+Open the page in your browser:
+
+```
+https://localhost:3001?key=org_YOUR_API_KEY
+```
+
+Replace `org_YOUR_API_KEY` with your actual API key. Accept the self-signed certificate warning when prompted.
+
+Click **Transcribe**, then open the browser console (`F12` → Console tab) to see the transcript output.
+
+## How it works
+
+The full source is in `browser-prerecorded/index.html`. Here are the key parts:
+
+### 1. Load the SDK and create a client
+
+The page loads the Deepgram SDK from a CDN and creates a client pointed at the SubQ API:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/@deepgram/sdk@4/dist/umd/deepgram.js"></script>
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const apiKey = urlParams.get("key");
+
+  const client = deepgram.createClient(apiKey, {
+    global: { url: "https://api.subquadratic.ai" }
+  });
+</script>
+```
+
+### 2. Transcribe a remote URL
+
+When the user clicks **Transcribe**, the SDK sends the audio URL to the SubQ API:
+
+```javascript
+const audioUrl = "https://platform.subquadratic.ai/subq_sample.wav";
+
+const { result, error } = await client.listen.prerecorded.transcribeUrl(
+  { url: audioUrl }
+);
+
+if (error) {
+  console.error(error);
+} else {
+  console.log(result.results.channels[0].alternatives[0].transcript);
+}
+```
+
+`transcribeUrl()` sends a `POST` request to `https://api.subquadratic.ai/v1/listen` with a JSON body containing the URL. The API downloads the audio, transcribes it, and returns the result.
+
+### 3. Read the response
+
+The transcript is at `result.results.channels[0].alternatives[0].transcript`. This is the same response structure returned by the [REST API](/docs/integration/transcribe-url) and all other integration paths.
+
+## Full source
+
+```html title="browser-prerecorded/index.html"
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SubQ Prerecorded Transcription</title>
+  </head>
+
+  <body>
+    <h1>SubQ Prerecorded Transcription</h1>
+    <p>Open the console to see the transcription results.</p>
+    <button onclick="transcribe()">Transcribe</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/@deepgram/sdk@4/dist/umd/deepgram.js"></script>
+    <script>
+      const transcribe = async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const apiKey = urlParams.get("key");
+
+        if (!apiKey) {
+          alert("Please add your SubQ API key to the query string, e.g. ?key=org_xxx...");
+          return;
+        }
+
+        const audioUrl = "https://platform.subquadratic.ai/subq_sample.wav";
+        const client = deepgram.createClient(apiKey, {
+          global: { url: "https://api.subquadratic.ai" }
+        });
+
+        const { result, error } = await client.listen.prerecorded.transcribeUrl(
+          { url: audioUrl }
+        );
+
+        if (error) {
+          console.error(error);
+        } else {
+          console.log(result.results.channels[0].alternatives[0].transcript);
+        }
+      };
+    </script>
+  </body>
+</html>
+```
+
+## Next steps
+
+- [Live recording](/docs/integration/browser/live-recording) — stream microphone audio for real-time transcription in the browser

@@ -1,6 +1,6 @@
 ---
 title: Transcribe from URL
-description: Transcribe audio from a URL using the Aldea API
+description: Transcribe audio from a URL using the SubQ API
 ---
 
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
@@ -20,14 +20,14 @@ This approach is useful when your audio files are stored in services like Amazon
 
 ## Transcribe audio from a URL
 
-In this example, you download audio from a public URL and send it to the Aldea API for transcription:
+In this example, you download audio from a public URL and send it to the SubQ API for transcription:
 
 ```python title="transcribe_url.py"
 import os
 import httpx
 
-ALDEA_API_KEY = os.environ["ALDEA_API_KEY"]
-AUDIO_URL = "https://platform.aldea.ai/aldea_sample.wav"
+SUBQ_API_KEY = os.environ["SUBQ_API_KEY"]
+AUDIO_URL = "https://platform.subquadratic.ai/subq_sample.wav"
 
 # Download the audio file
 print("Downloading audio...")
@@ -35,11 +35,11 @@ audio_response = httpx.get(AUDIO_URL, timeout=30.0, follow_redirects=True)
 audio_data = audio_response.content
 print(f"Downloaded {len(audio_data)} bytes")
 
-# Send the audio to the Aldea API
+# Send the audio to the SubQ API
 print("Transcribing...")
 response = httpx.post(
-    "https://api.aldea.ai/v1/listen",
-    headers={"Authorization": f"Bearer {ALDEA_API_KEY}"},
+    "https://api.subquadratic.ai/v1/listen",
+    headers={"Authorization": f"Bearer {SUBQ_API_KEY}"},
     content=audio_data,
     timeout=60.0
 )
@@ -70,7 +70,7 @@ To transcribe from a URL, you download the audio, send it to the API, and extrac
 
 1. **Download the audio:** `httpx.get()` fetches the audio file from the URL. The `follow_redirects=True` parameter handles HTTP redirects automatically. This is important for URLs from storage services that often redirect to a CDN. The `timeout=30.0` prevents the request from hanging on slow connections.
 
-2. **POST to `/v1/listen`:** You send the downloaded audio bytes to the Aldea API in the request body. This is the same endpoint and format used in [Transcribe a file](/docs/integration/transcribe-file). The only difference is where the audio comes from.
+2. **POST to `/v1/listen`:** You send the downloaded audio bytes to the SubQ API in the request body. This is the same endpoint and format used in [Transcribe a file](/docs/integration/transcribe-file). The only difference is where the audio comes from.
 
 3. **Parse the response:** The response structure is the same as file transcription. For full field descriptions, see the [response structure in Transcribe a file](/docs/integration/transcribe-file).
 
@@ -91,11 +91,11 @@ The approach is the same as [Transcribe a file](/docs/integration/transcribe-fil
 
 ## Transcribe audio from a URL
 
-In this example, you download audio from a public URL and send it to the Aldea API for transcription:
+In this example, you download audio from a public URL and send it to the SubQ API for transcription:
 
 ```javascript title="transcribe_url.js"
-const ALDEA_API_KEY = process.env.ALDEA_API_KEY;
-const AUDIO_URL = "https://platform.aldea.ai/aldea_sample.wav";
+const SUBQ_API_KEY = process.env.SUBQ_API_KEY;
+const AUDIO_URL = "https://platform.subquadratic.ai/subq_sample.wav";
 
 // Download the audio file
 console.log("Downloading audio...");
@@ -103,11 +103,11 @@ const audioResponse = await fetch(AUDIO_URL);
 const audioData = await audioResponse.arrayBuffer();
 console.log(`Downloaded ${audioData.byteLength} bytes`);
 
-// Send the audio to the Aldea API
+// Send the audio to the SubQ API
 console.log("Transcribing...");
-const response = await fetch("https://api.aldea.ai/v1/listen", {
+const response = await fetch("https://api.subquadratic.ai/v1/listen", {
   method: "POST",
-  headers: { "Authorization": `Bearer ${ALDEA_API_KEY}` },
+  headers: { "Authorization": `Bearer ${SUBQ_API_KEY}` },
   body: audioData,
 });
 
@@ -133,7 +133,7 @@ To transcribe from a URL, you download the audio, send it to the API, and extrac
 
 1. **Download the audio:** `fetch()` retrieves the audio file from the URL. The response is read as an `ArrayBuffer` with `.arrayBuffer()`, which gives you the raw binary data. `fetch` follows redirects automatically, which is important for URLs from storage services that often redirect to a CDN.
 
-2. **POST to `/v1/listen`:** You send the downloaded audio bytes to the Aldea API in the request body. This is the same endpoint and format used in [Transcribe a file](/docs/integration/transcribe-file). The only difference is where the audio comes from.
+2. **POST to `/v1/listen`:** You send the downloaded audio bytes to the SubQ API in the request body. This is the same endpoint and format used in [Transcribe a file](/docs/integration/transcribe-file). The only difference is where the audio comes from.
 
 3. **Parse the response:** The response structure is the same as file transcription. For full field descriptions, see the [response structure in Transcribe a file](/docs/integration/transcribe-file).
 
@@ -154,7 +154,7 @@ The approach is the same as [Transcribe a file](/docs/integration/transcribe-fil
 
 ## Transcribe audio from a URL
 
-In this example, you download audio from a public URL and send it to the Aldea API for transcription:
+In this example, you download audio from a public URL and send it to the SubQ API for transcription:
 
 ```go title="transcribe_url.go"
 package main
@@ -169,8 +169,8 @@ import (
 )
 
 func main() {
-	apiKey := os.Getenv("ALDEA_API_KEY")
-	audioURL := "https://platform.aldea.ai/aldea_sample.wav"
+	apiKey := os.Getenv("SUBQ_API_KEY")
+	audioURL := "https://platform.subquadratic.ai/subq_sample.wav"
 
 	// Download the audio file
 	fmt.Println("Downloading audio...")
@@ -183,9 +183,9 @@ func main() {
 	audioData, _ := io.ReadAll(audioResp.Body)
 	fmt.Printf("Downloaded %d bytes\n", len(audioData))
 
-	// Send the audio to the Aldea API
+	// Send the audio to the SubQ API
 	fmt.Println("Transcribing...")
-	req, _ := http.NewRequest("POST", "https://api.aldea.ai/v1/listen", bytes.NewReader(audioData))
+	req, _ := http.NewRequest("POST", "https://api.subquadratic.ai/v1/listen", bytes.NewReader(audioData))
 	req.Header.Set("Authorization", "Bearer "+apiKey)
 
 	resp, err := http.DefaultClient.Do(req)
@@ -227,7 +227,7 @@ To transcribe from a URL, you download the audio, send it to the API, and extrac
 
 1. **Download the audio:** `http.Get()` fetches the audio file from the URL. Go's HTTP client follows redirects automatically, which is important for URLs from storage services that often redirect to a CDN.
 
-2. **POST to `/v1/listen`:** You send the downloaded audio bytes to the Aldea API in the request body. This is the same endpoint and format used in [Transcribe a file](/docs/integration/transcribe-file). The only difference is where the audio comes from.
+2. **POST to `/v1/listen`:** You send the downloaded audio bytes to the SubQ API in the request body. This is the same endpoint and format used in [Transcribe a file](/docs/integration/transcribe-file). The only difference is where the audio comes from.
 
 3. **Parse the response:** The response structure is the same as file transcription. For full field descriptions, see the [response structure in Transcribe a file](/docs/integration/transcribe-file).
 
@@ -248,26 +248,26 @@ The approach is the same as [Transcribe a file](/docs/integration/transcribe-fil
 
 ## Transcribe audio from a URL
 
-In this example, you download audio from a public URL and send it to the Aldea API for transcription:
+In this example, you download audio from a public URL and send it to the SubQ API for transcription:
 
 ```rust title="transcribe_url.rs"
 use serde_json::Value;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let api_key = std::env::var("ALDEA_API_KEY").expect("ALDEA_API_KEY not set");
-    let audio_url = "https://platform.aldea.ai/aldea_sample.wav";
+    let api_key = std::env::var("SUBQ_API_KEY").expect("SUBQ_API_KEY not set");
+    let audio_url = "https://platform.subquadratic.ai/subq_sample.wav";
 
     // Download the audio file
     println!("Downloading audio...");
     let audio_data = reqwest::get(audio_url).await?.bytes().await?;
     println!("Downloaded {} bytes", audio_data.len());
 
-    // Send the audio to the Aldea API
+    // Send the audio to the SubQ API
     println!("Transcribing...");
     let client = reqwest::Client::new();
     let response = client
-        .post("https://api.aldea.ai/v1/listen")
+        .post("https://api.subquadratic.ai/v1/listen")
         .header("Authorization", format!("Bearer {}", api_key))
         .body(audio_data)
         .send()
@@ -303,7 +303,7 @@ To transcribe from a URL, you download the audio, send it to the API, and extrac
 
 1. **Download the audio:** `reqwest::get(url).await?.bytes().await?` fetches the audio file into memory. `reqwest` follows redirects automatically, which is important for URLs from storage services that often redirect to a CDN.
 
-2. **POST to `/v1/listen`:** You send the downloaded audio bytes to the Aldea API in the request body. This is the same endpoint and format used in [Transcribe a file](/docs/integration/transcribe-file). The only difference is where the audio comes from.
+2. **POST to `/v1/listen`:** You send the downloaded audio bytes to the SubQ API in the request body. This is the same endpoint and format used in [Transcribe a file](/docs/integration/transcribe-file). The only difference is where the audio comes from.
 
 3. **Parse the response:** The response structure is the same as file transcription. For full field descriptions, see the [response structure in Transcribe a file](/docs/integration/transcribe-file).
 
@@ -327,4 +327,4 @@ You can customize transcriptions with query parameters for [smart formatting](/d
 
 - [Transcribe a file](/docs/integration/transcribe-file) - transcribe audio from your local filesystem
 - [Real-time streaming](/docs/integration/streaming) - transcribe audio as it's being recorded or received
-- [Migrate from Deepgram](/docs/integration/migrate-from-deepgram) - already using the Deepgram SDK? Switch to Aldea with a 2-line change
+- [Migrate from Deepgram](/docs/integration/migrate-from-deepgram) - already using the Deepgram SDK? Switch to SubQ with a 2-line change

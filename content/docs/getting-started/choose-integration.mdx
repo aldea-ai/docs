@@ -3,7 +3,7 @@ title: Choose integration path
 description: Pick the fastest way to add speech-to-text - direct HTTP, Deepgram-compatible SDKs, browser, or mobile SDK
 ---
 
-The Aldea API platform provides several ways to add speech-to-text to your application. The best
+The SubQ API platform provides several ways to add speech-to-text to your application. The best
 choice depends on your runtime environment, whether you need real-time results, and
 how much of the HTTP/WebSocket layer you want to manage.
 
@@ -14,7 +14,7 @@ Before selecting an integration path, consider the format of your audio files:
 | Mode | When to use | Protocol |
 |------|------------|----------|
 | **Pre-recorded** | You already have an audio file or a publicly accessible URL pointing to one. You send it in a single request and get the full transcript back. | REST - HTTP `POST /v1/listen` |
-| **Streaming** | You need real-time, low-latency transcription as audio is being produced (live microphone, call center, or broadcast). You send audio chunks continuously, and the API returns partial results as they become available. | WebSocket - `wss://api.aldea.ai/v1/listen` |
+| **Streaming** | You need real-time, low-latency transcription as audio is being produced (live microphone, call center, or broadcast). You send audio chunks continuously, and the API returns partial results as they become available. | WebSocket - `wss://api.subquadratic.ai/v1/listen` |
 
 Every integration path described below supports both modes.
 
@@ -31,7 +31,7 @@ Every integration path described below supports both modes.
 ## 1. Direct HTTP requests
 
 The simplest starting point - no SDK required. You make a standard HTTP `POST`
-request to `https://api.aldea.ai/v1/listen` with your API key in the
+request to `https://api.subquadratic.ai/v1/listen` with your API key in the
 `Authorization` header and the audio in the request body. The API returns a JSON
 object containing the transcript.
 
@@ -51,9 +51,9 @@ third-party SDK.
 
 ## 2. Deepgram-compatible SDKs
 
-Aldea's servers implement Deepgram-compatible APIs, so you can use official
+SubQ's servers implement Deepgram-compatible APIs, so you can use official
 Deepgram SDKs (Python, Node.js, Go, Rust, or .NET) as client libraries to
-connect to Aldea. Point the SDK at Aldea by changing two configuration values:
+connect to SubQ. Point the SDK at SubQ by changing two configuration values:
 your **API key** and the **base URL**. Everything else including method signatures,
 response shapes, and event names stays the same.
 
@@ -78,22 +78,22 @@ Create a live connection through the SDK, register an event handler for incoming
 transcripts, and push audio chunks as they arrive. The SDK handles the WebSocket
 handshake, keep-alive, and graceful close for you.
 
-**Best for:** Production applications that need real-time streaming or projects migrating from Deepgram to Aldea.
+**Best for:** Production applications that need real-time streaming or projects migrating from Deepgram to SubQ.
 
 
 ## 3. Browser integration
 
 You can run transcription entirely in the browser with no back end of your own.
-Because Aldea implements Deepgram-compatible APIs, you can load the Deepgram
-JavaScript SDK from a content delivery network (CDN), point it at Aldea, and
+Because SubQ implements Deepgram-compatible APIs, you can load the Deepgram
+JavaScript SDK from a content delivery network (CDN), point it at SubQ, and
 start transcribing.
 
-Aldea supports two interaction patterns:
+SubQ supports two interaction patterns:
 
 - **Pre-recorded upload** - the user selects an audio file (or you supply a URL).
-  The SDK sends it to Aldea over HTTP and returns the transcript to your page.
+  The SDK sends it to SubQ over HTTP and returns the transcript to your page.
 - **Live recording** - the browser captures the user's microphone through the
-  `getUserMedia` API and streams audio chunks to Aldea over a WebSocket. Partial
+  `getUserMedia` API and streams audio chunks to SubQ over a WebSocket. Partial
   transcripts appear in real time.
 
 Because the SDK runs client-side, your API key is exposed to the browser. Use a
@@ -105,7 +105,7 @@ speech-to-text without setting up a dedicated server.
 
 ## 4. Mobile SDKs
 
-For native iOS and Android apps, Aldea provides Swift and Kotlin SDKs that wrap the API
+For native iOS and Android apps, SubQ provides Swift and Kotlin SDKs that wrap the API
 in platform interface. The mobile SDKs handle authentication, WebSocket lifecycle, audio capture, and
 permission management so you can focus on your app experience rather than
 low-level networking details.
@@ -116,7 +116,7 @@ real-time or pre-recorded transcription.
 ## Decision guide
 
 1. **Are you testing or prototyping?** Use [direct HTTP](#1-direct-http-requests) to send a request and see results immediately.
-2. **Do you have an existing Deepgram integration?** Use a [Deepgram-compatible SDK](#2-deepgram-compatible-sdks) - change two configuration values to point at Aldea.
+2. **Do you have an existing Deepgram integration?** Use a [Deepgram-compatible SDK](#2-deepgram-compatible-sdks) - change two configuration values to point at SubQ.
 3. **Building a web application that captures audio in the browser?** Use [browser integration](#3-browser-integration).
-4. **Building a native mobile app?** Use [Aldea's mobile SDKs](#4-mobile-sdks).
-5. **Need real-time streaming in a back-end service?** Use a [Deepgram-compatible SDK](#2-deepgram-compatible-sdks) that will manage the WebSocket connection to Aldea for you.
+4. **Building a native mobile app?** Use [SubQ's mobile SDKs](#4-mobile-sdks).
+5. **Need real-time streaming in a back-end service?** Use a [Deepgram-compatible SDK](#2-deepgram-compatible-sdks) that will manage the WebSocket connection to SubQ for you.

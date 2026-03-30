@@ -5,13 +5,13 @@ description: Include filler words in transcription with filler_words=true
 
 Filler words such as "um", "uh", "like", and "you know"  are a natural part of spoken language. You can decide whether to include or exclude them from your transcript depending on what you're using the transcript for.
 
-By default, Aldea removes filler words from the output to produce clean, readable text. However, you can preserve every utterance spoken in your verbatim by adding `filler_words=true` as a query parameter. This is useful for verbatim transcription or conversation analysis where hesitations carry meaning.
+By default, SubQ removes filler words from the output to produce clean, readable text. However, you can preserve every utterance spoken in your verbatim by adding `filler_words=true` as a query parameter. This is useful for verbatim transcription or conversation analysis where hesitations carry meaning.
 
 The following request shows how to include filler words in the output:
 
 ```bash
-curl -X POST "https://api.aldea.ai/v1/listen?filler_words=true" \
-  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+curl -X POST "https://api.subquadratic.ai/v1/listen?filler_words=true" \
+  -H "Authorization: Bearer YOUR_SUBQ_API_KEY" \
   --data-binary @audio.wav
 ```
 
@@ -28,25 +28,25 @@ Filler word detection is available for English only.
 
 Filler words carry meaningful signals in contexts such as:
 
-  - Conversation analysis and research: Linguists, UX researchers, and communication coaches study hesitation patterns to understand speaker confidence, cognitive load, and conversational dynamics. Removing fillers strips away the data they need.
+- **Conversation analysis and research:** Linguists, UX researchers, and communication coaches study hesitation patterns to understand speaker confidence, cognitive load, and conversational dynamics. Removing fillers strips away the data they need.
 
-  - Legal and compliance transcription. Verbatim court transcripts, deposition records, and regulatory proceedings often require every spoken word to be documented. Omitting fillers could be considered an incomplete record.
+- **Legal and compliance transcription:** Verbatim court transcripts, deposition records, and regulatory proceedings often require every spoken word to be documented. Omitting fillers could be considered an incomplete record.
 
-  - Sentiment and intent analysis. A customer who says "I, um, I guess the product is... fine" is communicating something different from one who says "The product is fine." Filler words and hesitation patterns can signal uncertainty, dissatisfaction, or discomfort that a cleaned-up transcript obscures.
+- **Sentiment and intent analysis:** A customer who says "I, um, I guess the product is... fine" is communicating something different from one who says "The product is fine." Filler words and hesitation patterns can signal uncertainty, dissatisfaction, or discomfort that a cleaned-up transcript obscures.
 
-  - Speaker coaching and training. Sales teams, public speakers, and media trainers use filler word frequency as a measurable metric for improvement. Preserving fillers in training session transcripts makes that analysis possible.
+- **Speaker coaching and training:** Sales teams, public speakers, and media trainers use filler word frequency as a measurable metric for improvement. Preserving fillers in training session transcripts makes that analysis possible.
 
 ## When to exclude filler words
 
 For most production use cases, the default behavior where filler words are removed produces the best result:
 
-- Meeting notes and summaries: Most readers want the key take aways from a discussion, not a record of every word. Clean transcripts are faster to read and easier to summarize.
+- **Meeting notes and summaries:** Most readers want the key takeaways from a discussion, not a record of every word. Clean transcripts are faster to read and easier to summarize.
 
-- Subtitles and captions: Screen space is limited, and some fillers may bring visual clutter without adding any value for the viewer.
+- **Subtitles and captions:** Screen space is limited, and some fillers may bring visual clutter without adding any value for the viewer.
 
-- Content publishing: Podcast transcripts, interview articles, and blog posts read better without fillers. Published text follows written conventions, not spoken ones.
+- **Content publishing:** Podcast transcripts, interview articles, and blog posts read better without fillers. Published text follows written conventions, not spoken ones.
 
-- Chatbot and voice assistant logs: When transcribing user commands or queries, fillers interfere with intent parsing. For example, the phrase "Um, set a timer for, uh, five minutes" could be harder to parse than "Set a timer for five minutes."
+- **Chatbot and voice assistant logs:** When transcribing user commands or queries, fillers interfere with intent parsing. For example, the phrase "Um, set a timer for, uh, five minutes" could be harder to parse than "Set a timer for five minutes."
 
 ## Next steps
 

@@ -3,11 +3,11 @@ title: Languages
 description: Supported languages, language selection, and automatic language detection
 ---
 
-In multilingual environments such as customer support centers handling calls in multiple languages, media companies processing international content, or platforms accepting user-generated audio, you can't always know the language of an audio file before processing it. Sending audio with the wrong language code produces poor or failed transcripts. Aldea supports explicit language selection and automatic detection to handle both known and unknown language scenarios. 
+In multilingual environments such as customer support centers handling calls in multiple languages, media companies processing international content, or platforms accepting user-generated audio, you can't always know the language of an audio file before processing it. Sending audio with the wrong language code produces poor or failed transcripts. SubQ supports explicit language selection and automatic detection to handle both known and unknown language scenarios. 
 
 ## Supported languages
 
-Aldea supports both English and Spanish transcription:
+SubQ supports both English and Spanish transcription:
 
 | Language | Code | Aliases |
 |----------|------|---------|
@@ -21,33 +21,33 @@ Language codes follow the [BCP-47](https://en.wikipedia.org/wiki/IETF_language_t
 When you know the language of your audio, pass the `language` query parameter (or its alias `lang`) in the transcription request:
 
 ```bash title="Pre-recorded"
-curl -X POST "https://api.aldea.ai/v1/listen?language=es" \
-  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+curl -X POST "https://api.subquadratic.ai/v1/listen?language=es" \
+  -H "Authorization: Bearer YOUR_SUBQ_API_KEY" \
   --data-binary @audio.wav
 ```
 
 ```bash title="Streaming"
 # WebSocket URL with language parameter
-wss://api.aldea.ai/v1/listen?language=es&interim_results=true
+wss://api.subquadratic.ai/v1/listen?language=es&interim_results=true
 ```
 
 When no `language` parameter is provided, the API defaults to English.
 
 ## Automatic language detection
 
-When you don't know the language of your audio files, enable automatic detection. Aldea analyzes the audio's acoustic features and phonetic patterns to identify the spoken language, then routes the audio through the corresponding transcription model. For Aldea APIs to identify the spoken language automatically, set `detect_language=true` as follows:
+When you don't know the language of your audio files, enable automatic detection. SubQ analyzes the audio's acoustic features and phonetic patterns to identify the spoken language, then routes the audio through the corresponding transcription model. For SubQ APIs to identify the spoken language automatically, set `detect_language=true` as follows:
 
 ```bash
-curl -X POST "https://api.aldea.ai/v1/listen?detect_language=true" \
-  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+curl -X POST "https://api.subquadratic.ai/v1/listen?detect_language=true" \
+  -H "Authorization: Bearer YOUR_SUBQ_API_KEY" \
   --data-binary @audio.wav
 ```
 
 You can also pass `language=auto` as a shorthand:
 
 ```bash
-curl -X POST "https://api.aldea.ai/v1/listen?language=auto" \
-  -H "Authorization: Bearer YOUR_ALDEA_API_KEY" \
+curl -X POST "https://api.subquadratic.ai/v1/listen?language=auto" \
+  -H "Authorization: Bearer YOUR_SUBQ_API_KEY" \
   --data-binary @audio.wav
 ```
 
