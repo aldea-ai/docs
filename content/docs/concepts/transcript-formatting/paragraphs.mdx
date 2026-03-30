@@ -9,9 +9,9 @@ Paragraph formatting adds line breaks to a transcript based on natural pauses, t
 
 SubQ doesn't insert line breaks at fixed intervals or arbitrary word counts. Instead, it analyzes different signals from the audio, such as:
 
-- Pause duration: Extended silences between utterances often indicate a transition. In most cases, a speaker finalizing one thought and beginning another. SubQ's STT models use these pauses as signals for potential paragraph boundaries.
+- **Pause duration:** Extended silences between utterances often indicate a transition. In most cases, a speaker finalizing one thought and beginning another. SubQ's STT models use these pauses as signals for potential paragraph boundaries.
 
-- Change in topic and context: SubQ's models evaluate whether the content that comes before and after a break represents a shift in the subject. For example, a speaker who pauses briefly to breathe mid-sentence won't trigger a paragraph break, but a speaker who finishes discussing Q1 revenue and moves to hiring plans will.
+- **Change in topic and context:** SubQ's models evaluate whether the content that comes before and after a break represents a shift in the subject. For example, a speaker who pauses briefly to breathe mid-sentence won't trigger a paragraph break, but a speaker who finishes discussing Q1 revenue and moves to hiring plans will.
 
 Paragraph formatting ensures that the final transcript feels natural, aligns with the speaker's intent, and mirrors how the conversation actually flowed.
 
@@ -37,10 +37,10 @@ curl -X POST "https://api.subquadratic.ai/v1/listen?paragraphs=true&smart_format
 
 Paragraph formatting adds structure to your transcript, which is important for:
 
-- Meeting and call transcripts: It makes it easier to scan though long-form recordings as reviewers can jump to specific sections instead of reading the entire transcript.
-- Content publishing: Podcast transcripts, interview write-ups, and lecture notes require structured paragraphs before publishing or sharing.
-- Accessibility: Screen readers and assistive technologies navigate structured text more effectively.
-- Downstream summaries: If you feed transcripts into a summarization model, paragraph boundaries give the model natural chunks to work with, which improves summary quality.
+- **Meeting and call transcripts:** It makes it easier to scan through long-form recordings as reviewers can jump to specific sections instead of reading the entire transcript.
+- **Content publishing:** Podcast transcripts, interview write-ups, and lecture notes require structured paragraphs before publishing or sharing.
+- **Accessibility:** Screen readers and assistive technologies navigate structured text more effectively.
+- **Downstream summaries:** If you feed transcripts into a summarization model, paragraph boundaries give the model natural chunks to work with, which improves summary quality.
 
 ## Next steps
 

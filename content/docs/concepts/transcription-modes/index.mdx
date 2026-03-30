@@ -131,12 +131,12 @@ The following endpoints are aliases and function identically to `/v1/listen`:
 
 ## Real-time streaming
 
-Real-time streaming transcription processes an audio as it is captured and returns results continuously. Audio is streamed to SubQ over a persistent WebSocket connection and transcript segments returned incrementally  as speech is detected. 
+Real-time streaming transcription processes audio as it is captured and returns results continuously. Audio is streamed to SubQ over a persistent WebSocket connection and transcript segments returned incrementally as speech is detected. 
 
 SubQ emits two types of results during real-time streaming transcription:
 
-- Interim results: This is partial, low-latency hypotheses that update as more audio context becomes available. Interim results are useful when displaying live captions but they can change as the utterances progresses.
-- Final results: The stable transcript segment returned once SubQ determines that an utterance is complete. These final results do not change after delivery. 
+- **Interim results:** These are partial, low-latency hypotheses that update as more audio context becomes available. Interim results are useful when displaying live captions but they can change as the utterance progresses.
+- **Final results:** The stable transcript segment returned once SubQ determines that an utterance is complete. These final results do not change after delivery. 
 
 Real-time streaming transcription is ideal for the following use cases:
 

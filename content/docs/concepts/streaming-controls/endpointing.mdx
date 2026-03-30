@@ -31,7 +31,7 @@ To disable automatic finalization, set `endpointing` to `false` as follows:
 wss://api.subquadratic.ai/v1/listen?endpointing=false&encoding=mp3
 ```
 
-When you disable endpointing, the server finalizes results only when you send a [`Finalize` or `CloseStream`](/docs/concepts/streaming-controls/websocket-protocol) message. This is useful when your application needs full control over when transcription segments are committed. For example, a dictation app where the user explicitly presses a button to finish a sentence.
+When you disable endpointing, the server finalizes results only when you send a [Finalize or CloseStream](/docs/concepts/streaming-controls/websocket-protocol) message. This is useful when your application needs full control over when transcription segments are committed. For example, a dictation app where the user explicitly presses a button to finish a sentence.
 
 ## Choosing an endpointing value
 
