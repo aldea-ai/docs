@@ -13,6 +13,18 @@
 }
 
 /*
+ * Mobile (<768px): Fumadocs keeps `style="padding-inline-start:var(--fd-sidebar-width)"`
+ * on #nd-docs-layout while the desktop sidebar is `max-md:hidden`, which reserves
+ * ~280px of empty space. Zero the variable here so the inline padding resolves to 0
+ * (no !important). Descendants (e.g. #nd-tocnav inset) inherit the same value.
+ */
+@media (max-width: 767px) {
+  #nd-docs-layout {
+    --fd-sidebar-width: 0px;
+  }
+}
+
+/*
  * Sidebar header row (fumadocs: SidebarHeader > div.flex) + collapse control.
  * Persisted from browser preview: center main-axis, align to start on cross-axis,
  * full-height row, full-height collapse trigger.
@@ -39,4 +51,19 @@
 #nd-sidebar button[aria-label="Collapse Sidebar"] {
   height: 100%;
   margin-block: 0;
+}
+
+/*
+ * Sidebar section labels (Fumadocs SidebarSeparator — meta.json ---Section--- rows).
+ * Nav links use flex-row; separators are p.inline-flex + mb-1.5 only.
+ */
+#nd-sidebar p[class~="inline-flex"][class~="mb-1.5"],
+#nd-sidebar-mobile p[class~="inline-flex"][class~="mb-1.5"] {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.25;
+  /* text-transform: uppercase; */
+  color: color-mix(in oklab, var(--color-fd-primary) 92%, transparent);
 }
