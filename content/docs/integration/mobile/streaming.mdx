@@ -1,0 +1,560 @@
+---
+title: Real-time streaming
+description: Stream live audio from the microphone for real-time transcription
+---
+
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+Real-time streaming opens a WebSocket connection to the SubQ API, sends audio frames from the device microphone, and receives transcript results as the user speaks. Use it for live captioning, voice input, dictation, and any scenario where you need transcription results before the recording finishes.
+
+The SDK handles WebSocket authentication using the `Sec-WebSocket-Protocol: token, <api-key>` header. For details on the WebSocket protocol, see [WebSocket protocol](/docs/concepts/streaming-controls/websocket-protocol).
+
+## Prerequisites
+
+- A SubQ API key ([Get API key](/docs/getting-started/get-api-key))
+- The `SubQSTTClient` class added to your project ([Setup](/docs/integration/mobile/setup))
+- Microphone permission granted by the user
+
+<Tabs items={['iOS (Swift)', 'Android (Kotlin)']} groupId="mobile-platform" persist updateAnchor>
+<Tab value="iOS (Swift)">
+
+## Request microphone permission
+
+iOS requires you to declare microphone usage in `Info.plist` and request permission at runtime. Add the following key to your `Info.plist`:
+
+```xml title="Info.plist"
+<key>NSMicrophoneUsageDescription</key>
+<string>This app uses the microphone for real-time speech-to-text.</string>
+```
+
+Request permission before starting audio capture. You can do this when the view appears:
+
+```swift title="Request permission"
+import AVFoundation
+
+AVAudioSession.sharedInstance().requestRecordPermission { granted in
+    if granted {
+        print("Microphone permission granted")
+    } else {
+        print("Microphone permission denied")
+    }
+}
+```
+
+## Start a streaming session
+
+Starting a live transcription session involves three steps: creating a `StreamSession`, setting up the audio engine, and starting capture.
+
+### Create the streaming session
+
+Call `streamSession(onTranscript:onError:)` on the client. This opens a WebSocket connection to `wss://api.subquadratic.ai/v1/listen`. The `onTranscript` closure receives two arguments: the transcript text and a boolean `isFinal` that indicates whether the result is finalized. Final results are stable and will not change. Interim results may change as more audio context arrives.
+
+```swift title="Create session"
+let client = SubQSTTClient(token: "org_YOUR_API_KEY")
+
+let session = client.streamSession(
+    onTranscript: { text, isFinal in
+        if isFinal {
+            print("Final: \(text)")
+        }
+    },
+    onError: { error in
+        print("Error: \(error.localizedDescription)")
+    }
+)
+```
+
+### Set up the audio engine
+
+Use `AVAudioEngine` to capture microphone input. Install a tap on the input node to receive audio buffers. Convert the audio to 16-bit linear PCM at 16 kHz, which is the format expected by the streaming endpoint.
+
+```swift title="Audio engine setup"
+import AVFoundation
+
+let audioEngine = AVAudioEngine()
+let inputNode = audioEngine.inputNode
+let inputFormat = inputNode.outputFormat(forBus: 0)
+
+// Define the target format: 16-bit signed integer PCM at 16 kHz, mono
+guard let targetFormat = AVAudioFormat(
+    commonFormat: .pcmFormatInt16,
+    sampleRate: 16000,
+    channels: 1,
+    interleaved: true
+) else {
+    print("Failed to create target audio format")
+    return
+}
+
+// Create a converter from the input format to the target format
+guard let converter = AVAudioConverter(from: inputFormat, to: targetFormat) else {
+    print("Failed to create audio converter")
+    return
+}
+
+// Install a tap on the input node to receive audio buffers
+inputNode.installTap(onBus: 0, bufferSize: 4096, format: inputFormat) { buffer, _ in
+    // Allocate a buffer for the converted audio
+    guard let converted = AVAudioPCMBuffer(
+        pcmFormat: targetFormat,
+        frameCapacity: AVAudioFrameCount(targetFormat.sampleRate * 0.1)
+    ) else { return }
+
+    // Convert the audio to the target format
+    var error: NSError?
+    converter.convert(to: converted, error: &error) { _, status in
+        status.pointee = .haveData
+        return buffer
+    }
+
+    // Send the converted audio to the streaming session
+    if error == nil, converted.frameLength > 0, let data = converted.int16ChannelData {
+        let audioData = Data(
+            bytes: data[0],
+            count: Int(converted.frameLength) * 2
+        )
+        session.sendAudio(audioData)
+    }
+}
+```
+
+### Start the engine
+
+Configure the audio session and start the engine:
+
+```swift title="Start the engine"
+let audioSession = AVAudioSession.sharedInstance()
+try audioSession.setCategory(.playAndRecord, options: .defaultToSpeaker)
+try audioSession.setActive(true)
+try audioEngine.start()
+```
+
+### Complete start function
+
+The following function combines all three steps:
+
+```swift title="startRecording()"
+var session: StreamSession?
+var audioEngine: AVAudioEngine?
+
+func startRecording(apiKey: String) {
+    do {
+        // Configure the audio session
+        let audioSession = AVAudioSession.sharedInstance()
+        try audioSession.setCategory(.playAndRecord, options: .defaultToSpeaker)
+        try audioSession.setActive(true)
+
+        // Create the streaming session
+        let client = SubQSTTClient(token: apiKey)
+        session = client.streamSession(
+            onTranscript: { text, isFinal in
+                if isFinal {
+                    print("Final: \(text)")
+                }
+            },
+            onError: { error in
+                print("Error: \(error.localizedDescription)")
+            }
+        )
+
+        // Set up the audio engine
+        audioEngine = AVAudioEngine()
+        let input = audioEngine!.inputNode
+        let inputFormat = input.outputFormat(forBus: 0)
+
+        guard let targetFormat = AVAudioFormat(
+            commonFormat: .pcmFormatInt16,
+            sampleRate: 16000,
+            channels: 1,
+            interleaved: true
+        ) else { return }
+
+        guard let converter = AVAudioConverter(from: inputFormat, to: targetFormat) else {
+            return
+        }
+
+        input.installTap(onBus: 0, bufferSize: 4096, format: inputFormat) {
+            [weak self] buffer, _ in
+            guard let converted = AVAudioPCMBuffer(
+                pcmFormat: targetFormat,
+                frameCapacity: AVAudioFrameCount(targetFormat.sampleRate * 0.1)
+            ) else { return }
+
+            var error: NSError?
+            converter.convert(to: converted, error: &error) { _, status in
+                status.pointee = .haveData
+                return buffer
+            }
+
+            if error == nil, converted.frameLength > 0,
+               let data = converted.int16ChannelData {
+                self?.session?.sendAudio(
+                    Data(bytes: data[0], count: Int(converted.frameLength) * 2)
+                )
+            }
+        }
+
+        try audioEngine!.start()
+    } catch {
+        print("Failed to start recording: \(error.localizedDescription)")
+    }
+}
+```
+
+## Stop recording
+
+To stop recording, stop the audio engine, remove the tap, close the streaming session, and deactivate the audio session:
+
+```swift title="stopRecording()"
+func stopRecording() {
+    audioEngine?.stop()
+    audioEngine?.inputNode.removeTap(onBus: 0)
+    session?.close()
+    audioEngine = nil
+    session = nil
+    try? AVAudioSession.sharedInstance().setActive(false)
+}
+```
+
+## Send control messages
+
+The `StreamSession` class provides convenience methods to send control messages to the server:
+
+| Method | Description |
+|--------|-------------|
+| `keepAlive()` | Prevent the connection from timing out during pauses in audio |
+| `finalizeStream()` | Flush the server buffer and receive any remaining results |
+| `requestClose()` | Ask the server to close the connection gracefully |
+| `close()` | Send a `CloseStream` message and cancel the WebSocket task |
+
+```swift title="Control messages"
+// Keep the connection alive during a pause
+session?.keepAlive()
+
+// Flush remaining results before stopping
+session?.finalizeStream()
+
+// Close the connection
+session?.close()
+```
+
+For the full list of control messages and their effects, see [WebSocket protocol](/docs/concepts/streaming-controls/websocket-protocol).
+
+## Handle errors
+
+The `onError` closure receives an `Error` object when the WebSocket connection fails. Common causes include invalid API keys, network interruptions, and server errors:
+
+```swift title="Error handling"
+session = client.streamSession(
+    onTranscript: { text, isFinal in
+        // Handle transcript
+    },
+    onError: { error in
+        let nsError = error as NSError
+        switch nsError.code {
+        case 1000:
+            print("Connection closed normally")
+        case 1008:
+            print("Authentication failed. Check your API key.")
+        default:
+            print("WebSocket error: \(error.localizedDescription)")
+        }
+    }
+)
+```
+
+</Tab>
+<Tab value="Android (Kotlin)">
+
+## Request microphone permission
+
+Android requires runtime permission for microphone access. Declare the `RECORD_AUDIO` permission in `AndroidManifest.xml` (covered in [Setup](/docs/integration/mobile/setup)), then request it at runtime.
+
+Register a permission request launcher in your Activity:
+
+```kotlin title="Permission request"
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+
+class MainActivity : ComponentActivity() {
+    private val requestPermission = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            Log.d("SubQSTT", "Microphone permission granted")
+        } else {
+            Log.e("SubQSTT", "Microphone permission denied")
+        }
+    }
+
+    private fun checkAndRequestPermission(): Boolean {
+        val granted = ContextCompat.checkSelfPermission(
+            this, Manifest.permission.RECORD_AUDIO
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (!granted) {
+            requestPermission.launch(Manifest.permission.RECORD_AUDIO)
+        }
+        return granted
+    }
+}
+```
+
+## Start a streaming session
+
+Starting a live transcription session involves three steps: creating a `StreamSession`, setting up `AudioRecord`, and starting a capture loop.
+
+### Create the streaming session
+
+Call `createStreamSession()` on the client. This opens a WebSocket connection to `wss://api.subquadratic.ai/v1/listen`. The `onTranscript` callback receives two arguments: the transcript text and a boolean `isFinal` that indicates whether the result is finalized. Final results are stable and will not change. Interim results may change as more audio context arrives.
+
+```kotlin title="Create session"
+val client = SubQSTTClient(token = "org_YOUR_API_KEY")
+
+val session = client.createStreamSession(
+    onTranscript = { text, isFinal ->
+        if (isFinal) {
+            Log.d("SubQSTT", "Final: $text")
+        }
+    },
+    onError = { errorMsg ->
+        Log.e("SubQSTT", "Error: $errorMsg")
+    },
+    onOpen = {
+        Log.d("SubQSTT", "WebSocket connected, starting audio capture")
+    }
+)
+```
+
+### Set up audio capture
+
+Use `AudioRecord` to capture microphone input. Configure it for 16-bit linear PCM at 16 kHz (mono), which is the format expected by the streaming endpoint. Calculate the buffer size using `getMinBufferSize()` with a minimum of 4096 bytes:
+
+```kotlin title="AudioRecord setup"
+import android.media.AudioFormat
+import android.media.AudioRecord
+import android.media.MediaRecorder
+
+val sampleRate = 16000
+val bufferSize = maxOf(
+    AudioRecord.getMinBufferSize(
+        sampleRate,
+        AudioFormat.CHANNEL_IN_MONO,
+        AudioFormat.ENCODING_PCM_16BIT
+    ),
+    4096
+)
+
+@Suppress("MissingPermission")
+val audioRecord = AudioRecord(
+    MediaRecorder.AudioSource.MIC,
+    sampleRate,
+    AudioFormat.CHANNEL_IN_MONO,
+    AudioFormat.ENCODING_PCM_16BIT,
+    bufferSize
+)
+
+if (audioRecord.state != AudioRecord.STATE_INITIALIZED) {
+    Log.e("SubQSTT", "AudioRecord failed to initialize")
+    return
+}
+```
+
+### Read and send audio
+
+Start the `AudioRecord` and read audio in a coroutine on the IO dispatcher. Send each buffer to the streaming session:
+
+```kotlin title="Audio capture loop"
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicBoolean
+
+val recordingFlag = AtomicBoolean(true)
+
+audioRecord.startRecording()
+
+scope.launch(Dispatchers.IO) {
+    val buffer = ByteArray(bufferSize)
+    while (recordingFlag.get()) {
+        val read = audioRecord.read(buffer, 0, bufferSize)
+        if (read > 0) {
+            session.sendAudio(buffer.copyOf(read))
+        } else if (read < 0) {
+            Log.e("SubQSTT", "AudioRecord read error: $read")
+            break
+        }
+    }
+    Log.d("SubQSTT", "Audio capture loop ended")
+}
+```
+
+### Complete start function
+
+The following function combines all three steps:
+
+```kotlin title="startRecording()"
+var streamSession: StreamSession? = null
+var audioRecord: AudioRecord? = null
+val recordingFlag = AtomicBoolean(false)
+
+fun startRecording(apiKey: String) {
+    if (!checkAndRequestPermission()) return
+
+    val client = SubQSTTClient(token = apiKey)
+
+    // Create the streaming session
+    streamSession = client.createStreamSession(
+        onTranscript = { text, isFinal ->
+            // Post to the main thread for UI updates
+            mainHandler.post {
+                if (isFinal) {
+                    Log.d("SubQSTT", "Final: $text")
+                }
+            }
+        },
+        onError = { msg ->
+            mainHandler.post {
+                Log.e("SubQSTT", "Stream error: $msg")
+            }
+        },
+        onOpen = {
+            Log.d("SubQSTT", "WebSocket opened")
+        }
+    )
+
+    // Set up audio capture
+    val sampleRate = 16000
+    val bufferSize = maxOf(
+        AudioRecord.getMinBufferSize(
+            sampleRate,
+            AudioFormat.CHANNEL_IN_MONO,
+            AudioFormat.ENCODING_PCM_16BIT
+        ),
+        4096
+    )
+
+    try {
+        @Suppress("MissingPermission")
+        val record = AudioRecord(
+            MediaRecorder.AudioSource.MIC,
+            sampleRate,
+            AudioFormat.CHANNEL_IN_MONO,
+            AudioFormat.ENCODING_PCM_16BIT,
+            bufferSize
+        )
+
+        if (record.state != AudioRecord.STATE_INITIALIZED) {
+            Log.e("SubQSTT", "AudioRecord failed to initialize")
+            return
+        }
+
+        record.startRecording()
+        audioRecord = record
+        recordingFlag.set(true)
+
+        // Read and send audio on a background thread
+        scope.launch(Dispatchers.IO) {
+            val buffer = ByteArray(bufferSize)
+            while (recordingFlag.get()) {
+                val read = record.read(buffer, 0, bufferSize)
+                if (read > 0) {
+                    streamSession?.sendAudio(buffer.copyOf(read))
+                } else if (read < 0) {
+                    Log.e("SubQSTT", "AudioRecord read error: $read")
+                    break
+                }
+            }
+        }
+    } catch (e: Exception) {
+        Log.e("SubQSTT", "Error starting recording: ${e.message}", e)
+    }
+}
+```
+
+## Stop recording
+
+To stop recording, set the recording flag to false, stop and release the `AudioRecord`, and close the streaming session:
+
+```kotlin title="stopRecording()"
+fun stopRecording() {
+    recordingFlag.set(false)
+
+    audioRecord?.let { record ->
+        try {
+            record.stop()
+            record.release()
+        } catch (e: Exception) {
+            Log.e("SubQSTT", "Error stopping AudioRecord: ${e.message}")
+        }
+    }
+    audioRecord = null
+
+    streamSession?.close()
+    streamSession = null
+}
+```
+
+## Send control messages
+
+On Android, send control messages as raw JSON strings through the WebSocket. The `StreamSession.close()` method sends a `CloseStream` message automatically, but you can also send other control messages:
+
+```kotlin title="Control messages"
+// The close() method sends CloseStream automatically
+streamSession?.close()
+
+// To send other control messages, you can extend the StreamSession class
+// with methods similar to the iOS SDK:
+//   - {"type":"KeepAlive"}     - prevent timeout during pauses
+//   - {"type":"Finalize"}      - flush the server buffer
+//   - {"type":"CloseStream"}   - graceful disconnect
+```
+
+For the full list of control messages and their effects, see [WebSocket protocol](/docs/concepts/streaming-controls/websocket-protocol).
+
+## Handle errors
+
+The `onError` callback receives a string describing the error. Common causes include invalid API keys, network interruptions, and server errors:
+
+```kotlin title="Error handling"
+streamSession = client.createStreamSession(
+    onTranscript = { text, isFinal ->
+        // Handle transcript
+    },
+    onError = { errorMsg ->
+        when {
+            errorMsg.contains("401") ->
+                Log.e("SubQSTT", "Authentication failed. Check your API key.")
+            errorMsg.contains("timeout", ignoreCase = true) ->
+                Log.e("SubQSTT", "Connection timed out. Check network connectivity.")
+            else ->
+                Log.e("SubQSTT", "WebSocket error: $errorMsg")
+        }
+        stopRecording()
+    }
+)
+```
+
+</Tab>
+</Tabs>
+
+## How it works
+
+1. `createStreamSession()` (Android) or `streamSession()` (iOS) opens a WebSocket connection to `wss://api.subquadratic.ai/v1/listen` with query parameters `encoding=linear16&sample_rate=16000&interim_results=true`.
+2. Authentication uses the `Sec-WebSocket-Protocol` header with value `token, <your-api-key>`.
+3. The audio capture system records from the device microphone in 16-bit linear PCM at 16 kHz (mono).
+4. Audio data is sent to the server as binary WebSocket frames using `sendAudio()`.
+5. The server returns JSON messages. The SDK parses `channel.alternatives[0].transcript` and `is_final` from each message.
+6. Interim results (`is_final: false`) update as more audio context arrives. Final results (`is_final: true`) are stable and will not change.
+
+<Callout type="info">
+Streaming uses `encoding=linear16` because the microphone produces raw PCM audio. To use a different encoding, change the query parameter in the WebSocket URL. See [Parameters](/docs/api-reference/parameters) for supported values.
+</Callout>
+
+## Next steps
+
+- [SDK reference](/docs/integration/mobile/sdk-reference) - complete class and method reference
+- [Interim results](/docs/concepts/streaming-controls/interim-results) - how interim and final results work
+- [Utterance detection](/docs/concepts/streaming-controls/utterance-detection) - detect when a speaker finishes an utterance
+- [Endpointing](/docs/concepts/streaming-controls/endpointing) - configure silence detection sensitivity

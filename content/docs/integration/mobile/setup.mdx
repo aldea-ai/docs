@@ -1,0 +1,574 @@
+---
+title: Setup
+description: Add speech-to-text to your iOS or Android app with the SubQ STT SDK
+---
+
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+Set up the SubQ STT client in your mobile app and make your first transcription call. The mobile SDKs use native HTTP and WebSocket clients (URLSession on iOS, OkHttp on Android) with no proprietary dependencies.
+
+## Prerequisites
+
+- A SubQ API key. If you don't have one, follow the [Get API key](/docs/getting-started/get-api-key) guide. Your key starts with `org_`.
+
+<Tabs items={['iOS (Swift)', 'Android (Kotlin)']} groupId="mobile-platform" persist updateAnchor>
+<Tab value="iOS (Swift)">
+
+## Requirements
+
+- iOS 15.0 or later
+- Xcode 15.0 or later
+
+## Add dependencies
+
+No external packages are required. The SDK uses Foundation's `URLSession` for REST requests and `URLSessionWebSocketTask` for streaming connections. Both are available on iOS 15 and later.
+
+## Add the client to your project
+
+Create a new Swift file named `SubQSTTClient.swift` in your Xcode project. This file contains two classes:
+
+- `SubQSTTClient`: handles REST transcription and creates streaming sessions.
+- `StreamSession`: manages a WebSocket connection for real-time audio streaming.
+
+Add the following code to `SubQSTTClient.swift`:
+
+```swift title="SubQSTTClient.swift"
+import Foundation
+
+/// SubQ STT API Client for iOS
+class SubQSTTClient {
+    let host: String
+    let token: String
+
+    init(host: String = "https://api.subquadratic.ai", token: String) {
+        self.host = host
+        self.token = token
+    }
+
+    /// Transcribe audio from a URL.
+    ///
+    /// Sends a POST request to `/v1/listen` with a JSON body containing the
+    /// audio URL. The API downloads the audio and returns the transcript.
+    func transcribeURL(_ audioURL: String) async throws -> String {
+        guard let url = URL(string: "\(host)/v1/listen") else {
+            throw URLError(.badURL)
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("Token \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(["url": audioURL])
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let http = response as? HTTPURLResponse else {
+            throw URLError(.badServerResponse)
+        }
+
+        if !(200...299).contains(http.statusCode) {
+            let errorBody = String(data: data, encoding: .utf8) ?? "Unknown error"
+            throw NSError(
+                domain: "STT",
+                code: http.statusCode,
+                userInfo: [NSLocalizedDescriptionKey: "HTTP \(http.statusCode): \(errorBody)"]
+            )
+        }
+
+        return try extractTranscript(from: data)
+    }
+
+    /// Transcribe audio data (WAV, MP3, AAC, FLAC, and other supported formats).
+    ///
+    /// Sends the raw audio bytes as the request body. The API auto-detects
+    /// the format from binary headers.
+    func transcribeFile(data: Data, contentType: String = "audio/wav") async throws -> String {
+        guard let url = URL(string: "\(host)/v1/listen") else {
+            throw URLError(.badURL)
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("Token \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue(contentType, forHTTPHeaderField: "Content-Type")
+        request.httpBody = data
+
+        let (responseData, response) = try await URLSession.shared.data(for: request)
+
+        guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+
+        return try extractTranscript(from: responseData)
+    }
+
+    /// Create a streaming session for real-time transcription.
+    ///
+    /// Opens a WebSocket connection to `/v1/listen` with linear16 encoding
+    /// at 16 kHz. Interim results are enabled by default.
+    func streamSession(
+        onTranscript: @escaping (String, Bool) -> Void,
+        onError: @escaping (Error) -> Void
+    ) -> StreamSession {
+        let wsHost = host
+            .replacingOccurrences(of: "https://", with: "wss://")
+            .replacingOccurrences(of: "http://", with: "ws://")
+        let wsURL = "\(wsHost)/v1/listen?encoding=linear16&sample_rate=16000&interim_results=true"
+
+        return StreamSession(
+            url: URL(string: wsURL)!,
+            token: token,
+            onTranscript: onTranscript,
+            onError: onError
+        )
+    }
+
+    /// Parse the transcript from the API response JSON.
+    private func extractTranscript(from data: Data) throws -> String {
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let results = json["results"] as? [String: Any],
+              let channels = results["channels"] as? [[String: Any]],
+              let alt = (channels.first?["alternatives"] as? [[String: Any]])?.first,
+              let transcript = alt["transcript"] as? String else {
+            throw URLError(.cannotParseResponse)
+        }
+        return transcript.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}
+
+/// WebSocket streaming session for real-time transcription.
+///
+/// Manages the WebSocket lifecycle: connection, receiving messages,
+/// sending audio data, and closing. Authentication uses the
+/// `Sec-WebSocket-Protocol` header with value `token, <api-key>`.
+class StreamSession: NSObject, URLSessionWebSocketDelegate {
+    private var task: URLSessionWebSocketTask?
+    private let onTranscript: (String, Bool) -> Void
+    private let onError: (Error) -> Void
+
+    init(
+        url: URL,
+        token: String,
+        onTranscript: @escaping (String, Bool) -> Void,
+        onError: @escaping (Error) -> Void
+    ) {
+        self.onTranscript = onTranscript
+        self.onError = onError
+        super.init()
+
+        let session = URLSession(configuration: .default, delegate: self, delegateQueue: nil)
+        // Authenticate with the Sec-WebSocket-Protocol header.
+        // The server expects two subprotocols: "token" and the API key.
+        task = session.webSocketTask(with: url, protocols: ["token", token])
+        task?.resume()
+        receiveLoop()
+    }
+
+    /// Send audio data to the server as a binary WebSocket frame.
+    func sendAudio(_ data: Data) {
+        task?.send(.data(data)) { _ in }
+    }
+
+    /// Send a KeepAlive message to prevent the connection from timing out.
+    func keepAlive() {
+        let msg = #"{"type":"KeepAlive"}"#
+        task?.send(.string(msg)) { _ in }
+    }
+
+    /// Send a Finalize message to flush the server buffer and receive
+    /// any remaining results.
+    func finalizeStream() {
+        let msg = #"{"type":"Finalize"}"#
+        task?.send(.string(msg)) { _ in }
+    }
+
+    /// Request the server to close the connection gracefully.
+    func requestClose() {
+        let msg = #"{"type":"CloseStream"}"#
+        task?.send(.string(msg)) { _ in }
+    }
+
+    /// Close the WebSocket connection.
+    func close() {
+        requestClose()
+        task?.cancel(with: .goingAway, reason: nil)
+    }
+
+    // MARK: - Internal
+
+    /// Continuously receive messages from the WebSocket.
+    private func receiveLoop() {
+        task?.receive { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success(let msg):
+                if case .string(let text) = msg {
+                    self.handleMessage(text)
+                }
+                self.receiveLoop()
+            case .failure(let error):
+                self.onError(error)
+            }
+        }
+    }
+
+    /// Parse a JSON message from the server and extract the transcript.
+    private func handleMessage(_ text: String) {
+        guard let data = text.data(using: .utf8),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let channel = json["channel"] as? [String: Any],
+              let alt = (channel["alternatives"] as? [[String: Any]])?.first,
+              let transcript = alt["transcript"] as? String else { return }
+
+        let isFinal = json["is_final"] as? Bool ?? false
+        let trimmed = transcript.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmed.isEmpty {
+            DispatchQueue.main.async { self.onTranscript(trimmed, isFinal) }
+        }
+    }
+
+    // MARK: - URLSessionWebSocketDelegate
+
+    func urlSession(
+        _ session: URLSession,
+        webSocketTask: URLSessionWebSocketTask,
+        didOpenWithProtocol protocol: String?
+    ) {
+        print("[SubQSTT] WebSocket connected")
+    }
+
+    func urlSession(
+        _ session: URLSession,
+        webSocketTask: URLSessionWebSocketTask,
+        didCloseWith closeCode: URLSessionWebSocketTask.CloseCode,
+        reason: Data?
+    ) {
+        let reasonStr = reason.flatMap { String(data: $0, encoding: .utf8) } ?? "unknown"
+        print("[SubQSTT] WebSocket closed: \(closeCode.rawValue) - \(reasonStr)")
+        if closeCode != .goingAway {
+            DispatchQueue.main.async {
+                self.onError(NSError(
+                    domain: "STT",
+                    code: closeCode.rawValue,
+                    userInfo: [NSLocalizedDescriptionKey: "Connection closed: \(reasonStr)"]
+                ))
+            }
+        }
+    }
+
+    func urlSession(
+        _ session: URLSession,
+        task: URLSessionTask,
+        didCompleteWithError error: Error?
+    ) {
+        if let error = error {
+            print("[SubQSTT] WebSocket error: \(error.localizedDescription)")
+            DispatchQueue.main.async { self.onError(error) }
+        }
+    }
+}
+```
+
+## Verify your setup
+
+Create a short test to confirm that the client can reach the SubQ API. The following function transcribes a public sample audio file and prints the result:
+
+```swift title="Verify setup"
+func verifySetup() async {
+    let client = SubQSTTClient(token: "org_YOUR_API_KEY")
+
+    do {
+        let transcript = try await client.transcribeURL(
+            "https://platform.subquadratic.ai/subq_sample.wav"
+        )
+        print("Transcript: \(transcript)")
+    } catch {
+        print("Error: \(error.localizedDescription)")
+    }
+}
+```
+
+Replace `org_YOUR_API_KEY` with your actual API key. If the setup is correct, you see a transcript printed to the console. If you get an HTTP 401 error, verify that your API key starts with `org_`.
+
+</Tab>
+<Tab value="Android (Kotlin)">
+
+## Requirements
+
+- Android Studio Hedgehog (2023.1.1) or later
+- Android SDK 34
+- Kotlin 1.9 or later
+
+## Add dependencies
+
+Add OkHttp to your module-level `build.gradle.kts`. OkHttp handles both HTTP requests (pre-recorded transcription) and WebSocket connections (real-time streaming):
+
+```kotlin title="app/build.gradle.kts"
+dependencies {
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+}
+```
+
+Sync your Gradle project after adding the dependency.
+
+## Add permissions
+
+Add the following permissions to your `AndroidManifest.xml`. The `INTERNET` permission is required for all API calls. The `RECORD_AUDIO` permission is needed only if you use live microphone streaming:
+
+```xml title="app/src/main/AndroidManifest.xml"
+<uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.RECORD_AUDIO" />
+```
+
+## Add the client to your project
+
+Create a new Kotlin file named `SubQSTTClient.kt`. This file contains two classes:
+
+- `SubQSTTClient`: handles REST transcription and creates streaming sessions.
+- `StreamSession`: manages a WebSocket connection for real-time audio streaming.
+
+Add the following code to `SubQSTTClient.kt`:
+
+```kotlin title="SubQSTTClient.kt"
+package ai.subquadratic.stt
+
+import android.util.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
+import java.util.concurrent.TimeUnit
+
+/**
+ * SubQ STT API Client for Android.
+ *
+ * Provides methods for pre-recorded transcription (URL and file)
+ * and real-time streaming via WebSocket.
+ */
+class SubQSTTClient(
+    private val host: String = "https://api.subquadratic.ai",
+    private val token: String
+) {
+    private val client = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
+        .build()
+
+    /**
+     * Transcribe audio from a URL.
+     *
+     * Sends a POST request to `/v1/listen` with a JSON body containing the
+     * audio URL. The API downloads the audio and returns the transcript.
+     */
+    suspend fun transcribeUrl(audioUrl: String): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val jsonBody = JSONObject().apply {
+                put("url", audioUrl)
+            }.toString()
+
+            val request = Request.Builder()
+                .url("$host/v1/listen")
+                .header("Authorization", "Token $token")
+                .header("Content-Type", "application/json")
+                .post(jsonBody.toRequestBody("application/json".toMediaType()))
+                .build()
+
+            Log.d("SubQSTT", "Transcribing URL: $audioUrl")
+            val response = client.newCall(request).execute()
+            val body = response.body?.string() ?: ""
+
+            if (!response.isSuccessful) {
+                Log.e("SubQSTT", "HTTP ${response.code}: $body")
+                return@withContext Result.failure(Exception("HTTP ${response.code}: $body"))
+            }
+
+            Log.d("SubQSTT", "Response: $body")
+            val transcript = extractTranscript(body)
+            Result.success(transcript)
+        } catch (e: Exception) {
+            Log.e("SubQSTT", "Error: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Transcribe audio data (WAV, MP3, AAC, FLAC, and other supported formats).
+     *
+     * Sends the raw audio bytes as the request body. The API auto-detects
+     * the format from binary headers.
+     */
+    suspend fun transcribeFile(
+        data: ByteArray,
+        contentType: String = "audio/wav"
+    ): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val request = Request.Builder()
+                .url("$host/v1/listen")
+                .header("Authorization", "Token $token")
+                .post(data.toRequestBody(contentType.toMediaType()))
+                .build()
+
+            val response = client.newCall(request).execute()
+            val body = response.body?.string() ?: ""
+
+            if (!response.isSuccessful) {
+                return@withContext Result.failure(Exception("HTTP ${response.code}: $body"))
+            }
+
+            val transcript = extractTranscript(body)
+            Result.success(transcript)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Create a streaming WebSocket session for real-time transcription.
+     *
+     * Opens a WebSocket connection to `/v1/listen` with linear16 encoding
+     * at 16 kHz. Interim results are enabled by default. Authentication
+     * uses the `Sec-WebSocket-Protocol` header.
+     */
+    fun createStreamSession(
+        onTranscript: (String, Boolean) -> Unit,
+        onError: (String) -> Unit,
+        onOpen: (() -> Unit)? = null
+    ): StreamSession {
+        val wsUrl = host
+            .replace("https://", "wss://")
+            .replace("http://", "ws://") +
+            "/v1/listen?encoding=linear16&sample_rate=16000&interim_results=true"
+
+        val request = Request.Builder()
+            .url(wsUrl)
+            .header("Sec-WebSocket-Protocol", "token, $token")
+            .build()
+
+        Log.d("SubQSTT", "Creating WebSocket: $wsUrl")
+        return StreamSession(client, request, onTranscript, onError, onOpen)
+    }
+
+    /** Parse the transcript from the API response JSON. */
+    private fun extractTranscript(json: String): String {
+        val obj = JSONObject(json)
+        return obj.getJSONObject("results")
+            .getJSONArray("channels")
+            .getJSONObject(0)
+            .getJSONArray("alternatives")
+            .getJSONObject(0)
+            .getString("transcript")
+            .trim()
+    }
+}
+
+/**
+ * WebSocket streaming session for real-time transcription.
+ *
+ * Manages the WebSocket lifecycle: connection, receiving messages,
+ * sending audio data, and closing.
+ */
+class StreamSession(
+    client: OkHttpClient,
+    request: Request,
+    private val onTranscript: (String, Boolean) -> Unit,
+    private val onError: (String) -> Unit,
+    private val onOpen: (() -> Unit)? = null
+) {
+    private var webSocket: WebSocket? = null
+    private var isConnected = false
+
+    init {
+        webSocket = client.newWebSocket(request, object : WebSocketListener() {
+            override fun onOpen(webSocket: WebSocket, response: Response) {
+                Log.d("SubQSTT", "WebSocket connected")
+                isConnected = true
+                onOpen?.invoke()
+            }
+
+            override fun onMessage(webSocket: WebSocket, text: String) {
+                try {
+                    Log.d("SubQSTT", "WS message: $text")
+                    val json = JSONObject(text)
+                    val channel = json.optJSONObject("channel") ?: return
+                    val alternatives = channel.optJSONArray("alternatives") ?: return
+                    if (alternatives.length() == 0) return
+
+                    val transcript = alternatives
+                        .getJSONObject(0)
+                        .optString("transcript", "")
+                        .trim()
+                    val isFinal = json.optBoolean("is_final", false)
+
+                    if (transcript.isNotEmpty()) {
+                        onTranscript(transcript, isFinal)
+                    }
+                } catch (e: Exception) {
+                    Log.d("SubQSTT", "Parse error: ${e.message}")
+                }
+            }
+
+            override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                Log.e("SubQSTT", "WebSocket failure: ${t.message}", t)
+                isConnected = false
+                onError(t.message ?: "WebSocket error")
+            }
+
+            override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+                Log.d("SubQSTT", "WebSocket closing: $code $reason")
+                isConnected = false
+            }
+
+            override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                Log.d("SubQSTT", "WebSocket closed: $code $reason")
+                isConnected = false
+            }
+        })
+    }
+
+    /** Send audio data to the server as a binary WebSocket frame. */
+    fun sendAudio(data: ByteArray) {
+        if (isConnected) {
+            webSocket?.send(okio.ByteString.of(*data))
+        }
+    }
+
+    /** Close the WebSocket connection gracefully. */
+    fun close() {
+        webSocket?.send("{\"type\":\"CloseStream\"}")
+        webSocket?.close(1000, "Done")
+        isConnected = false
+    }
+}
+```
+
+## Verify your setup
+
+Create a short test to confirm that the client can reach the SubQ API. The following snippet transcribes a public sample audio file and logs the result:
+
+```kotlin title="Verify setup"
+// Call this from a coroutine scope (for example, inside a ViewModel or lifecycleScope)
+val client = SubQSTTClient(token = "org_YOUR_API_KEY")
+
+scope.launch {
+    client.transcribeUrl("https://platform.subquadratic.ai/subq_sample.wav")
+        .onSuccess { transcript ->
+            Log.d("SubQSTT", "Transcript: $transcript")
+        }
+        .onFailure { error ->
+            Log.e("SubQSTT", "Error: ${error.message}")
+        }
+}
+```
+
+Replace `org_YOUR_API_KEY` with your actual API key. If the setup is correct, you see a transcript in Logcat. If you get an HTTP 401 error, verify that your API key starts with `org_`.
+
+</Tab>
+</Tabs>
+
+## Next steps
+
+- [Pre-recorded transcription](/docs/integration/mobile/pre-recorded) - transcribe audio files and URLs
+- [Real-time streaming](/docs/integration/mobile/streaming) - stream live audio from the microphone
+- [SDK reference](/docs/integration/mobile/sdk-reference) - complete class and method reference

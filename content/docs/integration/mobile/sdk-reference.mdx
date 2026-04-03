@@ -1,21 +1,288 @@
 ---
 title: SDK reference
-description: API reference for the SubQ STT mobile SDKs
+description: Class and method reference for the SubQ STT mobile SDKs
 ---
 
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
-# SDK reference
+Complete reference for the SubQ mobile SDK classes and methods. For endpoint parameters, response schemas, and error codes, see the [API reference](/docs/api-reference).
 
-<Tabs items={['iOS (Swift)', 'Android (Kotlin)']}>
+<Tabs items={['iOS (Swift)', 'Android (Kotlin)']} groupId="mobile-platform" persist updateAnchor>
 <Tab value="iOS (Swift)">
 
-Full API reference for the SubQ STT iOS SDK.
+## SubQSTTClient
+
+The main client class. Handles REST transcription and creates streaming sessions.
+
+### Constructor
+
+```swift
+SubQSTTClient(host: String = "https://api.subquadratic.ai", token: String)
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `host` | `String` | `https://api.subquadratic.ai` | Base URL of the SubQ API |
+| `token` | `String` | Required | Your SubQ API key (starts with `org_`) |
+
+### Methods
+
+#### transcribeURL(_:)
+
+Transcribe audio hosted at a public URL.
+
+```swift
+func transcribeURL(_ audioURL: String) async throws -> String
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `audioURL` | `String` | Public URL of the audio file to transcribe |
+
+**Returns:** The transcript text as a `String`.
+
+**Throws:** `URLError` if the URL is invalid or the response cannot be parsed. `NSError` with the HTTP status code if the server returns a non-2xx response.
+
+#### transcribeFile(data:contentType:)
+
+Transcribe audio data loaded into memory.
+
+```swift
+func transcribeFile(data: Data, contentType: String = "audio/wav") async throws -> String
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `data` | `Data` | Required | Raw audio bytes |
+| `contentType` | `String` | `audio/wav` | MIME type of the audio data |
+
+**Returns:** The transcript text as a `String`.
+
+**Throws:** `URLError` if the URL is invalid or the response cannot be parsed.
+
+#### streamSession(onTranscript:onError:)
+
+Create a streaming session for real-time transcription over WebSocket.
+
+```swift
+func streamSession(
+    onTranscript: @escaping (String, Bool) -> Void,
+    onError: @escaping (Error) -> Void
+) -> StreamSession
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `onTranscript` | `(String, Bool) -> Void` | Called when a transcript is received. The first argument is the transcript text. The second argument is `true` if the result is final. |
+| `onError` | `(Error) -> Void` | Called when a WebSocket error occurs |
+
+**Returns:** A `StreamSession` instance with an active WebSocket connection.
+
+The WebSocket connects to `wss://<host>/v1/listen?encoding=linear16&sample_rate=16000&interim_results=true`.
+
+---
+
+## StreamSession
+
+Manages a WebSocket connection for real-time audio streaming. Created by `SubQSTTClient.streamSession(onTranscript:onError:)`.
+
+### Methods
+
+#### sendAudio(_:)
+
+Send audio data to the server as a binary WebSocket frame.
+
+```swift
+func sendAudio(_ data: Data)
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `data` | `Data` | Raw audio bytes (16-bit linear PCM at 16 kHz by default) |
+
+#### keepAlive()
+
+Send a `KeepAlive` message to prevent the connection from timing out during pauses in audio.
+
+```swift
+func keepAlive()
+```
+
+#### finalizeStream()
+
+Send a `Finalize` message to flush the server buffer. The server processes any remaining audio and sends the results before acknowledging.
+
+```swift
+func finalizeStream()
+```
+
+#### requestClose()
+
+Send a `CloseStream` message asking the server to close the connection gracefully.
+
+```swift
+func requestClose()
+```
+
+#### close()
+
+Send a `CloseStream` message and cancel the WebSocket task. Call this method when you are done with the session.
+
+```swift
+func close()
+```
+
+### Delegate callbacks
+
+`StreamSession` conforms to `URLSessionWebSocketDelegate` and handles the following events internally:
+
+| Event | Behavior |
+|-------|----------|
+| Connection opened | Logs `[SubQSTT] WebSocket connected` |
+| Connection closed | Logs the close code and reason. Calls `onError` if the close was unexpected. |
+| Connection error | Logs the error and calls `onError` on the main thread |
 
 </Tab>
 <Tab value="Android (Kotlin)">
 
-Full API reference for the SubQ STT Android SDK.
+## SubQSTTClient
+
+The main client class. Handles REST transcription and creates streaming sessions.
+
+### Constructor
+
+```kotlin
+SubQSTTClient(
+    host: String = "https://api.subquadratic.ai",
+    token: String
+)
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `host` | `String` | `https://api.subquadratic.ai` | Base URL of the SubQ API |
+| `token` | `String` | Required | Your SubQ API key (starts with `org_`) |
+
+### Methods
+
+#### transcribeUrl()
+
+Transcribe audio hosted at a public URL.
+
+```kotlin
+suspend fun transcribeUrl(audioUrl: String): Result<String>
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `audioUrl` | `String` | Public URL of the audio file to transcribe |
+
+**Returns:** `Result<String>` containing the transcript text on success, or an `Exception` on failure. The exception message includes the HTTP status code and response body for server errors.
+
+#### transcribeFile()
+
+Transcribe audio data loaded into memory.
+
+```kotlin
+suspend fun transcribeFile(
+    data: ByteArray,
+    contentType: String = "audio/wav"
+): Result<String>
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `data` | `ByteArray` | Required | Raw audio bytes |
+| `contentType` | `String` | `audio/wav` | MIME type of the audio data |
+
+**Returns:** `Result<String>` containing the transcript text on success, or an `Exception` on failure.
+
+#### createStreamSession()
+
+Create a streaming session for real-time transcription over WebSocket.
+
+```kotlin
+fun createStreamSession(
+    onTranscript: (String, Boolean) -> Unit,
+    onError: (String) -> Unit,
+    onOpen: (() -> Unit)? = null
+): StreamSession
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `onTranscript` | `(String, Boolean) -> Unit` | Called when a transcript is received. The first argument is the transcript text. The second argument is `true` if the result is final. |
+| `onError` | `(String) -> Unit` | Called when a WebSocket error occurs, with the error message |
+| `onOpen` | `(() -> Unit)?` | Called when the WebSocket connection opens. Optional. |
+
+**Returns:** A `StreamSession` instance with an active WebSocket connection.
+
+The WebSocket connects to `wss://<host>/v1/listen?encoding=linear16&sample_rate=16000&interim_results=true`. Authentication uses the `Sec-WebSocket-Protocol` header with value `token, <api-key>`.
+
+---
+
+## StreamSession
+
+Manages a WebSocket connection for real-time audio streaming. Created by `SubQSTTClient.createStreamSession()`.
+
+### Methods
+
+#### sendAudio()
+
+Send audio data to the server as a binary WebSocket frame.
+
+```kotlin
+fun sendAudio(data: ByteArray)
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `data` | `ByteArray` | Raw audio bytes (16-bit linear PCM at 16 kHz by default) |
+
+Only sends data if the WebSocket connection is currently open.
+
+#### close()
+
+Send a `CloseStream` message and close the WebSocket connection gracefully. Call this method when you are done with the session.
+
+```kotlin
+fun close()
+```
+
+### WebSocket callbacks
+
+`StreamSession` handles the following OkHttp `WebSocketListener` events internally:
+
+| Event | Behavior |
+|-------|----------|
+| `onOpen` | Sets `isConnected` to `true`, calls the `onOpen` callback |
+| `onMessage` | Parses JSON, extracts `channel.alternatives[0].transcript` and `is_final`, calls `onTranscript` |
+| `onFailure` | Sets `isConnected` to `false`, calls `onError` with the error message |
+| `onClosing` | Sets `isConnected` to `false`, logs the close code and reason |
+| `onClosed` | Sets `isConnected` to `false`, logs the close code and reason |
 
 </Tab>
 </Tabs>
+
+## Authentication
+
+The client uses two authentication methods depending on the request type:
+
+| Request type | Header | Value |
+|-------------|--------|-------|
+| REST (pre-recorded) | `Authorization` | `Token <api-key>` |
+| WebSocket (streaming) | `Sec-WebSocket-Protocol` | `token, <api-key>` |
+
+Both are handled automatically by `SubQSTTClient`. You provide your API key once in the constructor.
+
+## Audio format
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| Encoding | `linear16` | 16-bit signed integer PCM (streaming default) |
+| Sample rate | `16000` Hz | 16 kHz mono |
+| Channels | `1` | Mono |
+
+Pre-recorded transcription auto-detects the audio format from binary headers. Supported formats include MP3, WAV, AAC, FLAC, OGG, Opus, WebM, and M4A.
+
+Streaming defaults to `linear16` at 16 kHz because that is the format produced by `AVAudioEngine` (iOS) and `AudioRecord` (Android) in the example configuration. To use a different encoding, change the query parameters in the WebSocket URL. See [Parameters](/docs/api-reference/parameters) for the full list.

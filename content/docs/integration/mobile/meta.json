@@ -1,5 +1,5 @@
 {
   "title": "Mobile",
   "defaultOpen": false,
-  "pages": ["installation", "quick-start", "authentication", "sdk-reference", "sample-app"]
+  "pages": ["setup", "pre-recorded", "streaming", "sdk-reference"]
 }

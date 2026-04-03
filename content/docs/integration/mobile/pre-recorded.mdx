@@ -1,0 +1,190 @@
+---
+title: Pre-recorded transcription
+description: Transcribe audio files and URLs from your iOS or Android app
+---
+
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+Pre-recorded transcription sends a complete audio file or URL to the SubQ API in a single request and returns the full transcript in the response. Use it for voicemails, uploaded recordings, podcast episodes, or any audio that is already available before transcription starts.
+
+For background on how pre-recorded and streaming transcription differ, see [Transcription modes](/docs/concepts/transcription-modes).
+
+## Prerequisites
+
+- A SubQ API key ([Get API key](/docs/getting-started/get-api-key))
+- The `SubQSTTClient` class added to your project ([Setup](/docs/integration/mobile/setup))
+
+<Tabs items={['iOS (Swift)', 'Android (Kotlin)']} groupId="mobile-platform" persist updateAnchor>
+<Tab value="iOS (Swift)">
+
+## Transcribe audio from a URL
+
+To transcribe audio hosted at a public URL, call `transcribeURL(_:)`. The client sends a POST request to `/v1/listen` with a JSON body `{"url": "..."}`. The API downloads the audio and returns the transcript.
+
+```swift title="Transcribe from URL"
+let client = SubQSTTClient(token: "org_YOUR_API_KEY")
+
+do {
+    let transcript = try await client.transcribeURL(
+        "https://platform.subquadratic.ai/subq_sample.wav"
+    )
+    print("Transcript: \(transcript)")
+} catch {
+    print("Error: \(error.localizedDescription)")
+}
+```
+
+## Transcribe audio data
+
+To transcribe audio loaded into memory, call `transcribeFile(data:contentType:)`. This sends the raw audio bytes in the request body. The API auto-detects the format from binary headers, but you can specify the MIME type explicitly.
+
+```swift title="Transcribe audio data"
+let client = SubQSTTClient(token: "org_YOUR_API_KEY")
+
+// Load audio data from the app bundle or filesystem
+let audioData: Data = // ... load your audio file
+
+do {
+    let transcript = try await client.transcribeFile(
+        data: audioData,
+        contentType: "audio/wav"
+    )
+    print("Transcript: \(transcript)")
+} catch {
+    print("Error: \(error.localizedDescription)")
+}
+```
+
+## Error handling
+
+Both methods throw Swift errors on failure. HTTP errors include the status code and response body in the error message. Wrap calls in a `do/catch` block to handle errors:
+
+```swift title="Error handling"
+do {
+    let transcript = try await client.transcribeURL("https://example.com/audio.wav")
+    // Use the transcript
+} catch let error as NSError where error.code == 401 {
+    print("Invalid API key. Verify that your key starts with org_.")
+} catch let error as NSError where error.code == 413 {
+    print("Audio file is too large.")
+} catch {
+    print("Transcription failed: \(error.localizedDescription)")
+}
+```
+
+</Tab>
+<Tab value="Android (Kotlin)">
+
+## Transcribe audio from a URL
+
+To transcribe audio hosted at a public URL, call `transcribeUrl()`. The client sends a POST request to `/v1/listen` with a JSON body `{"url": "..."}`. The API downloads the audio and returns the transcript.
+
+The method returns a Kotlin `Result<String>`, so you handle success and failure separately:
+
+```kotlin title="Transcribe from URL"
+val client = SubQSTTClient(token = "org_YOUR_API_KEY")
+
+scope.launch {
+    client.transcribeUrl("https://platform.subquadratic.ai/subq_sample.wav")
+        .onSuccess { transcript ->
+            Log.d("SubQSTT", "Transcript: $transcript")
+        }
+        .onFailure { error ->
+            Log.e("SubQSTT", "Error: ${error.message}")
+        }
+}
+```
+
+## Transcribe audio data
+
+To transcribe audio loaded into memory, call `transcribeFile()`. This sends the raw audio bytes in the request body. The API auto-detects the format from binary headers, but you can specify the MIME type explicitly.
+
+```kotlin title="Transcribe audio data"
+val client = SubQSTTClient(token = "org_YOUR_API_KEY")
+
+// Load audio data from a file, content resolver, or asset
+val audioData: ByteArray = // ... load your audio file
+
+scope.launch {
+    client.transcribeFile(audioData, "audio/wav")
+        .onSuccess { transcript ->
+            Log.d("SubQSTT", "Transcript: $transcript")
+        }
+        .onFailure { error ->
+            Log.e("SubQSTT", "Error: ${error.message}")
+        }
+}
+```
+
+## Error handling
+
+Both methods return `Result<String>`. Failed HTTP responses are wrapped as exceptions with the status code and response body. Use `onFailure` or `getOrElse` to handle errors:
+
+```kotlin title="Error handling"
+scope.launch {
+    val transcript = client.transcribeUrl("https://example.com/audio.wav")
+        .getOrElse { error ->
+            when {
+                error.message?.contains("401") == true ->
+                    Log.e("SubQSTT", "Invalid API key. Verify that your key starts with org_.")
+                error.message?.contains("413") == true ->
+                    Log.e("SubQSTT", "Audio file is too large.")
+                else ->
+                    Log.e("SubQSTT", "Transcription failed: ${error.message}")
+            }
+            return@launch
+        }
+
+    // Use the transcript
+    Log.d("SubQSTT", transcript)
+}
+```
+
+</Tab>
+</Tabs>
+
+## How it works
+
+1. The client sends a POST request to `https://api.subquadratic.ai/v1/listen`.
+2. For URL transcription, the request body contains JSON: `{"url": "https://..."}`. For file transcription, the request body contains raw audio bytes.
+3. The API auto-detects the audio format from binary headers. Supported formats include MP3, WAV, AAC, FLAC, OGG, Opus, WebM, and M4A.
+4. The API returns a JSON response. The client extracts the transcript from `results.channels[0].alternatives[0].transcript`.
+
+## Add query parameters
+
+You can customize transcription by appending query parameters to the `/v1/listen` URL. For example, to enable smart formatting and set the language to Spanish, modify the URL in the `SubQSTTClient` class:
+
+<Tabs items={['iOS (Swift)', 'Android (Kotlin)']} groupId="mobile-platform" persist updateAnchor>
+<Tab value="iOS (Swift)">
+
+```swift title="Custom parameters"
+// Modify the URL to include query parameters
+guard let url = URL(
+    string: "\(host)/v1/listen?smart_format=true&language=es"
+) else {
+    throw URLError(.badURL)
+}
+```
+
+</Tab>
+<Tab value="Android (Kotlin)">
+
+```kotlin title="Custom parameters"
+// Modify the URL to include query parameters
+val request = Request.Builder()
+    .url("$host/v1/listen?smart_format=true&language=es")
+    .header("Authorization", "Token $token")
+    .post(data.toRequestBody(contentType.toMediaType()))
+    .build()
+```
+
+</Tab>
+</Tabs>
+
+For the full list of available parameters, see [Parameters](/docs/api-reference/parameters).
+
+## Next steps
+
+- [Real-time streaming](/docs/integration/mobile/streaming) - stream live audio from the microphone
+- [SDK reference](/docs/integration/mobile/sdk-reference) - complete class and method reference
+- [Smart formatting](/docs/concepts/transcript-formatting/smart-formatting) - automatic punctuation, capitalization, and number formatting
