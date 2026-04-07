@@ -16,7 +16,8 @@ const libreBaskerville = Libre_Baskerville({
 });
 
 const robotoMono = Roboto_Mono({
-  weight: ['300', '400'],
+  // Only these are downloaded and usable; list every weight you need (matches Google Fonts offerings).
+  weight: ['100', '200', '300', '400', '500', '600', '700'],
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-roboto-mono',
