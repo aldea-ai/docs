@@ -14,7 +14,7 @@ Before selecting an integration path, consider the format of your audio files:
 | Mode | When to use | Protocol |
 |------|------------|----------|
 | **Pre-recorded** | You already have an audio file or a publicly accessible URL pointing to one. You send it in a single request and get the full transcript back. | REST - HTTP `POST /v1/listen` |
-| **Streaming** | You need real-time, low-latency transcription as audio is being produced (live microphone, call center, or broadcast). You send audio chunks continuously, and the API returns partial results as they become available. | WebSocket - `wss://api.subquadratic.ai/v1/listen` |
+| **Streaming** | You need real-time, low-latency transcription as audio is being produced (live microphone, call center, or broadcast). You send audio chunks continuously, and the API returns partial results as they become available. | WebSocket - `wss://stt-api.subq.ai/v1/listen` |
 
 Every integration path described below supports both modes.
 
@@ -31,7 +31,7 @@ Every integration path described below supports both modes.
 ## 1. Direct HTTP requests
 
 The simplest starting point - no SDK required. You make a standard HTTP `POST`
-request to `https://api.subquadratic.ai/v1/listen` with your API key in the
+request to `https://stt-api.subq.ai/v1/listen` with your API key in the
 `Authorization` header and the audio in the request body. The API returns a JSON
 object containing the transcript.
 

@@ -15,7 +15,7 @@ Speaker 2 [0.09 - 0.36]: "Thank you, I'll go first with my updates..."
 To enable diarization in your transcript, add `diarize=true` as a query parameter to a pre-recorded transcription request:
 
 ```bash
-curl -X POST "https://api.subquadratic.ai/v1/listen?diarize=true" \
+curl -X POST "https://stt-api.subq.ai/v1/listen?diarize=true" \
   -H "Authorization: Bearer YOUR_SUBQ_API_KEY" \
   -H "timestamps: true" \
   --data-binary @interview.wav
@@ -24,7 +24,7 @@ curl -X POST "https://api.subquadratic.ai/v1/listen?diarize=true" \
 You can combine it with other parameters:
 
 ```bash
-curl -X POST "https://api.subquadratic.ai/v1/listen?language=es&diarize=true&smart_format=true" \
+curl -X POST "https://stt-api.subq.ai/v1/listen?language=es&diarize=true&smart_format=true" \
   -H "Authorization: Bearer YOUR_SUBQ_API_KEY" \
   -H "timestamps: true" \
   --data-binary @interview.mp3

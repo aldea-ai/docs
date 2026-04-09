@@ -20,7 +20,7 @@ Paragraph formatting ensures that the final transcript feels natural, aligns wit
 Add `paragraphs=true` as a query parameter:
 
 ```bash
-curl -X POST "https://api.subquadratic.ai/v1/listen?paragraphs=true" \
+curl -X POST "https://stt-api.subq.ai/v1/listen?paragraphs=true" \
   -H "Authorization: Bearer YOUR_SUBQ_API_KEY" \
   --data-binary @audio.wav
 ```
@@ -28,7 +28,7 @@ curl -X POST "https://api.subquadratic.ai/v1/listen?paragraphs=true" \
 You can combine it with other formatting parameters such as smart formatting for fully polished output in a single request:
 
 ```bash
-curl -X POST "https://api.subquadratic.ai/v1/listen?paragraphs=true&smart_format=true&numerals=true" \
+curl -X POST "https://stt-api.subq.ai/v1/listen?paragraphs=true&smart_format=true&numerals=true" \
   -H "Authorization: Bearer YOUR_SUBQ_API_KEY" \
   --data-binary @audio.wav
 ```

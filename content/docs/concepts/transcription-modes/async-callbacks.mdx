@@ -29,7 +29,7 @@ To process transcription asynchronously, use the `callback` query parameter. The
 ## Example
 
 ```bash
-curl -X POST "https://api.subquadratic.ai/v1/listen?callback=https://your-server.com/webhook" \
+curl -X POST "https://stt-api.subq.ai/v1/listen?callback=https://your-server.com/webhook" \
   -H "Authorization: Bearer YOUR_SUBQ_API_KEY" \
   --data-binary @long-recording.wav
 ```
@@ -37,7 +37,7 @@ curl -X POST "https://api.subquadratic.ai/v1/listen?callback=https://your-server
 With optional metadata:
 
 ```bash
-curl -X POST "https://api.subquadratic.ai/v1/listen?callback=https://your-server.com/webhook&metadata=%7B%22job_id%22%3A%22123%22%7D" \
+curl -X POST "https://stt-api.subq.ai/v1/listen?callback=https://your-server.com/webhook&metadata=%7B%22job_id%22%3A%22123%22%7D" \
   -H "Authorization: Bearer YOUR_SUBQ_API_KEY" \
   --data-binary @long-recording.wav
 ```

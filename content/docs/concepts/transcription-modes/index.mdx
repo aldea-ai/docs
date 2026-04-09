@@ -24,13 +24,13 @@ You can send audio two ways:
 - **Binary audio**: raw file bytes in the request body. The format is auto-detected from binary headers.
 - **URL**: a JSON object `{"url": "https://..."}` with `Content-Type: application/json`. The API downloads and transcribes the audio.
 
-To transcript a file, send a `POST` request to `https://api.subquadratic.ai/v1/listen` with audio in the request body. The API processes the entire file and returns a single JSON response with the full transcript. You can also add `timestamps: true` header to include per-word timings in the response.
+To transcript a file, send a `POST` request to `https://stt-api.subq.ai/v1/listen` with audio in the request body. The API processes the entire file and returns a single JSON response with the full transcript. You can also add `timestamps: true` header to include per-word timings in the response.
 
 <Tabs items={['cURL (file)', 'cURL (URL)', 'Python', 'Node.js']}>
 <Tab value="cURL (file)">
 
 ```bash
-curl -X POST "https://api.subquadratic.ai/v1/listen" \
+curl -X POST "https://stt-api.subq.ai/v1/listen" \
   -H "Authorization: Bearer YOUR_SUBQ_API_KEY" \
   -H "timestamps: true" \
   --data-binary @audio.wav
@@ -40,11 +40,11 @@ curl -X POST "https://api.subquadratic.ai/v1/listen" \
 <Tab value="cURL (URL)">
 
 ```bash
-curl -X POST "https://api.subquadratic.ai/v1/listen" \
+curl -X POST "https://stt-api.subq.ai/v1/listen" \
   -H "Authorization: Bearer YOUR_SUBQ_API_KEY" \
   -H "Content-Type: application/json" \
   -H "timestamps: true" \
-  -d '{"url": "https://platform.subquadratic.ai/subq_sample.wav"}'
+  -d '{"url": "https://speech.subq.ai/subq_sample.wav"}'
 ```
 
 </Tab>
@@ -57,7 +57,7 @@ API_KEY = "YOUR_SUBQ_API_KEY"
 
 with open("audio.wav", "rb") as f:
     response = requests.post(
-        "https://api.subquadratic.ai/v1/listen",
+        "https://stt-api.subq.ai/v1/listen",
         headers={
             "Authorization": f"Bearer {API_KEY}",
             "timestamps": "true",
@@ -77,10 +77,10 @@ import { readFileSync } from "fs";
 
 const client = createClient({
   accessToken: "YOUR_SUBQ_API_KEY",
-  global: { url: "https://api.subquadratic.ai" }
+  global: { url: "https://stt-api.subq.ai" }
 });
 
-const response = await fetch("https://api.subquadratic.ai/v1/listen", {
+const response = await fetch("https://stt-api.subq.ai/v1/listen", {
   method: "POST",
   headers: {
     Authorization: `Bearer ${API_KEY}`,
@@ -145,7 +145,7 @@ Real-time streaming transcription is ideal for the following use cases:
 - Real-time agent assistants in contact centers
 - Transcribing meetings where participants need immediate visibility.
 
-To transcribe audio in real-time, open a WebSocket connection to `wss://api.subquadratic.ai/v1/listen`. You then send binary audio frames and receive JSON transcript messages as the speaker talks.
+To transcribe audio in real-time, open a WebSocket connection to `wss://stt-api.subq.ai/v1/listen`. You then send binary audio frames and receive JSON transcript messages as the speaker talks.
 
 SubQ exposes two WebSocket endpoints:
 
@@ -168,7 +168,7 @@ import { createClient, LiveTranscriptionEvents } from "@deepgram/sdk";
 
 const client = createClient({
   key: "YOUR_SUBQ_API_KEY",
-  global: { url: "https://api.subquadratic.ai" }
+  global: { url: "https://stt-api.subq.ai" }
 });
 
 const connection = client.listen.live({

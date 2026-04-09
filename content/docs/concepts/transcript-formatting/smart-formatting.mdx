@@ -26,7 +26,7 @@ Smart formatting applies punctuation, capitalization, and number formatting in a
 To enable smart formatting, add `smart_format=true` as a query parameter:
 
 ```bash
-curl -X POST "https://api.subquadratic.ai/v1/listen?smart_format=true" \
+curl -X POST "https://stt-api.subq.ai/v1/listen?smart_format=true" \
   -H "Authorization: Bearer YOUR_SUBQ_API_KEY" \
   --data-binary @audio.wav
 ```
@@ -53,7 +53,7 @@ When you need more granular behavior, use the individual formatting parameters (
 The `numerals` parameter converts spoken numbers into digit form without affecting punctuation or capitalization. Add `numerals=true` as a query parameter when you need numeric normalization but want to handle other formatting separately. For example, when your application applies its own punctuation rules.
 
 ```bash
-curl -X POST "https://api.subquadratic.ai/v1/listen?numerals=true" \
+curl -X POST "https://stt-api.subq.ai/v1/listen?numerals=true" \
   -H "Authorization: Bearer YOUR_SUBQ_API_KEY" \
   --data-binary @audio.wav
 ```
@@ -71,7 +71,7 @@ Numeral conversion is particularly valuable in data extraction pipelines. If you
 The `measurements` parameter converts spoken measurement expressions into standard notation. When you add `measurements=true` as a query parameter, SubQ pairs unit names with their symbols and formats values consistently.
 
 ```bash
-curl -X POST "https://api.subquadratic.ai/v1/listen?measurements=true" \
+curl -X POST "https://stt-api.subq.ai/v1/listen?measurements=true" \
   -H "Authorization: Bearer YOUR_SUBQ_API_KEY" \
   --data-binary @audio.wav
 ```

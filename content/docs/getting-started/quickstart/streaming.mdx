@@ -9,7 +9,7 @@ import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
 In this quickstart, you create a WebSocket connection to the SubQ Speech-to-Text API and receive transcripts in real-time as audio streams in. At the end, you'll have a working client that sends audio and returns the transcripts.
 
-The API exposes a WebSocket endpoint at `wss://api.subquadratic.ai/v1/listen`. You send binary audio frames and receive JSON messages containing interim and final transcripts. 
+The API exposes a WebSocket endpoint at `wss://stt-api.subq.ai/v1/listen`. You send binary audio frames and receive JSON messages containing interim and final transcripts. 
 
 ## Prerequisites
 
@@ -37,7 +37,7 @@ import websockets
 
 API_KEY = "YOUR_SUBQ_API_KEY"
 AUDIO_FILE = "audio.wav"
-WS_URL = "wss://api.subquadratic.ai/v1/listen?encoding=linear16&sample_rate=16000"
+WS_URL = "wss://stt-api.subq.ai/v1/listen?encoding=linear16&sample_rate=16000"
 
 async def stream():
     headers = {"Authorization": f"Bearer {API_KEY}"}
@@ -95,7 +95,7 @@ const AUDIO_FILE = "audio.wav";
 
 const client = createClient({
   key: API_KEY,
-  global: { url: "https://api.subquadratic.ai" },
+  global: { url: "https://stt-api.subq.ai" },
 });
 
 const connection = client.listen.live({
@@ -150,7 +150,7 @@ This example uses your microphone to capture audio and stream it to SubQ in real
 
   <script>
     const API_KEY = "YOUR_SUBQ_API_KEY"; 
-    const WS_URL = "wss://api.subquadratic.ai/v1/listen";
+    const WS_URL = "wss://stt-api.subq.ai/v1/listen";
 
     let socket, recorder;
 

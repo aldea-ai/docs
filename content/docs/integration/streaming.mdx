@@ -7,7 +7,7 @@ import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
 With real-time streaming transcription, you receive results as audio is being spoken. You open a WebSocket connection to the SubQ API, send binary audio frames, and receive JSON transcript messages back in real time. This is useful for streaming for live conversations, voice assistants, call center monitoring, live captioning, and any scenario where waiting for a full recording is not practical.
 
-The WebSocket endpoint is `wss://api.subquadratic.ai/v1/listen`. You specify the audio encoding and sample rate as query parameters, authenticate with the `Sec-WebSocket-Protocol` subprotocol header, and start sending audio. To learn how streaming differs from pre-recorded transcription, see [Transcription modes](/docs/concepts/transcription-modes).
+The WebSocket endpoint is `wss://stt-api.subq.ai/v1/listen`. You specify the audio encoding and sample rate as query parameters, authenticate with the `Sec-WebSocket-Protocol` subprotocol header, and start sending audio. To learn how streaming differs from pre-recorded transcription, see [Transcription modes](/docs/concepts/transcription-modes).
 
 <Tabs items={['Python', 'Node.js', 'Go', 'Rust']} groupId="language" persist updateAnchor>
 <Tab value="Python" id="python">
@@ -30,7 +30,7 @@ import websockets
 
 SUBQ_API_KEY = os.environ["SUBQ_API_KEY"]
 AUDIO_FILE = "audio.wav"
-WS_URL = "wss://api.subquadratic.ai/v1/listen?encoding=linear16&sample_rate=16000"
+WS_URL = "wss://stt-api.subq.ai/v1/listen?encoding=linear16&sample_rate=16000"
 
 async def stream():
     # Authenticate using the Sec-WebSocket-Protocol subprotocol header
@@ -71,7 +71,7 @@ python stream.py
 
 To stream audio in real time, you connect to the WebSocket, send audio frames, receive transcript messages as they arrive, and close the stream:
 
-1. **Connect with authentication:** `websockets.connect()` opens a WebSocket to `wss://api.subquadratic.ai/v1/listen`. The `Sec-WebSocket-Protocol` header authenticates the connection during the handshake by passing `token, <your-api-key>` as a subprotocol. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio. You can adjust these to match your audio format.
+1. **Connect with authentication:** `websockets.connect()` opens a WebSocket to `wss://stt-api.subq.ai/v1/listen`. The `Sec-WebSocket-Protocol` header authenticates the connection during the handshake by passing `token, <your-api-key>` as a subprotocol. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio. You can adjust these to match your audio format.
 
 2. **Send audio frames:** In the `send_audio` coroutine, you read the file in 4 KB chunks and send each as a binary WebSocket frame. The chunk size is not critical. 4096 bytes is a common default that balances latency and overhead. In production, you would read from a microphone or network stream instead of a file.
 
@@ -96,7 +96,7 @@ import websockets
 
 SUBQ_API_KEY = os.environ["SUBQ_API_KEY"]
 STREAM_URL = "http://icecast.omroep.nl/radio1-bb-mp3"
-WS_URL = "wss://api.subquadratic.ai/v1/listen?encoding=mp3"
+WS_URL = "wss://stt-api.subq.ai/v1/listen?encoding=mp3"
 
 async def stream_live():
     headers = {"Sec-WebSocket-Protocol": f"token, {SUBQ_API_KEY}"}
@@ -144,7 +144,7 @@ import WebSocket from "ws";
 
 const SUBQ_API_KEY = process.env.SUBQ_API_KEY;
 const AUDIO_FILE = "audio.wav";
-const WS_URL = "wss://api.subquadratic.ai/v1/listen?encoding=linear16&sample_rate=16000";
+const WS_URL = "wss://stt-api.subq.ai/v1/listen?encoding=linear16&sample_rate=16000";
 
 const ws = new WebSocket(WS_URL, [`token`, SUBQ_API_KEY]);
 
@@ -192,7 +192,7 @@ node stream.js
 
 To stream audio in real time, you connect to the WebSocket, send audio frames, receive transcript messages as they arrive, and close the stream:
 
-1. **Connect with authentication:** `new WebSocket(url, protocols)` opens a WebSocket to `wss://api.subquadratic.ai/v1/listen`. The second argument sets the `Sec-WebSocket-Protocol` header to `token, <your-api-key>`, which authenticates the connection during the handshake. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio. Adjust these to match your audio format.
+1. **Connect with authentication:** `new WebSocket(url, protocols)` opens a WebSocket to `wss://stt-api.subq.ai/v1/listen`. The second argument sets the `Sec-WebSocket-Protocol` header to `token, <your-api-key>`, which authenticates the connection during the handshake. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio. Adjust these to match your audio format.
 
 2. **Send audio frames:** You use `createReadStream` to read the file in 4 KB chunks (`highWaterMark: 4096`). Each chunk is sent as a binary WebSocket frame with `ws.send()`. The chunk size is not critical; 4096 bytes is a common default that balances latency and overhead. In production, you would read from a microphone or network stream instead of a file.
 
@@ -209,7 +209,7 @@ import WebSocket from "ws";
 
 const SUBQ_API_KEY = process.env.SUBQ_API_KEY;
 const STREAM_URL = "http://icecast.omroep.nl/radio1-bb-mp3";
-const WS_URL = "wss://api.subquadratic.ai/v1/listen?encoding=mp3";
+const WS_URL = "wss://stt-api.subq.ai/v1/listen?encoding=mp3";
 
 const ws = new WebSocket(WS_URL, [`token`, SUBQ_API_KEY]);
 
@@ -270,7 +270,7 @@ import (
 
 func main() {
 	apiKey := os.Getenv("SUBQ_API_KEY")
-	wsURL := "wss://api.subquadratic.ai/v1/listen?encoding=linear16&sample_rate=16000"
+	wsURL := "wss://stt-api.subq.ai/v1/listen?encoding=linear16&sample_rate=16000"
 
 	// Connect with authentication
 	headers := http.Header{}
@@ -336,7 +336,7 @@ go run stream.go
 
 To stream audio in real time, you connect to the WebSocket, send audio frames, receive transcript messages as they arrive, and close the stream:
 
-1. **Connect with authentication:** `websocket.DefaultDialer.Dial` opens a WebSocket to `wss://api.subquadratic.ai/v1/listen`. The `Sec-WebSocket-Protocol` header is passed via `http.Header` with value `token, <your-api-key>`. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio.
+1. **Connect with authentication:** `websocket.DefaultDialer.Dial` opens a WebSocket to `wss://stt-api.subq.ai/v1/listen`. The `Sec-WebSocket-Protocol` header is passed via `http.Header` with value `token, <your-api-key>`. The query parameters `encoding=linear16` and `sample_rate=16000` tell the API how to decode the incoming audio.
 
 2. **Send audio frames:** You read the file into memory and send it in 4 KB chunks as binary WebSocket messages. The chunk size is not critical; 4096 bytes is a common default that balances latency and overhead.
 
@@ -363,7 +363,7 @@ import (
 func main() {
 	apiKey := os.Getenv("SUBQ_API_KEY")
 	streamURL := "http://icecast.omroep.nl/radio1-bb-mp3"
-	wsURL := "wss://api.subquadratic.ai/v1/listen?encoding=mp3"
+	wsURL := "wss://stt-api.subq.ai/v1/listen?encoding=mp3"
 
 	headers := http.Header{}
 	headers.Set("Sec-WebSocket-Protocol", "token, "+apiKey)
@@ -464,13 +464,13 @@ struct Alternative {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api_key = std::env::var("SUBQ_API_KEY").expect("SUBQ_API_KEY not set");
-    let ws_url = "wss://api.subquadratic.ai/v1/listen?encoding=linear16&sample_rate=16000";
+    let ws_url = "wss://stt-api.subq.ai/v1/listen?encoding=linear16&sample_rate=16000";
 
     // Connect with authentication
     let request = Request::builder()
         .uri(ws_url)
         .header("Sec-WebSocket-Protocol", format!("token, {}", api_key))
-        .header("Host", "api.subquadratic.ai")
+        .header("Host", "stt-api.subq.ai")
         .header("Connection", "Upgrade")
         .header("Upgrade", "websocket")
         .header("Sec-WebSocket-Version", "13")
@@ -579,12 +579,12 @@ struct Alternative {
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api_key = std::env::var("SUBQ_API_KEY").expect("SUBQ_API_KEY not set");
     let stream_url = "http://icecast.omroep.nl/radio1-bb-mp3";
-    let ws_url = "wss://api.subquadratic.ai/v1/listen?encoding=mp3";
+    let ws_url = "wss://stt-api.subq.ai/v1/listen?encoding=mp3";
 
     let request = Request::builder()
         .uri(ws_url)
         .header("Sec-WebSocket-Protocol", format!("token, {}", api_key))
-        .header("Host", "api.subquadratic.ai")
+        .header("Host", "stt-api.subq.ai")
         .header("Connection", "Upgrade")
         .header("Upgrade", "websocket")
         .header("Sec-WebSocket-Version", "13")

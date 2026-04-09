@@ -43,7 +43,7 @@ The page loads the Deepgram SDK from a CDN and creates a client pointed at the S
   const apiKey = urlParams.get("key");
 
   const client = deepgram.createClient(apiKey, {
-    global: { url: "https://api.subquadratic.ai" }
+    global: { url: "https://stt-api.subq.ai" }
   });
 </script>
 ```
@@ -53,7 +53,7 @@ The page loads the Deepgram SDK from a CDN and creates a client pointed at the S
 When the user clicks **Transcribe**, the SDK sends the audio URL to the SubQ API:
 
 ```javascript
-const audioUrl = "https://platform.subquadratic.ai/subq_sample.wav";
+const audioUrl = "https://speech.subq.ai/subq_sample.wav";
 
 const { result, error } = await client.listen.prerecorded.transcribeUrl(
   { url: audioUrl }
@@ -66,7 +66,7 @@ if (error) {
 }
 ```
 
-`transcribeUrl()` sends a `POST` request to `https://api.subquadratic.ai/v1/listen` with a JSON body containing the URL. The API downloads the audio, transcribes it, and returns the result.
+`transcribeUrl()` sends a `POST` request to `https://stt-api.subq.ai/v1/listen` with a JSON body containing the URL. The API downloads the audio, transcribes it, and returns the result.
 
 ### 3. Read the response
 
@@ -97,9 +97,9 @@ The transcript is at `result.results.channels[0].alternatives[0].transcript`. Th
           return;
         }
 
-        const audioUrl = "https://platform.subquadratic.ai/subq_sample.wav";
+        const audioUrl = "https://speech.subq.ai/subq_sample.wav";
         const client = deepgram.createClient(apiKey, {
-          global: { url: "https://api.subquadratic.ai" }
+          global: { url: "https://stt-api.subq.ai" }
         });
 
         const { result, error } = await client.listen.prerecorded.transcribeUrl(
