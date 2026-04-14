@@ -55,7 +55,7 @@ export function baseOptions(): BaseLayoutProps {
       },
       {
         text: "Dashboard",
-        url: "https://platform.subquadratic.ai/dashboard",
+        url: "https://speech.subq.ai/dashboard",
         external: true,
         icon: (
           <svg

@@ -20,7 +20,7 @@ Word timestamps must be enabled for `UtteranceEnd` events to fire. Word timestam
 To enable utterance detection, add the `utterance_end_ms` parameter in the WebSocket query string. You also specify the silence duration that should trigger an utterance end in milliseconds:
 
 ```bash
-wss://api.subquadratic.ai/v1/listen?utterance_end_ms=1000&encoding=mp3
+wss://stt-api.subq.ai/v1/listen?utterance_end_ms=1000&encoding=mp3
 ```
 
 This example fires an `UtteranceEnd` event after 1 second of silence. You choose a value based on your use case. A shorter threshold such as 500 ms responds quickly but might trigger during natural mid-thought pauses. On the other hand, a longer threshold such as 1500 ms is more reliable for detecting true turn endings but adds delay.

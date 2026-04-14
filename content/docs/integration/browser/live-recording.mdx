@@ -41,13 +41,13 @@ The page loads the Deepgram SDK from a CDN, creates a client pointed at the SubQ
 
 ```javascript
 const client = deepgram.createClient(apiKey, {
-  global: { url: "https://api.subquadratic.ai" }
+  global: { url: "https://stt-api.subq.ai" }
 });
 
 connection = client.listen.live({});
 ```
 
-`client.listen.live()` opens a WebSocket to `wss://api.subquadratic.ai/v1/listen` and handles authentication automatically using the API key.
+`client.listen.live()` opens a WebSocket to `wss://stt-api.subq.ai/v1/listen` and handles authentication automatically using the API key.
 
 ### 2. Capture microphone audio
 
@@ -135,7 +135,7 @@ The example also fetches a remote radio stream (`icecast.omroep.nl/radio1-bb-mp3
 
         const client = deepgram.createClient(apiKey, {
           global: {
-            url: 'https://api.subquadratic.ai'
+            url: 'https://stt-api.subq.ai'
           }
         });
 

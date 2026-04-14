@@ -17,10 +17,10 @@ Interim results are **enabled by default**. To receive only finalized transcript
 
 ```bash
 # Default (interim results enabled)
-wss://api.subquadratic.ai/v1/listen?encoding=mp3
+wss://stt-api.subq.ai/v1/listen?encoding=mp3
 
 # Disable interim results
-wss://api.subquadratic.ai/v1/listen?encoding=mp3&interim_results=false
+wss://stt-api.subq.ai/v1/listen?encoding=mp3&interim_results=false
 ```
 
 Disabling interim results is useful when you only need the final, stable transcript. For example, when saving transcripts to a database or feeding text into a downstream process that shouldn't act on uncertain data.

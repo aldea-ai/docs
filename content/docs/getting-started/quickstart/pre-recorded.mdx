@@ -27,7 +27,7 @@ Use one of the following examples to test your API key and transcribe text from 
 Send a local audio file directly to the API:
 
 ```bash title="Transcribe a local file"
-curl -X POST "https://api.subquadratic.ai/v1/listen" \
+curl -X POST "https://stt-api.subq.ai/v1/listen" \
   -H "Authorization: Bearer YOUR_SUBQ_API_KEY" \
   -H "timestamps: true" \
   --data-binary @audio.wav
@@ -36,11 +36,11 @@ curl -X POST "https://api.subquadratic.ai/v1/listen" \
 You can also transcribe audio from a URL without downloading it first:
 
 ```bash title="Transcribe from URL"
-curl -X POST "https://api.subquadratic.ai/v1/listen" \
+curl -X POST "https://stt-api.subq.ai/v1/listen" \
   -H "Authorization: Bearer YOUR_SUBQ_API_KEY" \
   -H "Content-Type: application/json" \
   -H "timestamps: true" \
-  -d '{"url": "https://platform.subquadratic.ai/subq_sample.wav"}'
+  -d '{"url": "https://speech.subq.ai/subq_sample.wav"}'
 ```
 
 Replace `YOUR_SUBQ_API_KEY` with your API key.
@@ -63,7 +63,7 @@ API_KEY = "YOUR_SUBQ_API_KEY"
 
 with open("audio.wav", "rb") as f:
     response = requests.post(
-        "https://api.subquadratic.ai/v1/listen",
+        "https://stt-api.subq.ai/v1/listen",
         headers={
             "Authorization": f"Bearer {API_KEY}",
             "timestamps": "true",
@@ -93,7 +93,7 @@ import { readFileSync } from "fs";
 
 const API_KEY = "YOUR_SUBQ_API_KEY";
 
-const response = await fetch("https://api.subquadratic.ai/v1/listen", {
+const response = await fetch("https://stt-api.subq.ai/v1/listen", {
   method: "POST",
   headers: {
     Authorization: `Bearer ${API_KEY}`,

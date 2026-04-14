@@ -23,16 +23,16 @@ Add one or more `redact` query parameters to your request. PII redaction works w
 
 ```bash
 # Redact personal information
-wss://api.subquadratic.ai/v1/listen?redact=pii&encoding=mp3
+wss://stt-api.subq.ai/v1/listen?redact=pii&encoding=mp3
 
 # Redact payment card data
-wss://api.subquadratic.ai/v1/listen?redact=pci&encoding=mp3
+wss://stt-api.subq.ai/v1/listen?redact=pci&encoding=mp3
 
 # Combine multiple redaction types
-wss://api.subquadratic.ai/v1/listen?redact=pii&redact=pci&encoding=mp3
+wss://stt-api.subq.ai/v1/listen?redact=pii&redact=pci&encoding=mp3
 
 # Redact all supported types
-wss://api.subquadratic.ai/v1/listen?redact=true&encoding=mp3
+wss://stt-api.subq.ai/v1/listen?redact=true&encoding=mp3
 ```
 
 ## Redaction types
@@ -60,7 +60,7 @@ Use the `redact_mode` parameter to choose how redacted content is represented in
 
 ```bash
 # Use type labels instead of asterisks
-wss://api.subquadratic.ai/v1/listen?redact=pii&redact_mode=replace&encoding=mp3
+wss://stt-api.subq.ai/v1/listen?redact=pii&redact_mode=replace&encoding=mp3
 ```
 
 When applying redaction, choose the mode that best fits your use case. `replace` is ideal for transcripts that humans will read, because the labels make it clear that something was redacted and what type of data it was. `mask` is useful when you need to preserve the structure of the original text such as showing that a phone number was 10 digits. `redact` is the most aggressive option and is appropriate when you don't want any trace of the sensitive data.

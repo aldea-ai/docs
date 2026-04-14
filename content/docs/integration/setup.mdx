@@ -29,7 +29,7 @@ pip install httpx websockets
 | Package | Purpose |
 |---------|---------|
 | `httpx` | Send HTTP requests for pre-recorded transcription (`POST /v1/listen`). |
-| `websockets` | Connect to the WebSocket endpoint for real-time streaming (`wss://api.subquadratic.ai/v1/listen`). |
+| `websockets` | Connect to the WebSocket endpoint for real-time streaming (`wss://stt-api.subq.ai/v1/listen`). |
 
 If you only need pre-recorded transcription, `httpx` alone is sufficient. If you only need streaming, install `websockets` alone.
 
@@ -88,14 +88,14 @@ import os
 import httpx
 
 SUBQ_API_KEY = os.environ["SUBQ_API_KEY"]
-AUDIO_URL = "https://platform.subquadratic.ai/subq_sample.wav"
+AUDIO_URL = "https://speech.subq.ai/subq_sample.wav"
 
 # Download a sample audio file
 audio = httpx.get(AUDIO_URL, follow_redirects=True).content
 
 # Send it to the SubQ API for transcription
 response = httpx.post(
-    "https://api.subquadratic.ai/v1/listen",
+    "https://stt-api.subq.ai/v1/listen",
     headers={"Authorization": f"Bearer {SUBQ_API_KEY}"},
     content=audio,
     timeout=60.0
@@ -140,7 +140,7 @@ npm install ws
 
 | Package | Purpose |
 |---------|---------|
-| `ws` | Connect to the WebSocket endpoint for real-time streaming (`wss://api.subquadratic.ai/v1/listen`). |
+| `ws` | Connect to the WebSocket endpoint for real-time streaming (`wss://stt-api.subq.ai/v1/listen`). |
 
 For pre-recorded transcription, no additional packages are needed. Node.js 18+ includes the native `fetch` API.
 
@@ -196,14 +196,14 @@ Run a quick test to confirm that you can reach the SubQ API. In this example, yo
 
 ```javascript title="verify_setup.js"
 const SUBQ_API_KEY = process.env.SUBQ_API_KEY;
-const AUDIO_URL = "https://platform.subquadratic.ai/subq_sample.wav";
+const AUDIO_URL = "https://speech.subq.ai/subq_sample.wav";
 
 // Download a sample audio file
 const audioResponse = await fetch(AUDIO_URL);
 const audioData = await audioResponse.arrayBuffer();
 
 // Send it to the SubQ API for transcription
-const response = await fetch("https://api.subquadratic.ai/v1/listen", {
+const response = await fetch("https://stt-api.subq.ai/v1/listen", {
   method: "POST",
   headers: { "Authorization": `Bearer ${SUBQ_API_KEY}` },
   body: audioData,
@@ -244,7 +244,7 @@ go get github.com/gorilla/websocket
 
 | Package | Purpose |
 |---------|---------|
-| `github.com/gorilla/websocket` | Connect to the WebSocket endpoint for real-time streaming (`wss://api.subquadratic.ai/v1/listen`). |
+| `github.com/gorilla/websocket` | Connect to the WebSocket endpoint for real-time streaming (`wss://stt-api.subq.ai/v1/listen`). |
 
 For pre-recorded transcription, no third-party packages are needed. The standard library `net/http` handles everything.
 
@@ -310,7 +310,7 @@ import (
 
 func main() {
 	apiKey := os.Getenv("SUBQ_API_KEY")
-	audioURL := "https://platform.subquadratic.ai/subq_sample.wav"
+	audioURL := "https://speech.subq.ai/subq_sample.wav"
 
 	// Download a sample audio file
 	audioResp, err := http.Get(audioURL)
@@ -322,7 +322,7 @@ func main() {
 	audioData, _ := io.ReadAll(audioResp.Body)
 
 	// Send it to the SubQ API for transcription
-	req, _ := http.NewRequest("POST", "https://api.subquadratic.ai/v1/listen", bytes.NewReader(audioData))
+	req, _ := http.NewRequest("POST", "https://stt-api.subq.ai/v1/listen", bytes.NewReader(audioData))
 	req.Header.Set("Authorization", "Bearer "+apiKey)
 
 	resp, err := http.DefaultClient.Do(req)
@@ -388,7 +388,7 @@ futures = "0.3"
 | `reqwest` | Send audio to `POST /v1/listen` for pre-recorded transcription. The `stream` feature enables streaming response bodies for URL downloads. |
 | `tokio` | Async runtime required by `reqwest` and `tokio-tungstenite`. |
 | `serde` / `serde_json` | Parse the JSON transcription response. |
-| `tokio-tungstenite` | Connect to `wss://api.subquadratic.ai/v1/listen` for real-time streaming. Only needed if you use streaming. |
+| `tokio-tungstenite` | Connect to `wss://stt-api.subq.ai/v1/listen` for real-time streaming. Only needed if you use streaming. |
 | `futures` | Provides `StreamExt` / `SinkExt` for working with async streams and WebSocket sinks. Only needed for streaming. |
 
 ## Set up your API key
@@ -445,7 +445,7 @@ use serde_json::Value;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api_key = std::env::var("SUBQ_API_KEY").expect("SUBQ_API_KEY not set");
-    let audio_url = "https://platform.subquadratic.ai/subq_sample.wav";
+    let audio_url = "https://speech.subq.ai/subq_sample.wav";
 
     // Download a sample audio file
     let audio_data = reqwest::get(audio_url).await?.bytes().await?;
@@ -453,7 +453,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Send it to the SubQ API for transcription
     let client = reqwest::Client::new();
     let response = client
-        .post("https://api.subquadratic.ai/v1/listen")
+        .post("https://stt-api.subq.ai/v1/listen")
         .header("Authorization", format!("Bearer {}", api_key))
         .body(audio_data)
         .send()

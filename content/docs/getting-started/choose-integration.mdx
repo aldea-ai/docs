@@ -1,0 +1,122 @@
+---
+title: Choose integration path
+description: Pick the fastest way to add speech-to-text - direct HTTP, Deepgram-compatible SDKs, browser, or mobile SDK
+---
+
+The SubQ API platform provides several ways to add speech-to-text to your application. The best
+choice depends on your runtime environment, whether you need real-time results, and
+how much of the HTTP/WebSocket layer you want to manage.
+
+## Audio modes
+
+Before selecting an integration path, consider the format of your audio files:
+
+| Mode | When to use | Protocol |
+|------|------------|----------|
+| **Pre-recorded** | You already have an audio file or a publicly accessible URL pointing to one. You send it in a single request and get the full transcript back. | REST - HTTP `POST /v1/listen` |
+| **Streaming** | You need real-time, low-latency transcription as audio is being produced (live microphone, call center, or broadcast). You send audio chunks continuously, and the API returns partial results as they become available. | WebSocket - `wss://stt-api.subq.ai/v1/listen` |
+
+Every integration path described below supports both modes.
+
+## Integration paths overview
+
+| Path | Best for | Audio modes | Languages / platforms |
+|------|----------|-------------|----------------------|
+| [Direct HTTP](#1-direct-http-requests) | Quick testing, any language with an HTTP client | Pre-recorded | Any (cURL, Postman, fetch, httpx …) |
+| [Deepgram-compatible SDKs](#2-deepgram-compatible-sdks) | Production back-end applications, existing Deepgram users, real-time streaming | Pre-recorded and streaming | Python, Node.js, Go, Rust, .NET |
+| [Browser](#3-browser-integration) | Web apps, in-browser demos | Pre-recorded and streaming | JavaScript (browser) |
+| [Mobile SDK](#4-mobile-sdks) | Native iOS and Android apps | Pre-recorded & streaming | Swift, Kotlin |
+
+
+## 1. Direct HTTP requests
+
+The simplest starting point - no SDK required. You make a standard HTTP `POST`
+request to `https://stt-api.subq.ai/v1/listen` with your API key in the
+`Authorization` header and the audio in the request body. The API returns a JSON
+object containing the transcript.
+
+You can send audio in two ways:
+
+- **File upload:** set the `Content-Type` to the audio MIME type (for example,
+  `audio/wav`) and send the raw bytes in the body.
+- **URL reference:** - set the `Content-Type` to `application/json` and pass a
+  JSON body with a `url` field pointing to a publicly accessible audio file.
+
+This path works with any language or tool that can make HTTP requests, including
+cURL, Postman, Python's `httpx`, and JavaScript's `fetch`.
+
+**Best for:** Prototyping, ad hoc transcriptions, continuous integration (CI)
+scripts, or when you want full control over the HTTP layer without depending on a
+third-party SDK.
+
+## 2. Deepgram-compatible SDKs
+
+SubQ's servers implement Deepgram-compatible APIs, so you can use official
+Deepgram SDKs (Python, Node.js, Go, Rust, or .NET) as client libraries to
+connect to SubQ. Point the SDK at SubQ by changing two configuration values:
+your **API key** and the **base URL**. Everything else including method signatures,
+response shapes, and event names stays the same.
+
+The SDKs give you:
+
+- **Typed responses:** structured objects instead of raw JSON, with autocomplete
+  in your editor.
+- **WebSocket management:** the SDK opens, authenticates, and reconnects the
+  WebSocket for streaming so you don't have to.
+- **Pre-recorded helpers:** single-method calls to transcribe a local file or a
+  remote URL.
+- **Built-in retry logic:** automatic retries on transient network errors.
+
+### Pre-recorded via SDK
+
+Call a single method with a file path or URL. The SDK sends the HTTP request and
+returns a typed transcript object.
+
+### Streaming via WebSocket
+
+Create a live connection through the SDK, register an event handler for incoming
+transcripts, and push audio chunks as they arrive. The SDK handles the WebSocket
+handshake, keep-alive, and graceful close for you.
+
+**Best for:** Production applications that need real-time streaming or projects migrating from Deepgram to SubQ.
+
+
+## 3. Browser integration
+
+You can run transcription entirely in the browser with no back end of your own.
+Because SubQ implements Deepgram-compatible APIs, you can load the Deepgram
+JavaScript SDK from a content delivery network (CDN), point it at SubQ, and
+start transcribing.
+
+SubQ supports two interaction patterns:
+
+- **Pre-recorded upload** - the user selects an audio file (or you supply a URL).
+  The SDK sends it to SubQ over HTTP and returns the transcript to your page.
+- **Live recording** - the browser captures the user's microphone through the
+  `getUserMedia` API and streams audio chunks to SubQ over a WebSocket. Partial
+  transcripts appear in real time.
+
+Because the SDK runs client-side, your API key is exposed to the browser. Use a
+scoped, low-privilege key and consider proxying requests through your own back end
+for production deployments.
+
+**Best for:** Web applications, interactive demos, or prototypes where you want
+speech-to-text without setting up a dedicated server.
+
+## 4. Mobile SDKs
+
+For native iOS and Android apps, SubQ provides Swift and Kotlin SDKs that wrap the API
+in platform interface. The mobile SDKs handle authentication, WebSocket lifecycle, audio capture, and
+permission management so you can focus on your app experience rather than
+low-level networking details.
+
+**Best for:** Native mobile apps that need on-device microphone capture with
+real-time or pre-recorded transcription.
+
+## Decision guide
+
+1. **Are you testing or prototyping?** Use [direct HTTP](#1-direct-http-requests) to send a request and see results immediately.
+2. **Do you have an existing Deepgram integration?** Use a [Deepgram-compatible SDK](#2-deepgram-compatible-sdks) - change two configuration values to point at SubQ.
+3. **Building a web application that captures audio in the browser?** Use [browser integration](#3-browser-integration).
+4. **Building a native mobile app?** Use [SubQ's mobile SDKs](#4-mobile-sdks).
+5. **Need real-time streaming in a back-end service?** Use a [Deepgram-compatible SDK](#2-deepgram-compatible-sdks) that will manage the WebSocket connection to SubQ for you.
