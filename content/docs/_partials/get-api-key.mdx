@@ -1,17 +1,8 @@
 ---
-title: Get API key
-description: Create an account and get your SubQ API key
+title: Get API key partial
 ---
 
-To use the SubQ Speech-to-Text API, you need an API key. The API key is sent in the `Authorization` header of every request and ties your usage to your account.
-
-## Prerequisites
-
-You need a SubQ account. If you don't already have one, [create one for free](https://speech.subq.ai).
-
-## Get your key
-
-Follow these steps to get your API key:
+<section id="get-api-key">
 
 1. **Sign in to the SubQ API platform:** Go to [speech.subq.ai](https://speech.subq.ai) and sign in to your account.
 2. **Navigate to API Keys:** While signed in, select **API Key** on the left sidebar. Your organization's API key is displayed and ready to copy.
@@ -23,7 +14,4 @@ Follow these steps to get your API key:
 <Callout type="warn">
 **Never expose your API key.** Store it in an environment variable or secrets manager. Do not hard-code it in client-side code, commit it to version control, or share it in public channels. If you suspect a key has been compromised, regenerate it immediately from your account settings.
 </Callout>
-
-## Next steps
-
-- [Quickstart](/docs/getting-started/quickstart) - make your first transcription request.
+</section>

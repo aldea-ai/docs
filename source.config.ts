@@ -10,6 +10,7 @@ import {
 export const docs = defineDocs({
   docs: {
     schema: frontmatterSchema,
+    files: ["**/*.mdx", "!_partials/**"],
     postprocess: {
       includeProcessedMarkdown: true,
     },

@@ -13,9 +13,13 @@ The API exposes a WebSocket endpoint at `wss://stt-api.subq.ai/v1/listen`. You s
 
 ## Prerequisites
 
-- A SubQ API key. Sign up and generate one from the [API Keys page](/docs/getting-started/get-api-key).
+You need a SubQ account. If you don't already have one, [create one for free](https://speech.subq.ai).
 
-## Step 1: Connect and stream
+## Step 1: Get your API key
+
+<include>../../_partials/get-api-key.mdx#get-api-key</include>
+
+## Step 2: Connect and stream
 
 Pick your language and run the example. Each one connects to the WebSocket endpoint, streams audio, and prints transcripts as they arrive.
 
@@ -203,7 +207,7 @@ Open `live.html` in your browser, click **Start**, and speak. Transcripts appear
 </Tab>
 </Tabs>
 
-## Step 2: Understand the response
+## Step 3: Understand the response
 
 Each message from the server is a JSON object. Transcript results look like this:
 

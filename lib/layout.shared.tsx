@@ -34,7 +34,7 @@ export function baseOptions(): BaseLayoutProps {
     },
     links: [
       {
-        text: "Home",
+        text: "Welcome",
         url: "/docs",
         icon: (
           <svg
