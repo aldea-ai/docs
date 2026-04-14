@@ -10,6 +10,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
     ...base,
     HeroBanner,
+    img: (props) => <img {...props} />,
     h1: (props) => {
       const Comp = base.h1 ?? 'h1';
       return <Comp {...props} className={cn('font-serif', props.className)} />;

@@ -7,15 +7,17 @@ import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
 # Pre-recorded audio
 
-In this quickstart, you send an audio file to the SubQ Speech-to-Text API and receive a JSON transcript with word-level timestamps. By the end, you have a working API call you can adapt for your own audio files.
-
-The API accepts a `POST` request to `/v1/listen` with the raw audio bytes in the body. It auto-detects the audio format (WAV, MP3, AAC, FLAC, OGG, WebM, Opus, M4A) from binary headers, so no `Content-Type` header is needed. Add the `timestamps: true` header to include per-word timings in the response.
+In this quickstart, you send an audio file to the SubQ Speech-to-Text API and receive a JSON transcript with word-level timestamps. By the end, you have a working API call you can adapt for your audio files.
 
 ## Prerequisites
 
-- A SubQ API key. Sign up and generate one from the [API Keys page](/docs/getting-started/get-api-key).
+You need a SubQ account. If you don't already have one, [create one for free](https://platform.subquadratic.ai).
 
-## Step 1: Make your first API request
+## Step 1: Get your API key
+
+<include>../../_partials/get-api-key.mdx#get-api-key</include>
+
+## Step 2: Make your first API request
 
 Use one of the following examples to test your API key and transcribe text from speech. Replace `YOUR_SUBQ_API_KEY` with your actual API key.
 
@@ -30,8 +32,6 @@ curl -X POST "https://api.subquadratic.ai/v1/listen" \
   -H "timestamps: true" \
   --data-binary @audio.wav
 ```
-
-This works with any supported file format (MP3, WAV, AAC, FLAC, OGG, WebM, Opus, M4A).
 
 You can also transcribe audio from a URL without downloading it first:
 
@@ -117,7 +117,8 @@ Replace `YOUR_SUBQ_API_KEY` with your API key.
 </Tab>
 </Tabs>
 
-## Step 2: Read the response
+The API accepts a `POST` request to `/v1/listen` with the raw audio bytes in the body. It auto-detects the audio format (WAV, MP3, AAC, FLAC, OGG, WebM, Opus, M4A) from binary headers, so no `Content-Type` header is needed. Add the `timestamps: true` header to include per-word timings in the response.
+## Step 3: Read the response
 
 The API returns a JSON object with the transcript, confidence score, and word-level timestamps (when the `timestamps: true` header is included):
 
