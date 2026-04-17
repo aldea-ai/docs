@@ -1,6 +1,7 @@
 {
   "title": "Documentation",
   "pages": [
+    "[Welcome](/docs)",
     "overview",
     "---Get started---",
     "...getting-started",
