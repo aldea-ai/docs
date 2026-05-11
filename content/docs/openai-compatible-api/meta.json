@@ -1,0 +1,12 @@
+{
+  "title": "OpenAI-compatible API",
+  "defaultOpen": true,
+  "pages": [
+    "overview",
+    "quickstart",
+    "models",
+    "chat-completions-api",
+    "streaming",
+    "errors-rate-limits-debugging"
+  ]
+}
